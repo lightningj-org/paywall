@@ -1,5 +1,4 @@
-/**
- * **********************************************************************
+/************************************************************************
  *                                                                       *
  *  LightningJ                                                           *
  *                                                                       *
@@ -11,27 +10,31 @@
  *  See terms of license at gnu.org.                                     *
  *                                                                       *
  *************************************************************************/
-package org.lightningj.paywall.util;
+package org.lightningj.paywall.btcpayserver;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
-import java.security.Security;
+import org.lightningj.paywall.keymgmt.AsymmetricKeyManager;
 
 /**
- * Bouncy castle related utility methods.
+ * Main class in charge of communicating with BTC Pay Server API using REST.
  *
- * Created by Philip Vendil on 2018-09-19.
+ * In charge of creating/parsing json data, and sending it to server and maintaining access tokens.
+ *
+ * Created by philip on 2018-10-17.
  */
-public class BCUtils {
+public abstract class BTCPayServer {
 
-    /**
-     * Help method to install BouncyCastle Cryptographic library
-     * into JVM.
-     */
-   public static void installBCProvider(){
-       if (Security.getProvider("BC") == null){
-           Security.addProvider(new BouncyCastleProvider());
-       }
-   }
+    BTCPayServerTokenManager tokenManager = new BTCPayServerTokenManager();
 
+    private BTCPayServerHTTPSender sender;
+
+    public BTCPayServer(){
+        this.sender = new BTCPayServerHTTPSender(getBaseURL(),getKeyManager());
+    }
+
+
+
+
+    protected abstract String getBaseURL();
+
+    protected abstract AsymmetricKeyManager getKeyManager();
 }

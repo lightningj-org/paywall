@@ -16,19 +16,24 @@ package org.lightningj.paywall.keymgmt;
 import org.lightningj.paywall.InternalErrorException;
 
 import java.security.Key;
+import java.security.KeyPair;
+import java.time.Clock;
+import java.time.Duration;
 
 /**
  * Test implementation of a SymmetricFileKeyManager
  * Created by Philip Vendil on 2018-09-19.
  */
-public class TestSymmetricFileKeyManager extends SymmetricFileKeyManager {
+public class TestDefaultFileKeyManager extends DefaultFileKeyManager {
 
     private String keyStorePath;
     private String protectPassphrase;
+    private String trustStorePath;
 
-    public TestSymmetricFileKeyManager(String keyStorePath, String protectPassphrase){
+    public TestDefaultFileKeyManager(String keyStorePath, String trustStorePath, String protectPassphrase){
         this.keyStorePath=keyStorePath;
         this.protectPassphrase = protectPassphrase;
+        this.trustStorePath = trustStorePath;
     }
 
     @Override
@@ -39,6 +44,23 @@ public class TestSymmetricFileKeyManager extends SymmetricFileKeyManager {
     @Override
     protected String getProtectPassphrase() throws InternalErrorException {
         return protectPassphrase;
+    }
+
+    @Override
+    protected String getAsymTrustStorePath() throws InternalErrorException {
+        return trustStorePath;
+    }
+
+    public KeyPair getKeyPairField(){
+        return asymKeyPair;
+    }
+
+    public void setKeyPairField(KeyPair keyPair){
+        this.asymKeyPair =keyPair;
+    }
+
+    public void forwardClock(Duration duration){
+        this.clock = Clock.offset(clock,duration);
     }
 
     public Key getSecretKey(){

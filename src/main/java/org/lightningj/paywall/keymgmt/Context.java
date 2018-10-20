@@ -1,5 +1,4 @@
-/**
- * **********************************************************************
+/************************************************************************
  *                                                                       *
  *  LightningJ                                                           *
  *                                                                       *
@@ -11,27 +10,12 @@
  *  See terms of license at gnu.org.                                     *
  *                                                                       *
  *************************************************************************/
-package org.lightningj.paywall.util;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
-import java.security.Security;
+package org.lightningj.paywall.keymgmt;
 
 /**
- * Bouncy castle related utility methods.
+ * Extendable class specifying context of crytographic operations.
  *
- * Created by Philip Vendil on 2018-09-19.
+ *  Created by Philip Vendil on 2018-10-06.
  */
-public class BCUtils {
-
-    /**
-     * Help method to install BouncyCastle Cryptographic library
-     * into JVM.
-     */
-   public static void installBCProvider(){
-       if (Security.getProvider("BC") == null){
-           Security.addProvider(new BouncyCastleProvider());
-       }
-   }
-
+public abstract class Context {
 }

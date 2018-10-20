@@ -1,5 +1,4 @@
-/**
- * **********************************************************************
+/************************************************************************
  *                                                                       *
  *  LightningJ                                                           *
  *                                                                       *
@@ -11,27 +10,21 @@
  *  See terms of license at gnu.org.                                     *
  *                                                                       *
  *************************************************************************/
-package org.lightningj.paywall.util;
+package org.lightningj.paywall.btcpayserver
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
-import java.security.Security;
+import spock.lang.Specification
 
 /**
- * Bouncy castle related utility methods.
+ * Unit tests for BTCPayServerFacade
  *
- * Created by Philip Vendil on 2018-09-19.
+ * Created by Philip Vendil on 2018-10-14.
  */
-public class BCUtils {
+class BTCPayServerFacadeSpec extends Specification {
 
-    /**
-     * Help method to install BouncyCastle Cryptographic library
-     * into JVM.
-     */
-   public static void installBCProvider(){
-       if (Security.getProvider("BC") == null){
-           Security.addProvider(new BouncyCastleProvider());
-       }
-   }
-
+    def "Verify that toString returns in lowercase"(){
+        expect:
+        BTCPayServerFacade.MERCHANT.toString() == "merchant"
+        BTCPayServerFacade.POS.toString() == "pos"
+        BTCPayServerFacade.PUBLIC.toString() == "public"
+    }
 }

@@ -22,12 +22,25 @@ import java.security.MessageDigest
  */
 class DigestUtilsSpec extends Specification {
 
-    def "Verify that sha256 generates a valid sha256 request"(){
+    def setupSpec(){
+        BCUtils.installBCProvider()
+    }
+
+    def "Verify that sha256 generates a valid sha256 digest"(){
         setup:
         MessageDigest md = MessageDigest.getInstance("SHA-256")
         md.update("somedata".getBytes("UTF-8"))
         byte[] digest = md.digest()
         expect:
         DigestUtils.sha256("somedata".getBytes("UTF-8")) == digest
+    }
+
+    def "Verify that sha256 generates a valid ripemd160 digest"(){
+        setup:
+        MessageDigest md = MessageDigest.getInstance("RipeMD160","BC")
+        md.update("somedata".getBytes("UTF-8"))
+        byte[] digest = md.digest()
+        expect:
+        DigestUtils.ripeMD160("somedata".getBytes("UTF-8")) == digest
     }
 }

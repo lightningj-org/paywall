@@ -25,7 +25,7 @@ import java.util.logging.Logger
  */
 class FileKeyManagerSpec extends Specification {
 
-    def km = new TestSymmetricFileKeyManager("target/tmp", "foobar321")
+    def km = new TestDefaultFileKeyManager("target/tmp", "target/tmp","foobar321")
 
     @Shared def originalLog
     def setupSpec(){
@@ -56,13 +56,13 @@ class FileKeyManagerSpec extends Specification {
     def """Verify that getProtectPassphraseWithDefault() returns default
 passphrase and logs a warning if no pass phrase have been configured"""(){
         when:
-        km = new TestSymmetricFileKeyManager("target/tmp", null)
+        km = new TestDefaultFileKeyManager("target/tmp", "target/tmp", null)
         def result = km.getProtectPassphraseWithDefault()
         then:
         result == FileKeyManager.DEFAULT_PROTECT_PASSPHRASE.toCharArray()
         1 * FileKeyManager.log.warning("WARNING: no protection pass phrase for JSON Web Token keys set, using built-in default pass phrase, should not be used in production environments.")
         when:
-        km = new TestSymmetricFileKeyManager("target/tmp", " ")
+        km = new TestDefaultFileKeyManager("target/tmp", "target/tmp", " ")
         result = km.getProtectPassphraseWithDefault()
         then:
         result == FileKeyManager.DEFAULT_PROTECT_PASSPHRASE.toCharArray()
@@ -88,7 +88,7 @@ passphrase and logs a warning if no pass phrase have been configured"""(){
 
     def "Verify that if keystore location is not configured is temporary directory created and used and warning log created."(){
         setup:
-        km = km = new TestSymmetricFileKeyManager(null, null)
+        km = km = new TestDefaultFileKeyManager(null, null,null)
         when:
         def path = km.getDirectory("Some Type","testdir")
 
@@ -100,7 +100,7 @@ passphrase and logs a warning if no pass phrase have been configured"""(){
         1 * FileKeyManager.log.warning("No Some Type configured, using temporary directory /var/folders/91/lcc2y45902b9z_9qqmkrmplm0000gn/T/. THIS SHOULD NOT BE USED IN TEST ENVIRONMENTS.")
 
         when:
-        km = km = new TestSymmetricFileKeyManager(" ", null)
+        km = km = new TestDefaultFileKeyManager(" ", " ", "")
         path = km.getDirectory("Some Type","testdir")
 
         pathDir = new File(path)

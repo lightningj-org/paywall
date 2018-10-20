@@ -14,6 +14,10 @@
 
 package org.lightningj.paywall.keymgmt;
 
+import org.bouncycastle.jce.ECNamedCurveTable;
+import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.bouncycastle.jce.spec.ECPublicKeySpec;
+import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.openssl.*;
 import org.bouncycastle.openssl.bc.BcPEMDecryptorProvider;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
@@ -32,6 +36,8 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.*;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -101,7 +107,7 @@ public class KeySerializationHelper {
 
     /**
      * Method to serialize an asymmetric key pair to key data. Deserialization should
-     * be done with deserializeKeyPair.
+     * be done with deserializeAsymKeyPair.
      *
      * @param keyPair the key pair to serialize, never null.
      * @param protectPassphrase the password used to protect the private key.
@@ -109,7 +115,7 @@ public class KeySerializationHelper {
      * index 0 and private at index 1.
      * @throws InternalErrorException if internal problems occurred serializing the keys.
      */
-    public static byte[][] serializeKeyPair(KeyPair keyPair, char[] protectPassphrase) throws InternalErrorException{
+    public static byte[][] serializeAsymKeyPair(KeyPair keyPair, char[] protectPassphrase) throws InternalErrorException{
         try {
             if(protectPassphrase == null || protectPassphrase.length == 0){
                 throw new InternalErrorException("Error encrypting asymmetric key, no protect pass phrase defined.");
@@ -140,6 +146,44 @@ public class KeySerializationHelper {
     }
 
     /**
+     * Method to serialize an btc pay server access token key pair to key data. Deserialization should
+     * be done with deserializeBTCPayServerKeyPair.
+     *
+     * The files saved is a Encrypted PEM file for the private key and the public
+     * key stored as a hexadecimal string.
+     *
+     * @param keyPair the key pair to serialize, never null.
+     * @param protectPassphrase the password used to protect the private key.
+     * @return an array of serialized byte array with header and data with size 2 and public is at
+     * index 0 and private at index 1.
+     * @throws InternalErrorException if internal problems occurred serializing the keys.
+     */
+    public static byte[][] serializeBTCPayServerKeyPair(KeyPair keyPair, char[] protectPassphrase) throws InternalErrorException{
+        try {
+            if(protectPassphrase == null || protectPassphrase.length == 0){
+                throw new InternalErrorException("Error encrypting BTC Pay Server Token Access key, no protect pass phrase defined.");
+            }
+            String header = getHeader(keyPair.getPublic().getEncoded());
+            org.bouncycastle.jce.interfaces.ECPublicKey pubKey = (org.bouncycastle.jce.interfaces.ECPublicKey) keyPair.getPublic();
+            String publicKeyData = HexUtils.encodeHexString(pubKey.getQ().getEncoded(true));
+            StringWriter encryptedPEMString = new StringWriter();
+            PEMEncryptor pemEncryptor =  new JcePEMEncryptorBuilder("AES-256-CBC").build(protectPassphrase);
+            JcaPEMWriter pemWriter = new JcaPEMWriter(encryptedPEMString);
+            pemWriter.writeObject(keyPair.getPrivate(),pemEncryptor);
+            pemWriter.close();
+
+            String privateKeyData = header + encryptedPEMString.toString();
+
+            return new byte[][] {publicKeyData.getBytes("UTF-8"), privateKeyData.getBytes("UTF-8")};
+        }catch (Exception e){
+            if(e instanceof InternalErrorException){
+                throw (InternalErrorException) e;
+            }
+            throw new InternalErrorException("Internal error encoding asymmetric key data: " + e.getMessage(),e);
+        }
+    }
+
+    /**
      * Method to deserialize an asymmetric key data into a key pair.
      *
      * @param publicKeyData the serialized public key data, never null.
@@ -148,9 +192,9 @@ public class KeySerializationHelper {
      * @return a reconstructed key pair.
      * @throws InternalErrorException if internal problems occurred deserializing the keys.
      */
-    public static KeyPair deserializeKeyPair(byte[] publicKeyData, byte[] privateKeyData, char[] protectPassphrase, KeyFactory keyFactory) throws InternalErrorException{
+    public static KeyPair deserializeAsymKeyPair(byte[] publicKeyData, byte[] privateKeyData, char[] protectPassphrase, KeyFactory keyFactory) throws InternalErrorException{
         try {
-            PublicKey publicKey = keyFactory.generatePublic(new X509EncodedKeySpec(parsePEMData(publicKeyData,BEGIN_PUBLIC_KEY_TAG,END_PUBLIC_KEY_TAG)));
+            PublicKey publicKey = deserializePublicKey(publicKeyData,keyFactory);
 
             PEMDecryptorProvider decryptor = new BcPEMDecryptorProvider(protectPassphrase);
             PEMParser parser = new PEMParser(new InputStreamReader(new ByteArrayInputStream(privateKeyData)));
@@ -172,6 +216,63 @@ public class KeySerializationHelper {
         }
     }
 
+    /**
+     * Method to deserialize an BTC Pay Server key data into a key pair.
+     *
+     * The method only parses the private key and generates the public key from it automatically.
+     *
+     * @param privateKeyData the serialized private key data, never null.
+     * @param keyFactory the keyFactory to reconstruct the keys with.
+     * @return a reconstructed key pair.
+     * @throws InternalErrorException if internal problems occurred deserializing the keys.
+     */
+    public static KeyPair deserializeBTCPayServerKeyPair(byte[] privateKeyData, char[] protectPassphrase, KeyFactory keyFactory, String eCCurveName) throws InternalErrorException{
+        try {
+            PEMDecryptorProvider decryptor = new BcPEMDecryptorProvider(protectPassphrase);
+            PEMParser parser = new PEMParser(new InputStreamReader(new ByteArrayInputStream(privateKeyData)));
+            Object o = parser.readObject();
+            if(o instanceof PEMEncryptedKeyPair) {
+                PEMEncryptedKeyPair pemEncryptedKeyPair = (PEMEncryptedKeyPair) o;
+
+                PEMKeyPair pemKeyPair = pemEncryptedKeyPair.decryptKeyPair(decryptor);
+                PrivateKey privateKey = new JcaPEMKeyConverter().getPrivateKey(pemKeyPair.getPrivateKeyInfo());
+                if(privateKey instanceof ECPrivateKey){
+                    ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(eCCurveName);
+
+                    ECPoint Q = ecSpec.getG().multiply(((org.bouncycastle.jce.interfaces.ECPrivateKey) privateKey).getD());
+
+                    ECPublicKeySpec pubSpec = new ECPublicKeySpec(Q, ecSpec);
+                    PublicKey publicKey = keyFactory.generatePublic(pubSpec);
+                    return new KeyPair(publicKey, privateKey);
+                }else{
+                    throw new InternalErrorException("Invalid key type when parsing encrypted btc pay server token access key. Stored private key isn't an EC key.");
+                }
+            }else{
+                throw new InternalErrorException("Error parsing encrypted btc pay server token access key. Stored private key isn't an Encrypted Key");
+            }
+        }catch (Exception e){
+            if(e instanceof InternalErrorException){
+                throw (InternalErrorException) e;
+            }
+            throw new InternalErrorException("Internal error decoding btc pay server token access key data (Check protect passphrase): " + e.getMessage(),e);
+        }
+    }
+
+    /**
+     * Help method to decode a public key data only.
+     *
+     * @param publicKeyData the public key data to parse.
+     * @param keyFactory the keyFactory to reconstruct the keys with.
+     * @return a reconstructed public key.
+     * @throws InternalErrorException if internal problems occurred deserializing the keys.
+     */
+    public static PublicKey deserializePublicKey(byte[] publicKeyData, KeyFactory keyFactory) throws InternalErrorException{
+        try {
+            return keyFactory.generatePublic(new X509EncodedKeySpec(parsePEMData(publicKeyData, BEGIN_PUBLIC_KEY_TAG, END_PUBLIC_KEY_TAG)));
+        }catch(Exception e){
+          throw new InternalErrorException("Error parsing public key: " + e.getMessage(),e);
+        }
+    }
 
     /**
      * Help method generating help data for the serialized key, such as

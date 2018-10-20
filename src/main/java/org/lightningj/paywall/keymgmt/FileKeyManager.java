@@ -40,7 +40,7 @@ public abstract class FileKeyManager implements KeyManager{
      * @return the provider to use.
      */
     @Override
-    public String getProvider(KeyManager.Context context) {
+    public String getProvider(Context context) {
         return "BC";
     }
 

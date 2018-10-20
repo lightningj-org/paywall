@@ -13,8 +13,11 @@
 
 package org.lightningj.paywall.keymgmt
 
+import org.bouncycastle.jce.ECNamedCurveTable
+import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec
 import org.lightningj.paywall.InternalErrorException
 import org.lightningj.paywall.util.BCUtils
+import org.lightningj.paywall.btcpayserver.BTCPayServerHelper
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -35,6 +38,8 @@ class KeySerializationHelperSpec extends Specification {
     Key symmetricKey
     @Shared
     KeyPair asymmetricKey
+    @Shared
+    KeyPair btcPayServerKey
 
     def setupSpec() {
         BCUtils.installBCProvider()
@@ -43,9 +48,14 @@ class KeySerializationHelperSpec extends Specification {
         keyGenerator.init(256)
         symmetricKey = keyGenerator.generateKey()
 
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA")
-        keyPairGenerator.initialize(1024)
-        asymmetricKey = keyPairGenerator.generateKeyPair()
+        KeyPairGenerator rsaKeyPairGenerator = KeyPairGenerator.getInstance("RSA")
+        rsaKeyPairGenerator.initialize(1024)
+        asymmetricKey = rsaKeyPairGenerator.generateKeyPair()
+
+        KeyPairGenerator ecKeyGen = KeyPairGenerator.getInstance("EC", "BC")
+        ECNamedCurveParameterSpec curveSpec = ECNamedCurveTable.getParameterSpec("secp256k1")
+        ecKeyGen.initialize(curveSpec)
+        btcPayServerKey = ecKeyGen.generateKeyPair()
     }
 
     def "Verify that serializeSecretKey() generates valid data and that deserializeSecretKey() can parse it"() {
@@ -117,9 +127,9 @@ class KeySerializationHelperSpec extends Specification {
         e.message == "Internal error decoding secret key data: Internal error encrypting secret key, (check passphrase) : The wrapped key is not padded correctly"
     }
 
-    def "Verify that serializeKeyPair() generates valid key data with unencrypted private key and that deserializeKeyPair converts it back again."() {
+    def "Verify that serializeAsymKeyPair() generates valid key data with unencrypted private key and that deserializeKeyPair converts it back again."() {
         when:
-        def data = KeySerializationHelper.serializeKeyPair(asymmetricKey, "foobar123".toCharArray())
+        def data = KeySerializationHelper.serializeAsymKeyPair(asymmetricKey, "foobar123".toCharArray())
 
         def publicDataString = new String(data[0], "UTF-8")
         def privateDataString = new String(data[01], "UTF-8")
@@ -140,7 +150,7 @@ class KeySerializationHelperSpec extends Specification {
         privateDataString.contains("DEK-Info: AES-256-CB")
 
         when:
-        def keyPair = KeySerializationHelper.deserializeKeyPair(data[0], data[1], "foobar123".toCharArray(), KeyFactory.getInstance("RSA"))
+        def keyPair = KeySerializationHelper.deserializeAsymKeyPair(data[0], data[1], "foobar123".toCharArray(), KeyFactory.getInstance("RSA"))
 
         then:
         keyPair.public.encoded == asymmetricKey.public.encoded
@@ -149,56 +159,133 @@ class KeySerializationHelperSpec extends Specification {
 
 
 
-    def "Verify that serializeKeyPair() with invalid data throws InternalErrorException"() {
+    def "Verify that serializeAsymKeyPair() with invalid data throws InternalErrorException"() {
         when:
-        KeySerializationHelper.serializeKeyPair(null,"foobar123".toCharArray())
+        KeySerializationHelper.serializeAsymKeyPair(null,"foobar123".toCharArray())
         then:
         def e = thrown(InternalErrorException)
         e.message == "Internal error encoding asymmetric key data: null"
     }
 
-    def "Verify that serializeKeyPair() throws InternalErrorException with pass phrase hint if passphrase is null or empty"() {
+    def "Verify that serializeAsymKeyPair() throws InternalErrorException with pass phrase hint if passphrase is null or empty"() {
         when:
-        KeySerializationHelper.serializeKeyPair(asymmetricKey,null)
+        KeySerializationHelper.serializeAsymKeyPair(asymmetricKey,null)
         then:
         def e = thrown(InternalErrorException)
         e.message == "Error encrypting asymmetric key, no protect pass phrase defined."
         when:
-        KeySerializationHelper.serializeKeyPair(asymmetricKey,new char[0])
+        KeySerializationHelper.serializeAsymKeyPair(asymmetricKey,new char[0])
         then:
         e = thrown(InternalErrorException)
         e.message == "Error encrypting asymmetric key, no protect pass phrase defined."
     }
 
-    def "Verify that deserializeKeyPair() with invalid data throws InternalErrorException"() {
+    def "Verify that serializeAsymKeyPair() with null data throws InternalErrorException"() {
         when:
-        KeySerializationHelper.deserializeKeyPair(null, null, "foobar123".toCharArray(), KeyFactory.getInstance("RSA"))
+        KeySerializationHelper.deserializeAsymKeyPair(null, null, "foobar123".toCharArray(), KeyFactory.getInstance("RSA"))
         then:
         def e = thrown(InternalErrorException)
-        e.message == "Internal error decoding asymmetric key data (Check protect passphrase): null"
+        e.message == "Error parsing public key: null"
 
         when:
-        def data = KeySerializationHelper.serializeKeyPair(asymmetricKey,  "foobar123".toCharArray())
-        KeySerializationHelper.deserializeKeyPair(data[0], data[1], "foobar123".toCharArray(), KeyFactory.getInstance("EC"))
+        def data = KeySerializationHelper.serializeAsymKeyPair(asymmetricKey,  "foobar123".toCharArray())
+        KeySerializationHelper.deserializeAsymKeyPair(data[0], data[1], "foobar123".toCharArray(), KeyFactory.getInstance("EC"))
         then:
         e = thrown(InternalErrorException)
-        e.message.startsWith("Internal error decoding asymmetric key data (Check protect passphrase):")
+        e.message.startsWith("Error parsing public key:")
     }
 
-    def "Verify that serializeKeyPair() throws InternalErrorException with pass phrase hint if passphrase is null or wrong"() {
+    def "Verify that serializeAsymKeyPair() throws InternalErrorException with pass phrase hint if passphrase is null or wrong"() {
         setup:
-        def data = KeySerializationHelper.serializeKeyPair(asymmetricKey,  "foobar123".toCharArray())
+        def data = KeySerializationHelper.serializeAsymKeyPair(asymmetricKey,  "foobar123".toCharArray())
         def kf = KeyFactory.getInstance("RSA")
         when:
-        KeySerializationHelper.deserializeKeyPair(data[0],data[1],null,kf)
+        KeySerializationHelper.deserializeAsymKeyPair(data[0],data[1],null,kf)
         then:
         def e = thrown(InternalErrorException)
-        println e.message
         e.message.startsWith("Internal error decoding asymmetric key data (Check protect passphrase):")
         when:
-        KeySerializationHelper.deserializeKeyPair(data[0],data[1],"bad".toCharArray(),kf)
+        KeySerializationHelper.deserializeAsymKeyPair(data[0],data[1],"bad".toCharArray(),kf)
         then:
         e = thrown(InternalErrorException)
         e.message.startsWith("Internal error decoding asymmetric key data (Check protect passphrase):")
+    }
+
+    def "Verify that serializeBTCPayServerKeyPair() generates valid key data with unencrypted private key and that deserializeKeyPair converts it back again."() {
+        when:
+        def data = KeySerializationHelper.serializeBTCPayServerKeyPair(btcPayServerKey, "foobar123".toCharArray())
+
+        def publicDataString = new String(data[0], "UTF-8")
+        def privateDataString = new String(data[1], "UTF-8")
+
+        then:
+        publicDataString == new BTCPayServerHelper().pubKeyInHex(btcPayServerKey.public)
+
+        privateDataString.contains(KeySerializationHelper.ID_TAG)
+        privateDataString.contains(KeySerializationHelper.GENERATED_TAG)
+        privateDataString.contains(KeySerializationHelper.HOSTNAME_TAG)
+        privateDataString.contains("-----BEGIN EC PRIVATE KEY-----")
+        privateDataString.contains("-----END EC PRIVATE KEY-----")
+        privateDataString.contains("Proc-Type: 4,ENCRYPTED")
+        privateDataString.contains("DEK-Info: AES-256-CB")
+
+        when:
+        def keyPair = KeySerializationHelper.deserializeBTCPayServerKeyPair(data[1], "foobar123".toCharArray(), KeyFactory.getInstance("EC"), "secp256k1")
+
+        then:
+        keyPair.public.encoded == btcPayServerKey.public.encoded
+        keyPair.private.encoded == btcPayServerKey.private.encoded
+    }
+
+    def "Verify that serializeBTCPayServerKeyPair() with invalid data throws InternalErrorException"() {
+        when:
+        KeySerializationHelper.serializeBTCPayServerKeyPair(null,"foobar123".toCharArray())
+        then:
+        def e = thrown(InternalErrorException)
+        e.message == "Internal error encoding asymmetric key data: null"
+    }
+
+    def "Verify that serializeBTCPayServerKeyPair() throws InternalErrorException with pass phrase hint if passphrase is null or empty"() {
+        when:
+        KeySerializationHelper.serializeBTCPayServerKeyPair(btcPayServerKey,null)
+        then:
+        def e = thrown(InternalErrorException)
+        e.message == "Error encrypting BTC Pay Server Token Access key, no protect pass phrase defined."
+        when:
+        KeySerializationHelper.serializeBTCPayServerKeyPair(btcPayServerKey,new char[0])
+        then:
+        e = thrown(InternalErrorException)
+        e.message == "Error encrypting BTC Pay Server Token Access key, no protect pass phrase defined."
+    }
+
+    def "Verify that deserializeBTCPayServerKeyPair() with null data throws InternalErrorException"() {
+        when:
+        KeySerializationHelper.deserializeBTCPayServerKeyPair( null, "foobar123".toCharArray(), KeyFactory.getInstance("EC"),"secp256k1")
+        then:
+        def e = thrown(InternalErrorException)
+        e.message == "Internal error decoding btc pay server token access key data (Check protect passphrase): null"
+
+        when:
+        def data = KeySerializationHelper.serializeBTCPayServerKeyPair(btcPayServerKey,  "foobar123".toCharArray())
+        KeySerializationHelper.deserializeBTCPayServerKeyPair(data[1], "foobar123".toCharArray(), KeyFactory.getInstance("RSA"),"secp256k1")
+        then:
+        e = thrown(InternalErrorException)
+        e.message.startsWith("Internal error decoding btc pay server token access key data (Check protect passphrase):")
+    }
+
+    def "Verify that deserializeBTCPayServerKeyPair() throws InternalErrorException with pass phrase hint if passphrase is null or wrong"() {
+        setup:
+        def data = KeySerializationHelper.serializeBTCPayServerKeyPair(btcPayServerKey,  "foobar123".toCharArray())
+        def kf = KeyFactory.getInstance("EC")
+        when:
+        KeySerializationHelper.deserializeBTCPayServerKeyPair(data[1],null,kf,"secp256k1")
+        then:
+        def e = thrown(InternalErrorException)
+        e.message.startsWith("Internal error decoding btc pay server token access key data (Check protect passphrase):")
+        when:
+        KeySerializationHelper.deserializeBTCPayServerKeyPair(data[1],"bad".toCharArray(),kf,"secp256k1")
+        then:
+        e = thrown(InternalErrorException)
+        e.message.startsWith("Internal error decoding btc pay server token access key data (Check protect passphrase):")
     }
 }

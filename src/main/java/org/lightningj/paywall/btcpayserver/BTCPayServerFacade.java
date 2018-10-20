@@ -1,5 +1,4 @@
-/**
- * **********************************************************************
+/************************************************************************
  *                                                                       *
  *  LightningJ                                                           *
  *                                                                       *
@@ -11,27 +10,26 @@
  *  See terms of license at gnu.org.                                     *
  *                                                                       *
  *************************************************************************/
-package org.lightningj.paywall.util;
+package org.lightningj.paywall.btcpayserver;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.lightningj.paywall.InternalErrorException;
 
-import java.security.Security;
+import java.io.IOException;
 
 /**
- * Bouncy castle related utility methods.
+ * Enumeration indicating the different roles that might access the BTC Pay Server API.
  *
- * Created by Philip Vendil on 2018-09-19.
+ * Created by philip on 2018-10-14.
  */
-public class BCUtils {
+public enum BTCPayServerFacade {
 
-    /**
-     * Help method to install BouncyCastle Cryptographic library
-     * into JVM.
-     */
-   public static void installBCProvider(){
-       if (Security.getProvider("BC") == null){
-           Security.addProvider(new BouncyCastleProvider());
-       }
-   }
+    MERCHANT,
+    POS,
+    PUBLIC;
+
+    public String toString(){
+        return this.name().toLowerCase();
+    }
+
 
 }

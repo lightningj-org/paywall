@@ -14,6 +14,8 @@
 
 package org.lightningj.paywall.keymgmt;
 
+import org.lightningj.paywall.InternalErrorException;
+
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
@@ -31,8 +33,9 @@ public interface AsymmetricKeyManager extends KeyManager{
      * @return related public key.
      * @throws UnsupportedOperationException if operation in combination with given context isn't
      * supported.
+     * @throws InternalErrorException if internal error occurred parsing/generating public key.
      */
-    PublicKey getPublicKey(Context context) throws UnsupportedOperationException;
+    PublicKey getPublicKey(Context context) throws UnsupportedOperationException, InternalErrorException;
 
     /**
      * Returns the private key that should be used for asymmetric operations for the given context.
@@ -41,8 +44,9 @@ public interface AsymmetricKeyManager extends KeyManager{
      * @return related private key.
      * @throws UnsupportedOperationException if operation in combination with given context isn't
      * supported.
+     * @throws InternalErrorException if internal error occurred parsing/generating private key.
      */
-    PrivateKey getPrivateKey(Context context) throws UnsupportedOperationException;
+    PrivateKey getPrivateKey(Context context) throws UnsupportedOperationException, InternalErrorException;
 
     /**
      * Method to verify if a given public key is trusted.
@@ -50,7 +54,9 @@ public interface AsymmetricKeyManager extends KeyManager{
      * @param context related context.
      * @param publicKey the public key to check if trusted.
      * @return true if the public key is trusted for the given context.
-     * @throws UnsupportedOperationException
+     * @throws UnsupportedOperationException if operation in combination with given context isn't
+     * supported.
+     * @throws InternalErrorException if internal error occurred checking trust.
      */
-    boolean isTrusted(Context context, PublicKey publicKey) throws UnsupportedOperationException;
+    boolean isTrusted(Context context, PublicKey publicKey) throws UnsupportedOperationException, InternalErrorException;
 }

@@ -13,6 +13,10 @@
 
 package org.lightningj.paywall.keymgmt;
 
+import org.bouncycastle.jce.ECNamedCurveTable;
+import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
+import org.lightningj.paywall.btcpayserver.BTCPayServerKeyContext;
+
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.security.*;
@@ -26,19 +30,25 @@ import java.security.*;
 public class DummyKeyManager implements SymmetricKeyManager,AsymmetricKeyManager {
 
     private KeyPair asymmetricKeyPair;
+    private KeyPair btcPayServerKey;
     private SecretKey symmetricKey;
 
     public DummyKeyManager(){
         try {
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA", "BC");
             keyPairGenerator.initialize(2048);
             asymmetricKeyPair = keyPairGenerator.genKeyPair();
 
-            KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+            KeyGenerator keyGenerator = KeyGenerator.getInstance("AES", "BC");
             keyGenerator.init(256);
             symmetricKey = keyGenerator.generateKey();
 
-        }catch (NoSuchAlgorithmException e) {
+            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC","BC");
+            ECNamedCurveParameterSpec curveSpec = ECNamedCurveTable.getParameterSpec(DefaultFileKeyManager.BTCPAY_SERVER_ECDSA_CURVE);
+            keyGen.initialize(curveSpec);
+            btcPayServerKey = keyGen.generateKeyPair();
+
+        }catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
             throw new RuntimeException("Error creating Dummy Key Manager: " + e.getMessage(),e);
         }
     }
@@ -65,6 +75,9 @@ public class DummyKeyManager implements SymmetricKeyManager,AsymmetricKeyManager
      */
     @Override
     public PublicKey getPublicKey(Context context) throws UnsupportedOperationException {
+        if(context instanceof BTCPayServerKeyContext){
+            return btcPayServerKey.getPublic();
+        }
         return asymmetricKeyPair.getPublic();
     }
 
@@ -78,6 +91,9 @@ public class DummyKeyManager implements SymmetricKeyManager,AsymmetricKeyManager
      */
     @Override
     public PrivateKey getPrivateKey(Context context) throws UnsupportedOperationException {
+        if(context instanceof BTCPayServerKeyContext){
+            return btcPayServerKey.getPrivate();
+        }
         return asymmetricKeyPair.getPrivate();
     }
 
@@ -96,6 +112,6 @@ public class DummyKeyManager implements SymmetricKeyManager,AsymmetricKeyManager
 
     @Override
     public String getProvider(Context context) {
-        return "SUN";
+        return "BC";
     }
 }

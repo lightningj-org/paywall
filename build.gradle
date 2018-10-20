@@ -38,6 +38,8 @@ buildscript {
 dependencies {
     compile 'org.bouncycastle:bcprov-jdk15on:1.60'
     compile 'org.bouncycastle:bcpkix-jdk15on:1.60'
+    compile 'org.lightningj:lightningj:0.5.0-Beta'
+    compile 'org.bitbucket.b_c:jose4j:0.6.4' // JSON Web Token Generator, JWS and JWE
 
     // mandatory dependencies for using Spock
     testCompile "org.spockframework:spock-core:1.1-groovy-2.4"

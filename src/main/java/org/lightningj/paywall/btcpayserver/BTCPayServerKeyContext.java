@@ -1,5 +1,4 @@
-/**
- * **********************************************************************
+/************************************************************************
  *                                                                       *
  *  LightningJ                                                           *
  *                                                                       *
@@ -11,27 +10,27 @@
  *  See terms of license at gnu.org.                                     *
  *                                                                       *
  *************************************************************************/
-package org.lightningj.paywall.util;
+package org.lightningj.paywall.btcpayserver;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
-import java.security.Security;
+import org.lightningj.paywall.keymgmt.Context;
 
 /**
- * Bouncy castle related utility methods.
+ * Cryptographic context specific for btcpay api key generation.
  *
- * Created by Philip Vendil on 2018-09-19.
+ * Created by philip on 2018-10-07.
  */
-public class BCUtils {
+public class BTCPayServerKeyContext extends Context {
+
+    public static BTCPayServerKeyContext INSTANCE = new BTCPayServerKeyContext();
 
     /**
-     * Help method to install BouncyCastle Cryptographic library
-     * into JVM.
+     * Default constructor.
      */
-   public static void installBCProvider(){
-       if (Security.getProvider("BC") == null){
-           Security.addProvider(new BouncyCastleProvider());
-       }
-   }
+    BTCPayServerKeyContext(){
+    }
 
+    @Override
+    public String toString() {
+        return "BTCPayServerKeyContext{}";
+    }
 }

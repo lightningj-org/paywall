@@ -12,10 +12,14 @@
  *************************************************************************/
 package org.lightningj.paywall.keymgmt
 
+import org.lightningj.paywall.btcpayserver.BTCPayServerKeyContext
+import org.lightningj.paywall.util.BCUtils
 import spock.lang.Shared
 import spock.lang.Specification
 
 import javax.crypto.SecretKey
+import java.security.interfaces.ECPrivateKey
+import java.security.interfaces.ECPublicKey
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 
@@ -27,19 +31,20 @@ import java.security.interfaces.RSAPublicKey
 class DummyKeyManagerSpec extends Specification {
 
     @Shared
-    DummyKeyManager km = new DummyKeyManager()
+    DummyKeyManager km
+
+    def setupSpec(){
+        BCUtils.installBCProvider()
+        km = new DummyKeyManager()
+    }
 
     def "Verify that correct keys are returned by dummy key manager"(){
         expect:
         km.getSymmetricKey(null) instanceof SecretKey
         km.getPublicKey(null) instanceof RSAPublicKey
         km.getPrivateKey(null) instanceof RSAPrivateKey
-
-        when:
-        SecretKey s = km.getSymmetricKey(null)
-
-        then:
-        true
+        km.getPublicKey(BTCPayServerKeyContext.INSTANCE) instanceof ECPublicKey
+        km.getPrivateKey(BTCPayServerKeyContext.INSTANCE) instanceof ECPrivateKey
     }
 
     def "Verify that all keys are trusted"(){

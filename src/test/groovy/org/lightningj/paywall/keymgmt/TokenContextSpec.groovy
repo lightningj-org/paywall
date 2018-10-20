@@ -15,35 +15,33 @@ package org.lightningj.paywall.keymgmt
 import spock.lang.Specification
 
 /**
- * Unit test for KeyManager.Context.
+ * Unit test forTokenContext.
  *
  * Created by philip on 2018-09-14.
  */
-class ContextSpec extends Specification {
+class TokenContextSpec extends Specification {
 
     def "Verify constructor and getter"(){
         when:
-        KeyManager.Context context = new  KeyManager.Context("SomeContextType")
+        TokenContext context = new TokenContext("SomeContextType")
         then:
-        context.getContextType() == "SomeContextType"
+        context.getType() == "SomeContextType"
     }
 
     def "Verify toString()"(){
         expect:
-        new  KeyManager.Context("SomeContextType").toString() == "Context{contextType='SomeContextType'}"
+        new TokenContext("SomeContextType").toString() == "TokenContext{type='SomeContextType'}"
     }
 
     def "Verify equals() and hashCode()"(){
         setup:
-        KeyManager.Context context1 = new  KeyManager.Context("SomeContextType")
-        KeyManager.Context context1_2 = new  KeyManager.Context("SomeContextType")
-        KeyManager.Context context2 = new  KeyManager.Context("OtherContextType")
+        TokenContext context1 = new TokenContext("SomeContextType")
+        TokenContext context1_2 = new TokenContext("SomeContextType")
+        TokenContext context2 = new TokenContext("OtherContextType")
         expect:
         context1 == context1_2
         context1 != context2
         context1.hashCode() == context1_2.hashCode()
         context1.hashCode() != context2.hashCode()
-
-
     }
 }

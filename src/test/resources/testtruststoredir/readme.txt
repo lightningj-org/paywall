@@ -1,0 +1,1 @@
+Test directory for public key files. This file should be ignored during cache renewal.
