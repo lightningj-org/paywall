@@ -15,6 +15,7 @@
 package org.lightningj.paywall.btcpayserver
 
 import org.lightningj.paywall.btcpayserver.vo.Invoice
+import org.lightningj.paywall.btcpayserver.vo.Token
 import spock.lang.Specification
 
 /**
@@ -38,6 +39,16 @@ class BTCPayServerResponseParserSpec extends Specification {
         i.id == "HGgydgG9JRTcRoYDnKrtKk"
         i.posData == null
         i.status == "new"
+    }
+
+    def "Verify that parseTokenwith BTCPay Server token returns an Token"(){
+        when:
+        Token t = parser.parseToken(tokenData)
+        then:
+        t.token == "A5WTwn1hH31bWJXukFecoGMYvYyHo9xa5KHoZCCNR11F"
+        t.label == "Paywall Test Client"
+        t.expireDate ==  null
+        t.pairingCode == "iuiWpWq"
     }
 
     static final invoiceData = """{
@@ -175,5 +186,7 @@ class BTCPayServerResponseParserSpec extends Specification {
             }
         }
     }
-}"""
+}""".getBytes("UTF-8")
+
+    static final tokenData = """{"data":[{"policies":[],"pairingCode":"iuiWpWq","pairingExpiration":1540191320741,"dateCreated":1540190420741,"facade":"merchant","token":"A5WTwn1hH31bWJXukFecoGMYvYyHo9xa5KHoZCCNR11F","label":"Paywall Test Client"}]}""".getBytes("UTF-8")
 }

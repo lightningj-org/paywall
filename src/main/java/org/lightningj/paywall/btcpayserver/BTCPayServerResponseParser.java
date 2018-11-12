@@ -16,12 +16,14 @@ package org.lightningj.paywall.btcpayserver;
 
 import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.btcpayserver.vo.Invoice;
+import org.lightningj.paywall.btcpayserver.vo.Token;
 
 import javax.json.Json;
 import javax.json.JsonException;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Class parsing JSON responses from BTC Pay Server into value objects.
@@ -44,16 +46,37 @@ public class BTCPayServerResponseParser {
      * @return the related invoice value object.
      * @throws InternalErrorException if problems occurred parsing the json data.
      */
-    public Invoice parseInvoice(String jsonResponse) throws JsonException {
+    public Invoice parseInvoice(byte[] jsonResponse) throws JsonException {
         if(jsonResponse == null){
             return null;
         }
-        JsonReader reader = Json.createReader(new StringReader(jsonResponse));
-        JsonObject response = reader.readObject();
-        return new Invoice(response.getJsonObject("data"));
+        return new Invoice(toJsonObject(jsonResponse).getJsonObject("data"));
     }
 
-    // TODO Token
+    /**
+     * Method to parse and convert a BTC Pay Server JSON invoice response into a value object
+     * invoice.
+     * @param jsonResponse the jsonResponse as a string.
+     * @return the related invoice value object.
+     * @throws InternalErrorException if problems occurred parsing the json data.
+     */
+    public Token parseToken(byte[] jsonResponse) throws JsonException {
+        if(jsonResponse == null){
+            return null;
+        }
+        return new Token(toJsonObject(jsonResponse).getJsonArray("data").getJsonObject(0));
+    }
+
+    protected JsonObject toJsonObject(byte[] jsonResponse) throws JsonException {
+        try {
+            System.out.print(new String(jsonResponse));
+          JsonReader reader = Json.createReader(new StringReader(new String(jsonResponse, "UTF-8")));
+           return reader.readObject();
+        }catch (UnsupportedEncodingException e){
+            throw  new JsonException(e.getMessage(),e);
+        }
+    }
+    // TODO Token Test
 
     // TODO Rate
 

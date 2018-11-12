@@ -54,7 +54,7 @@ class BTCPayServerHTTPSenderSpec extends Specification {
     BTCPayServerHTTPSender sender
     TestHandler handler = new TestHandler()
 
-    private static final int PORT = 39820
+    private static final int PORT = 39823
 
     def setupSpec(){
         BCUtils.installBCProvider()
@@ -111,7 +111,7 @@ class BTCPayServerHTTPSenderSpec extends Specification {
         handler.headers["x-accept-version"] == "2.0.0"
         handler.headers["x-identity"] == null
         handler.headers["x-signature"] == null
-        handler.headers["Content-Type"] == null
+        handler.headers["Content-Type"] == "application/json"
         handler.method.name() == "GET"
         handler.recievedData == """"""
 
@@ -126,7 +126,6 @@ class BTCPayServerHTTPSenderSpec extends Specification {
         cleanup:
         webServer.shutdown()
     }
-    // TODO test sending
 
 
     @Unroll

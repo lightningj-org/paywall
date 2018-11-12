@@ -90,7 +90,6 @@ class DefaultFileKeyManagerSpec extends Specification {
         then:
         new File("target/tmp" + ASYM_PRIVATE_KEYNAME).exists()
         new File("target/tmp" + ASYM_PUBLIC_KEYNAME).exists()
-        println new String(Files.readAllBytes(new File("target/tmp" + ASYM_PUBLIC_KEYNAME).toPath()),"UTF-8");
         km.getPrivateKey(null) == privateKey // Verify it is cached
         km.getPublicKey(null) == publicKey
 
@@ -203,13 +202,19 @@ class DefaultFileKeyManagerSpec extends Specification {
         when:
         PrivateKey privateKey = km.getPrivateKey(BTCPayServerKeyContext.INSTANCE)
         PublicKey publicKey = km.getPublicKey(BTCPayServerKeyContext.INSTANCE)
+
+        String publicKeyHex = btcPayServerUtils.pubKeyInHex(publicKey)
+        String sIN = btcPayServerUtils.toSIN(publicKeyHex)
         then:
         km.getPrivateKey(BTCPayServerKeyContext.INSTANCE) == privateKey // Verify it is cached
         km.getPublicKey(BTCPayServerKeyContext.INSTANCE) == publicKey
         km.btcKeyPair != null
         km.keyPairField == null
         new File("target/tmp" + BTCPAY_SERVER_PRIVATE_KEYNAME).exists()
-        1 * FileKeyManager.log.info(_) >> { it -> assert it =~ "New BTC Pay Server access key generated and stored in file target/tmp/btcpayserver_key_prv.pem, key SIN: "}
+        File pubFile = new File("target/tmp" + BTCPAY_SERVER_PUBLIC_KEYNAME.replaceAll("@SIN@",sIN))
+        pubFile.exists()
+        Files.readAllLines(pubFile.toPath())[0] == publicKeyHex
+        1 * FileKeyManager.log.info(_) >> { it -> assert it =~ "New BTC Pay Server access key generated and stored in files target/tmp/btcpayserver_key_prv.pem and target/tmp/btcpayserver_key_pub_sin_"}
         cleanup:
         new File("target/tmp" + BTCPAY_SERVER_PRIVATE_KEYNAME).delete()
     }

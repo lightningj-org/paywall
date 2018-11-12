@@ -29,6 +29,9 @@ public class HexUtils {
      * @return String representation of the hex encoded data.
      */
     public static String encodeHexString(byte[] data){
+        if(data == null){
+            return null;
+        }
         return DatatypeConverter.printHexBinary(data);
     }
 
@@ -39,6 +42,9 @@ public class HexUtils {
      * @return the decoded data.
      */
     public static byte[] decodeHexString(String hexString){
+        if(hexString == null){
+            return null;
+        }
         return DatatypeConverter.parseHexBinary(hexString);
     }
 }

@@ -18,6 +18,7 @@ import org.lightningj.paywall.btcpayserver.vo.Invoice
 import spock.lang.Specification
 
 import javax.json.Json
+import javax.json.JsonException
 import javax.json.JsonObject
 
 /**
@@ -78,6 +79,49 @@ class JSONParsableSpec extends Specification {
         i.getLongIfSet(o,"somelong") == 1234L
         i.getDoubleIfSet(o,"notexists") == null
         i.getDoubleIfSet(o,"somedouble") == (double) 1.0
+    }
+
+    def "Verify that add() throws JsonException if required value is null"(){
+        setup:
+        def b = Json.createBuilderFactory().createObjectBuilder()
+        Invoice i = new Invoice()
+        when:
+        i.add(b,"somestring",null)
+        then:
+        def e = thrown(JsonException)
+        e.message == "Error building JSON object, required key somestring is null."
+    }
+
+    def "Verify that all get<Type> method throws JsonException if required but not set"(){
+        setup:
+        def b = Json.createBuilderFactory().createObjectBuilder()
+        def o = b.build()
+        Invoice i = new Invoice()
+        when:
+        i.getString(o,"notexists", true)
+        then:
+        def e = thrown(JsonException)
+        e.message == "Error parsing JSON data, field key notexists is required."
+        when:
+        i.getInt(o,"notexists", true)
+        then:
+        e = thrown(JsonException)
+        e.message == "Error parsing JSON data, field key notexists is required."
+        when:
+        i.getBoolean(o,"notexists", true)
+        then:
+        e = thrown(JsonException)
+        e.message == "Error parsing JSON data, field key notexists is required."
+        when:
+        i.getLong(o,"notexists", true)
+        then:
+        e = thrown(JsonException)
+        e.message == "Error parsing JSON data, field key notexists is required."
+        when:
+        i.getDouble(o,"notexists", true)
+        then:
+        e = thrown(JsonException)
+        e.message == "Error parsing JSON data, field key notexists is required."
     }
 
     static JsonObject toJsonObject(String jsonData){

@@ -16,6 +16,7 @@ package org.lightningj.paywall.btcpayserver;
 
 import com.google.common.io.ByteStreams;
 import org.lightningj.paywall.InternalErrorException;
+import org.lightningj.paywall.JSONParsable;
 import org.lightningj.paywall.keymgmt.AsymmetricKeyManager;
 import org.lightningj.paywall.keymgmt.Context;
 
@@ -29,6 +30,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.security.interfaces.ECPublicKey;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -51,6 +53,8 @@ public class BTCPayServerHTTPSender {
     public static final String HEADER_CONTENT_TYPE = "Content-Type";
     public static final String JSON_CONTENT_TYPE = "application/json";
 
+    public static final String HEADER_ACCEPT = "Accept";
+
     public static final String HEADER_ACCEPT_VERSION= "x-accept-version";
     public static final String DEFAULT_ACCEPT_VERSION = "2.0.0";
 
@@ -64,6 +68,7 @@ public class BTCPayServerHTTPSender {
     protected static final Context keyCtx = BTCPayServerKeyContext.INSTANCE;
 
     protected static Logger log = Logger.getLogger(BTCPayServerHTTPSender.class.getName());
+    private static Level debugLevel = Level.INFO;
 
     /**
      * Constructor of BTCPayServerHTTPSender when using default SSL Context.
@@ -85,7 +90,7 @@ public class BTCPayServerHTTPSender {
     public BTCPayServerHTTPSender(String baseURL, AsymmetricKeyManager keyManager, SSLContext sslContext){
         this.baseURL = baseURL;
         if(baseURL.endsWith("/")){
-            this.baseURL = baseURL.substring(0,baseURL.length()-2);
+            this.baseURL = baseURL.substring(0,baseURL.length()-1);
         }
         this.keyManager = keyManager;
         this.sslContext = sslContext;
@@ -102,7 +107,7 @@ public class BTCPayServerHTTPSender {
      * @throws IOException if communication problems occurred.
      */
     public byte[] send(METHOD method, String endpoint, boolean sign) throws InternalErrorException, IOException{
-        return send(method,endpoint,null, sign,null);
+        return send(method,endpoint,(byte[]) null, sign,null);
     }
 
     /**
@@ -125,6 +130,21 @@ public class BTCPayServerHTTPSender {
      *
      * @param method the HTTP method to use.
      * @param endpoint the REST endpoint, i.e '/invoices', starting with "/"
+     * @param requestJson The JSON data to send, null to not perform any output body. (GET requests)
+     * @param sign if the request should contain a x-signature header.
+     * @return the resulting json data in the response.
+     * @throws InternalErrorException if internal error occurred setting up communication or BTC Pay Server signaled error.
+     * @throws IOException if communication problems occurred.
+     */
+    public byte[] send(METHOD method, String endpoint, JSONParsable requestJson, boolean sign) throws InternalErrorException, IOException{
+        return send(method,endpoint,requestJson, sign,null);
+    }
+
+    /**
+     * Method to send data to given REST endpoint of BTC Pay Server.
+     *
+     * @param method the HTTP method to use.
+     * @param endpoint the REST endpoint, i.e '/invoices', starting with "/"
      * @param sign if the request should contain a x-signature header.
      * @param queryParams a map of query parameters appended to the URI string.
      * @return the resulting json data in the response.
@@ -132,7 +152,7 @@ public class BTCPayServerHTTPSender {
      * @throws IOException if communication problems occurred.
      */
     public byte[] send(METHOD method, String endpoint, boolean sign, Map<String,String> queryParams) throws InternalErrorException, IOException{
-        return send(method,endpoint,null,sign, queryParams);
+        return send(method,endpoint,(byte[]) null,sign, queryParams);
     }
 
     /**
@@ -147,10 +167,28 @@ public class BTCPayServerHTTPSender {
      * @throws InternalErrorException if internal error occurred setting up communication or BTC Pay Server signaled error.
      * @throws IOException if communication problems occurred.
      */
-    // TODO error here for TOKEN
+    public byte[] send(METHOD method, String endpoint, JSONParsable requestJson, boolean sign, Map<String,String> queryParams) throws InternalErrorException, IOException{
+        return send(method,endpoint,requestJson.toJsonAsString(false).getBytes("UTF-8"),sign,queryParams);
+    }
+
+    /**
+     * Method to send data to given REST endpoint of BTC Pay Server.
+     *
+     * @param method the HTTP method to use.
+     * @param endpoint the REST endpoint, i.e '/invoices', starting with "/"
+     * @param requestJson The JSON data to send, null to not perform any output body. (GET requests)
+     * @param sign if the request should contain a x-signature header.
+     * @param queryParams a map of query parameters appended to the URI string.
+     * @return the resulting json data in the response.
+     * @throws InternalErrorException if internal error occurred setting up communication or BTC Pay Server signaled error.
+     * @throws IOException if communication problems occurred.
+     */
     public byte[] send(METHOD method, String endpoint, byte[] requestJson, boolean sign, Map<String,String> queryParams) throws InternalErrorException, IOException{
         try {
             String urlString = baseURL + endpoint + constructQueryString(queryParams);
+            if(log.isLoggable(debugLevel)){
+                log.log(debugLevel, "Sending to BTC Server " + method + " " + urlString + ", data: " + (requestJson != null ? new String(requestJson, "UTF-8") : ""));
+            }
             URL url = new URL(urlString);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             if(connection instanceof HttpsURLConnection && sslContext != null){
@@ -160,8 +198,9 @@ public class BTCPayServerHTTPSender {
             connection.setRequestMethod(method.name());
             connection.addRequestProperty(HEADER_ACCEPT_VERSION,DEFAULT_ACCEPT_VERSION);
             connection.setDoInput(true);
+            connection.setRequestProperty(HEADER_CONTENT_TYPE, JSON_CONTENT_TYPE);
+            connection.setRequestProperty(HEADER_ACCEPT, JSON_CONTENT_TYPE);
             if(requestJson != null) {
-                connection.setRequestProperty(HEADER_CONTENT_TYPE, JSON_CONTENT_TYPE);
                 connection.setDoOutput(true);
             }
             if(sign){
@@ -176,8 +215,15 @@ public class BTCPayServerHTTPSender {
             }
             int result = connection.getResponseCode();
             if(result == HttpURLConnection.HTTP_OK){
-                return ByteStreams.toByteArray(connection.getInputStream());
+                byte[] response = ByteStreams.toByteArray(connection.getInputStream());
+                if(log.isLoggable(debugLevel)){
+                    log.log(debugLevel, "Received from BTC Server, " + result + ", data: " + new String(response,"UTF-8"));
+                }
+                return response;
             }else{
+                if(log.isLoggable(debugLevel)){
+                    log.log(debugLevel, "Received from BTC Server, " + result + ", data: " + connection.getResponseMessage());
+                }
                 throw new InternalErrorException("Error communicating with BTC Pay Server: " + connection.getResponseMessage());
             }
 

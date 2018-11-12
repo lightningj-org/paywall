@@ -46,6 +46,7 @@ abstract class DefaultFileKeyManager extends FileKeyManager implements Asymmetri
     protected static final String ASYM_PUBLIC_KEYNAME = "/asymkey_pub.pem";
 
     protected static final String BTCPAY_SERVER_PRIVATE_KEYNAME = "/btcpayserver_key_prv.pem";
+    protected static final String BTCPAY_SERVER_PUBLIC_KEYNAME = "/btcpayserver_key_pub_sin_@SIN@.pem";
 
     protected static final String SYMMENTRIC_FILENAME = "/secret.key";
 
@@ -309,10 +310,19 @@ abstract class DefaultFileKeyManager extends FileKeyManager implements Asymmetri
 
             byte[][] keyData = KeySerializationHelper.serializeBTCPayServerKeyPair(keyPair,protectPassphrase);
 
-            FileOutputStream fos = new FileOutputStream(privateKeyFile);
+            String sIN = btcPayServerHelper.toSIN(new String(keyData[0]));
+
+            File publicKeyFile = genPublicBTCPayServerFile(sIN);
+
+            FileOutputStream fos = new FileOutputStream(publicKeyFile);
+            fos.write(keyData[0]);
+            fos.close();
+
+            fos = new FileOutputStream(privateKeyFile);
             fos.write(keyData[1]);
             fos.close();
-            log.info("New BTC Pay Server access key generated and stored in file " + privateKeyFile.getPath()  + ", key SIN: " + btcPayServerHelper.toSIN(new String(keyData[0])));
+            log.info("New BTC Pay Server access key generated and stored in files " + privateKeyFile.getPath()  + " and " + publicKeyFile.getPath() +", key SIN: " + sIN);
+
             return keyPair;
         }catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
             throw new InternalErrorException("Internal error generating EC key for BTCPay Server access token: " + e.getMessage(), e);
@@ -393,5 +403,12 @@ abstract class DefaultFileKeyManager extends FileKeyManager implements Asymmetri
         } catch (IOException e) {
             throw new InternalErrorException("Internal error storing generated AES key to file " + keyFile.getPath() + ": " + e.getMessage(),e);
         }
+    }
+
+    /**
+     * Method to return the BTC Pay Server public file name with sIN value filename.
+     */
+    protected File genPublicBTCPayServerFile(String sIN) throws InternalErrorException{
+        return new File(getDirectory("BTC Pay Server key store", "/keys") + (BTCPAY_SERVER_PUBLIC_KEYNAME.replace("@SIN@",sIN)));
     }
 }

@@ -36,8 +36,8 @@ class BTCPayServerTokenManagerSpec extends Specification {
         mngr.clock = Mock(Clock)
         mngr.clock.instant() >> { Instant.ofEpochMilli(60 * 60 * 1000)}
 
-        def validToken = new Token("abc123",Instant.ofEpochMilli(60*60*1000).minus(16,ChronoUnit.MINUTES),MERCHANT)
-        def expiredToken = new Token("abc124",Instant.ofEpochMilli(60*60*1000).minus(14,ChronoUnit.MINUTES),POS)
+        def validToken = new Token("id1","abc123",Instant.ofEpochMilli(60*60*1000).minus(16,ChronoUnit.MINUTES),MERCHANT)
+        def expiredToken = new Token("id2", "abc124",Instant.ofEpochMilli(60*60*1000).minus(14,ChronoUnit.MINUTES),POS)
 
         when: // Verify that put sets tokens correctly
         mngr.put(validToken)

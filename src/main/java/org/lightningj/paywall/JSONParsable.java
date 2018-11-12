@@ -15,8 +15,10 @@
 package org.lightningj.paywall;
 
 import org.lightningj.lnd.util.JsonGenUtils;
+import org.lightningj.paywall.util.HexUtils;
 
 import javax.json.*;
+import java.time.Instant;
 
 /**
  * Base class for value classes that should be JSON Parsable.
@@ -94,7 +96,21 @@ public abstract class JSONParsable {
             if(value instanceof Boolean){
                 jsonObjectBuilder.add(key,(Boolean) value);
             }
+            if(value instanceof Instant){
+                jsonObjectBuilder.add(key,((Instant) value).toEpochMilli());
+            }
+            if(value instanceof JSONParsable){
+                jsonObjectBuilder.add(key,((JSONParsable) value).toJson());
+            }
+
         }
+    }
+
+    protected void add(JsonObjectBuilder jsonObjectBuilder, String key, Object value) throws JsonException{
+        if(value == null){
+            throw new JsonException("Error building JSON object, required key " + key + " is null.");
+        }
+        addNotRequired(jsonObjectBuilder,key,value);
     }
 
     /**
@@ -102,8 +118,49 @@ public abstract class JSONParsable {
      * if set in JsonObject otherwise returns null.
      */
     protected String getStringIfSet(JsonObject object, String key){
+        return getString(object,key,false);
+    }
+
+    /**
+     * Help method used in parseJson implementation to fetch a string value
+     * if set in JsonObject otherwise returns null or throws JsonException if required.
+     * @throws JSONParsable if field is not set but required.
+     */
+    protected String getString(JsonObject object, String key, boolean required) throws JsonException{
         if(object.containsKey(key) && !object.isNull(key)){
             return object.getString(key);
+        }
+        if(required){
+            throw new JsonException("Error parsing JSON data, field key " + key + " is required.");
+        }
+        return null;
+    }
+
+    /**
+     * Help method used in parseJson implementation to fetch a hex string value and decode it into byte[]
+     * if set in JsonObject otherwise returns null.
+     */
+    protected byte[] getByteArrayFromHexIfSet(JsonObject object, String key){
+        return getByteArrayFromHex(object,key,false);
+    }
+
+    /**
+     * Help method used in parseJson implementation to fetch a hex string value and decode
+     * it into byte array if set in JsonObject otherwise returns null or throws JsonException if required.
+     * @throws JSONParsable if field is not set but required.
+     */
+    protected byte[] getByteArrayFromHex(JsonObject object, String key, boolean required) throws JsonException{
+        if(object.containsKey(key) && !object.isNull(key)){
+            try {
+                return HexUtils.decodeHexString(object.getString(key));
+            }catch (JsonException e){
+              throw e;
+            }catch (Exception e){
+                throw new JsonException("Error parsing JSON data, problem decoding hex data from field " + key + ".");
+            }
+        }
+        if(required){
+            throw new JsonException("Error parsing JSON data, field key " + key + " is required.");
         }
         return null;
     }
@@ -113,8 +170,24 @@ public abstract class JSONParsable {
      * if set in JsonObject otherwise returns null.
      */
     protected Long getLongIfSet(JsonObject object, String key){
+        return getLong(object,key,false);
+    }
+
+    /**
+     * Help method used in parseJson implementation to fetch a long value
+     * if set in JsonObject otherwise returns null or throws JsonException if required.
+     * @throws JSONParsable if field is not set but required.
+     */
+    protected Long getLong(JsonObject object, String key, boolean required) throws JsonException{
         if(object.containsKey(key) && !object.isNull(key)){
-            return object.getJsonNumber(key).longValueExact();
+            try {
+                return object.getJsonNumber(key).longValueExact();
+            }catch(Exception e){
+                throw new JsonException("Error parsing JSON data, field key " + key + " is not a number.");
+            }
+        }
+        if(required){
+            throw new JsonException("Error parsing JSON data, field key " + key + " is required.");
         }
         return null;
     }
@@ -124,8 +197,24 @@ public abstract class JSONParsable {
      * if set in JsonObject otherwise returns null.
      */
     protected Integer getIntIfSet(JsonObject object, String key){
+        return getInt(object,key,false);
+    }
+
+    /**
+     * Help method used in parseJson implementation to fetch a int value
+     * if set in JsonObject otherwise returns null or throws JsonException if required.
+     * @throws JSONParsable if field is not set but required.
+     */
+    protected Integer getInt(JsonObject object, String key, boolean required) throws JsonException{
         if(object.containsKey(key) && !object.isNull(key)){
-            return object.getJsonNumber(key).intValueExact();
+            try{
+                return object.getJsonNumber(key).intValueExact();
+            }catch(Exception e){
+                throw new JsonException("Error parsing JSON data, field key " + key + " is not a number.");
+            }
+        }
+        if(required){
+            throw new JsonException("Error parsing JSON data, field key " + key + " is required.");
         }
         return null;
     }
@@ -135,8 +224,20 @@ public abstract class JSONParsable {
      * if set in JsonObject otherwise returns null.
      */
     protected Boolean getBooleanIfSet(JsonObject object, String key){
+        return getBoolean(object,key,false);
+    }
+
+    /**
+     * Help method used in parseJson implementation to fetch a boolean value
+     * if set in JsonObject otherwise returns null.
+     * @throws JSONParsable if field is not set but required.
+     */
+    protected Boolean getBoolean(JsonObject object, String key, boolean required) throws JsonException{
         if(object.containsKey(key) && !object.isNull(key)){
             return object.getBoolean(key);
+        }
+        if(required){
+            throw new JsonException("Error parsing JSON data, field key " + key + " is required.");
         }
         return null;
     }
@@ -146,8 +247,47 @@ public abstract class JSONParsable {
      * if set in JsonObject otherwise returns null.
      */
     protected Double getDoubleIfSet(JsonObject object, String key){
+        return getDouble(object,key,false);
+    }
+
+    /**
+     * Help method used in parseJson implementation to fetch a double value
+     * if set in JsonObject otherwise returns null.
+     * @throws JSONParsable if field is not set but required.
+     */
+    protected Double getDouble(JsonObject object, String key, boolean required) throws JsonException{
         if(object.containsKey(key) && !object.isNull(key)){
-            return object.getJsonNumber(key).doubleValue();
+            try{
+                return object.getJsonNumber(key).doubleValue();
+            }catch(Exception e){
+                throw new JsonException("Error parsing JSON data, field key " + key + " is not a number.");
+            }
+        }
+        if(required){
+            throw new JsonException("Error parsing JSON data, field key " + key + " is required.");
+        }
+        return null;
+    }
+
+    /**
+     * Help method used in parseJson implementation to fetch a json object
+     * if set in JsonObject otherwise returns null.
+     */
+    protected JsonObject getJsonObjectIfSet(JsonObject object, String key){
+        return getJsonObject(object,key,false);
+    }
+
+    /**
+     * Help method used in parseJson implementation to fetch a json object
+     * if set in JsonObject otherwise returns null.
+     * @throws JSONParsable if field is not set but required.
+     */
+    protected JsonObject getJsonObject(JsonObject object, String key, boolean required) throws JsonException{
+        if(object.containsKey(key) && !object.isNull(key)){
+            return object.getJsonObject(key);
+        }
+        if(required){
+            throw new JsonException("Error parsing JSON data, field key " + key + " is required.");
         }
         return null;
     }

@@ -39,20 +39,38 @@ import java.time.temporal.TemporalField;
  */
 public class Token extends JSONParsable {
 
+    String id;
     String token;
     Instant expireDate;
     BTCPayServerFacade facade;
+    String pairingCode;
+    String label;
 
     /**
      * Default constructor for a BTC Pay Server Token
      *
+     * @param id the SIN value of the public key
      * @param token the token value
      * @param expireDate the expire instant of this token.
      * @param facade the facade this token is valid for.
      */
-    public Token(String token, Instant expireDate, BTCPayServerFacade facade) {
+    public Token(String id, String token, Instant expireDate, BTCPayServerFacade facade) {
+        this.id = id;
         this.token = token;
         this.expireDate = expireDate;
+        this.facade = facade;
+    }
+
+    /**
+     * Constructor when creating a Token for fetching from BTC Pay SErver
+     *
+     * @param id the SIN value of the public key
+     * @param label name of this requesting application.
+     * @param facade the facade this token is valid for.
+     */
+    public Token(String id, String label, BTCPayServerFacade facade) {
+        this.id = id;
+        this.label = label;
         this.facade = facade;
     }
 
@@ -113,6 +131,47 @@ public class Token extends JSONParsable {
         this.facade = facade;
     }
 
+    /**
+     * The id of the token, i.e the public key SIN
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * The id of the token, i.e the public key SIN
+     */
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    /**
+     * The pairing code retrieved from BTC Pay Server
+     */
+    public String getPairingCode() {
+        return pairingCode;
+    }
+
+    /**
+     * The pairing code retrieved from BTC Pay Server
+     */
+    public void setPairingCode(String pairingCode) {
+        this.pairingCode = pairingCode;
+    }
+
+    /**
+     * Name of this requesting application.
+     */
+    public String getLabel() {
+        return label;
+    }
+
+    /**
+     * Name of this requesting application.
+     */
+    public void setLabel(String label) {
+        this.label = label;
+    }
 
     /**
      * Method that should set the objects property to Json representation.
@@ -122,13 +181,16 @@ public class Token extends JSONParsable {
      */
     @Override
     public void convertToJson(JsonObjectBuilder jsonObjectBuilder) throws JsonException {
+        addNotRequired(jsonObjectBuilder,"id", id);
         addNotRequired(jsonObjectBuilder,"token", token);
         if(expireDate != null){
           jsonObjectBuilder.add("expireDate", expireDate.toEpochMilli());
         }
         if(facade != null){
-            jsonObjectBuilder.add("facade", facade.name());
+            jsonObjectBuilder.add("facade", facade.toString());
         }
+        addNotRequired(jsonObjectBuilder,"pairingCode", pairingCode);
+        addNotRequired(jsonObjectBuilder,"label", label);
     }
 
     /**
@@ -140,6 +202,7 @@ public class Token extends JSONParsable {
     @Override
     public void parseJson(JsonObject jsonObject) throws JsonException {
         try {
+            id = getStringIfSet(jsonObject, "id");
             token = getStringIfSet(jsonObject, "token");
             if (jsonObject.containsKey("expireDate") && !jsonObject.isNull("expireDate")) {
                 expireDate = Instant.ofEpochMilli(jsonObject.getJsonNumber("expireDate").longValueExact());
@@ -147,6 +210,8 @@ public class Token extends JSONParsable {
             if (jsonObject.containsKey("facade") && !jsonObject.isNull("facade")) {
                 facade = BTCPayServerFacade.valueOf(jsonObject.getString("facade").toUpperCase());
             }
+            pairingCode = getStringIfSet(jsonObject, "pairingCode");
+            label = getStringIfSet(jsonObject, "label");
         }catch(Exception e){
             throw new JsonException("Problem parsing json: " + e.getMessage(),e);
         }
@@ -157,16 +222,18 @@ public class Token extends JSONParsable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Token that = (Token) o;
-        if (token != null ? !token.equals(that.token) : that.token != null) return false;
-        return facade != null ? facade.equals(that.facade) : that.facade == null;
+        Token token1 = (Token) o;
+
+        if (id != null ? !id.equals(token1.id) : token1.id != null) return false;
+        if (token != null ? !token.equals(token1.token) : token1.token != null) return false;
+        return facade == token1.facade;
     }
 
     @Override
     public int hashCode() {
-        int result = token != null ? token.hashCode() : 0;
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (token != null ? token.hashCode() : 0);
+        result = 31 * result + (facade != null ? facade.hashCode() : 0);
         return result;
     }
-
-
 }

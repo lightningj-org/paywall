@@ -14,7 +14,6 @@
  *************************************************************************/
 package org.lightningj.paywall.btcpayserver
 
-import org.lightningj.paywall.btcpayserver.BTCPayServerKeyContext
 import spock.lang.Specification
 
 /**
