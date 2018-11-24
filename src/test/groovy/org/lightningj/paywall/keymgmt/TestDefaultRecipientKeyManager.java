@@ -18,61 +18,56 @@ import org.lightningj.paywall.InternalErrorException;
 
 import java.security.Key;
 import java.security.KeyPair;
-import java.security.PublicKey;
 import java.time.Clock;
 import java.time.Duration;
-import java.util.Map;
 
 /**
  * Test implementation of a SymmetricFileKeyManager
  * Created by Philip Vendil on 2018-09-19.
  */
-public class TestDefaultFileKeyManager extends DefaultFileKeyManager {
+public class TestDefaultRecipientKeyManager extends DefaultRecipientKeyManager {
 
-    private String keyStorePath;
-    private String protectPassphrase;
-    private String trustStorePath;
+    private String recipientStorePath;
+    private AsymmetricKeyManager keyManager;
 
-    public TestDefaultFileKeyManager(String keyStorePath, String trustStorePath, String protectPassphrase){
-        this.keyStorePath=keyStorePath;
-        this.protectPassphrase = protectPassphrase;
-        this.trustStorePath = trustStorePath;
-    }
-
-    @Override
-    protected String getKeyStorePath() throws InternalErrorException {
-        return keyStorePath;
-    }
-
-    @Override
-    protected String getProtectPassphrase() throws InternalErrorException {
-        return protectPassphrase;
-    }
-
-    @Override
-    protected String getAsymTrustStorePath() throws InternalErrorException {
-        return trustStorePath;
-    }
-
-    public KeyPair getKeyPairField(){
-        return asymKeyPair;
-    }
-
-    public void setKeyPairField(KeyPair keyPair){
-        this.asymKeyPair =keyPair;
+    public TestDefaultRecipientKeyManager(String recipientStorePath,AsymmetricKeyManager keyManager){
+        this.recipientStorePath=recipientStorePath;
+        this.keyManager = keyManager;
     }
 
     public void forwardClock(Duration duration){
         this.clock = Clock.offset(clock,duration);
     }
 
-    public Key getSecretKey(){
-        return secretKey;
+    /**
+     * Returns the path of directory where recipients public key files are stored used to encrypt
+     * messages to.
+     *
+     * @return the path to the directory where recipients public key files are stored used to encrypt
+     * messages to. Or null if not configured.
+     * @throws InternalErrorException if internal error occurred retrieving the recipients store path.
+     */
+    @Override
+    protected String getAsymRecipientsStorePath() throws InternalErrorException {
+        return recipientStorePath;
     }
 
-    public void setSecretKey(Key secretKey){
-        this.secretKey=secretKey;
+    /**
+     * @return Returns the related asymmetric key manager.
+     */
+    @Override
+    protected AsymmetricKeyManager getAsymmetricKeyManager() {
+        return keyManager;
     }
 
-
+    /**
+     * Method to return the Security Provider to use in given context.
+     *
+     * @param context the related context
+     * @return the provider to use.
+     */
+    @Override
+    public String getProvider(Context context) {
+        return "BC";
+    }
 }

@@ -17,11 +17,14 @@ package org.lightningj.paywall.keymgmt;
 
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
+import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.btcpayserver.BTCPayServerKeyContext;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.security.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Dummy Key Manager that can be used in test setups, should be used in
@@ -29,7 +32,7 @@ import java.security.*;
  *
  * Created by Philip Vendil on 2018-09-14.
  */
-public class DummyKeyManager implements SymmetricKeyManager,AsymmetricKeyManager {
+public class DummyKeyManager implements SymmetricKeyManager, AsymmetricKeyManager, RecipientKeyManager {
 
     private KeyPair asymmetricKeyPair;
     private KeyPair btcPayServerKey;
@@ -54,6 +57,9 @@ public class DummyKeyManager implements SymmetricKeyManager,AsymmetricKeyManager
             throw new RuntimeException("Error creating Dummy Key Manager: " + e.getMessage(),e);
         }
     }
+
+
+
     /**
      * Returns the key that should be used for symmetric operations for the given context.
      *
@@ -100,16 +106,25 @@ public class DummyKeyManager implements SymmetricKeyManager,AsymmetricKeyManager
     }
 
     /**
-     * All keys are trusted in dummy setup.
+     * Own keys are trusted in dummy setup.
      *
-     * @param context   related context.
-     * @param publicKey the public key to check if trusted.
-     * @return true if the public key is trusted for the given context.
-     * @throws UnsupportedOperationException
      */
     @Override
-    public boolean isTrusted(Context context, PublicKey publicKey) throws UnsupportedOperationException {
-        return true;
+    public Map<String,PublicKey> getTrustedKeys(Context context) throws UnsupportedOperationException, InternalErrorException {
+        Map<String,PublicKey> keys = new HashMap<>();
+        keys.put(KeySerializationHelper.genKeyId(asymmetricKeyPair.getPublic().getEncoded()),asymmetricKeyPair.getPublic());
+        return keys;
+    }
+
+    /**
+     * Own keys are trusted in dummy setup.
+     *
+     */
+    @Override
+    public Map<String, PublicKey> getReceipients(Context context) throws UnsupportedOperationException, InternalErrorException {
+        Map<String,PublicKey> keys = new HashMap<>();
+        keys.put(KeySerializationHelper.genKeyId(asymmetricKeyPair.getPublic().getEncoded()),asymmetricKeyPair.getPublic());
+        return keys;
     }
 
     @Override

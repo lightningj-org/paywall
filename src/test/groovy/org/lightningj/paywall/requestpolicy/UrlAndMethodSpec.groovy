@@ -15,6 +15,7 @@
 package org.lightningj.paywall.requestpolicy
 
 import org.lightningj.paywall.util.BCUtils
+import org.lightningj.paywall.vo.RequestData
 import org.lightningj.paywall.web.CachableHttpServletRequest
 import spock.lang.Specification
 
@@ -34,23 +35,23 @@ class UrlAndMethodSpec extends Specification {
 
     def "Verify that URL and Method are used for aggregation"(){
         when:
-        byte[] result = policy.significantRequestDataDigest(request)
+        RequestData result = policy.significantRequestDataDigest(request)
         then:
-        result.length == 32
+        result.significantData.length == 32
         1 * request.getMethod() >> { return "POST"}
         1 * request.getRequestURL() >> { return new StringBuffer("http://somehost/test")}
         when:
-        byte[] result2 = policy.significantRequestDataDigest(request)
+        RequestData result2 = policy.significantRequestDataDigest(request)
         then:
         result != result2
-        result2.length == 32
+        result2.significantData.length == 32
         1 * request.getMethod() >> { return "GET"}
         1 * request.getRequestURL() >> { return new StringBuffer("http://somehost/test")}
         when:
-        byte[] result3 = policy.significantRequestDataDigest(request)
+        RequestData result3 = policy.significantRequestDataDigest(request)
         then:
         result != result3
-        result3.length == 32
+        result3.significantData.length == 32
         1 * request.getMethod() >> { return "POST"}
         1 * request.getRequestURL() >> { return new StringBuffer("http://somehost/test2")}
     }

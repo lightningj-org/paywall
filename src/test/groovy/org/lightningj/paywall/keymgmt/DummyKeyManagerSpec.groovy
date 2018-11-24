@@ -37,7 +37,7 @@ class DummyKeyManagerSpec extends Specification {
 
     def setupSpec(){
         BCUtils.installBCProvider()
-        km = new DummyKeyManager()
+        km = DummyKeyManagerInstance.commonInstance
     }
 
     def "Verify that correct keys are returned by dummy key manager"(){
@@ -49,8 +49,21 @@ class DummyKeyManagerSpec extends Specification {
         km.getPrivateKey(BTCPayServerKeyContext.INSTANCE) instanceof ECPrivateKey
     }
 
-    def "Verify that all keys are trusted"(){
-        expect:
-        km.isTrusted(null,null)
+    def "Verify that getTrustedKeys returns map with own public key."(){
+        when:
+        Map m = km.getTrustedKeys(null)
+        then:
+        m.size() == 1
+        m.keySet().contains(KeySerializationHelper.genKeyId(km.getPublicKey(null).encoded))
+        m.values().contains(km.getPublicKey(null))
+    }
+
+    def "Verify that getReceipients returns map with own public key."(){
+        when:
+        Map m = km.getReceipients(null)
+        then:
+        m.size() == 1
+        m.keySet().contains(KeySerializationHelper.genKeyId(km.getPublicKey(null).encoded))
+        m.values().contains(km.getPublicKey(null))
     }
 }

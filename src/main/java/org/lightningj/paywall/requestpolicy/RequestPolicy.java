@@ -15,6 +15,7 @@
 package org.lightningj.paywall.requestpolicy;
 
 import org.lightningj.paywall.InternalErrorException;
+import org.lightningj.paywall.vo.RequestData;
 import org.lightningj.paywall.web.CachableHttpServletRequest;
 
 import java.io.IOException;
@@ -34,11 +35,11 @@ public interface RequestPolicy {
      * to determine that the call is same that is invoiced
      *
      * @param request the cachable http servlet request to aggregate request data for.
-     * @return a secure cryptographic digest of all significant request data.
+     * @return a RequestData containing a secure cryptographic digest of all significant request data.
      *
      * @throws IllegalArgumentException if supplied request contained invalid data.
      * @throws IOException if i/o related problems occurred reading the request data.
      * @throws InternalErrorException if internal errors occurred reading the request data.
      */
-    byte[] significantRequestDataDigest(CachableHttpServletRequest request) throws IllegalArgumentException, IOException, InternalErrorException;
+    RequestData significantRequestDataDigest(CachableHttpServletRequest request) throws IllegalArgumentException, IOException, InternalErrorException;
 }

@@ -63,9 +63,11 @@ class SettlementDataSpec extends Specification {
         sd2.getSettlementDate().toEpochMilli() == 12344L
     }
 
+    // JWTClaims constructor tested in BaseTokenGeneratorSpec
+
     def "Verify that toJsonAsString works as expected"(){
         expect:
-        new SettlementData("123".getBytes(),true,new BTC(1234),Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(12344L)).toJsonAsString(false) == """{"preImageHash":"313233","isSettled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"validUntil":12345,"settlementDate":12344}"""
+        new SettlementData("123".getBytes(),true,new BTC(1234),Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(12344L)).toJsonAsString(false) == """{"preImageHash":"MTIz","isSettled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"validUntil":12345,"settlementDate":12344}"""
         when:
         new SettlementData(null,true,new BTC(1234),Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(12344L)).toJsonAsString(false)
         then:
@@ -90,7 +92,7 @@ class SettlementDataSpec extends Specification {
 
     def "Verify that parsing of JSON data works as expected"(){
         when:
-        SettlementData d = new SettlementData(toJsonObject("""{"preImageHash":"313233","isSettled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"validUntil":12345,"settlementDate":12344}"""))
+        SettlementData d = new SettlementData(toJsonObject("""{"preImageHash":"MTIz","isSettled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"validUntil":12345,"settlementDate":12344}"""))
         then:
         d.getPreImageHash() == "123".getBytes()
         d.isSettled()
@@ -132,7 +134,7 @@ class SettlementDataSpec extends Specification {
         new SettlementData(toJsonObject("""{"preImageHash":"åäö","isSettled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"validUntil":12345,"settlementDate":12344}"""))
         then:
         e = thrown(JsonException)
-        e.message == "Error parsing JSON data, problem decoding hex data from field preImageHash."
+        e.message == "Error parsing JSON data, problem decoding base64 data from field preImageHash."
 
         when:
         new SettlementData(toJsonObject("""{"preImageHash":"313233","isSettled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"validUntil":"abc","settlementDate":12344}"""))
@@ -145,5 +147,10 @@ class SettlementDataSpec extends Specification {
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key settlementDate is not a number."
+    }
+
+    def "Verify getClaimName() returns correct value"(){
+        expect:
+        new SettlementData().getClaimName() == SettlementData.CLAIM_NAME
     }
 }

@@ -16,11 +16,13 @@ package org.lightningj.paywall.requestpolicy;
 
 import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.util.DigestUtils;
+import org.lightningj.paywall.vo.RequestData;
 import org.lightningj.paywall.web.CachableHttpServletRequest;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.time.Clock;
 
 /**
  * Base class with help methods to generate digest of the significant
@@ -29,6 +31,8 @@ import java.io.IOException;
  * Created by Philip Vendil on 2018-10-27.
  */
 public abstract class BaseRequestPolicy implements RequestPolicy{
+
+    protected Clock clock = Clock.systemDefaultZone();
 
     /**
      * Method in charge of generating a digest
@@ -42,11 +46,11 @@ public abstract class BaseRequestPolicy implements RequestPolicy{
      * @throws IOException if i/o related problems occurred reading the request data.
      * @throws InternalErrorException if internal errors occurred reading the request data.
      */
-    public byte[] significantRequestDataDigest(CachableHttpServletRequest request) throws IllegalArgumentException, IOException, InternalErrorException{
+    public RequestData significantRequestDataDigest(CachableHttpServletRequest request) throws IllegalArgumentException, IOException, InternalErrorException{
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream daos = new DataOutputStream(baos);
         aggregateSignificantData(request,daos);
-        return DigestUtils.sha256(baos.toByteArray());
+        return new RequestData(DigestUtils.sha256(baos.toByteArray()),clock.instant());
     }
 
     /**

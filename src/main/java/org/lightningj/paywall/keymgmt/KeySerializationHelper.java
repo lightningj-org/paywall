@@ -276,6 +276,18 @@ public class KeySerializationHelper {
     }
 
     /**
+     * Help method to generate a keyId of a specific key used to identify it.
+     *
+     * The key id is the first 16 bytes of a sha256 hash of the key data.
+     * @param keyData the keyData.
+     * @return the generated key id
+     * @throws InternalErrorException if internal error occurred generating the digest of the keyData.
+     */
+    public static String genKeyId(byte[] keyData) throws InternalErrorException{
+        return HexUtils.encodeHexString(sha256(keyData)).substring(0,16);
+    }
+
+    /**
      * Help method generating help data for the serialized key, such as
      * generation date and hostname
      *
@@ -285,7 +297,7 @@ public class KeySerializationHelper {
      */
     private static String getHeader(byte[] keyData) throws InternalErrorException {
         try {
-            String retval = ID_TAG + HexUtils.encodeHexString(sha256(keyData)).substring(0,16) + "\n";
+            String retval = ID_TAG + genKeyId(keyData) + "\n";
             retval += GENERATED_TAG + dateFormat.format(new Date()) + "\n";
             retval += HOSTNAME_TAG + InetAddress.getLocalHost().getHostName() + "\n";
             return retval;

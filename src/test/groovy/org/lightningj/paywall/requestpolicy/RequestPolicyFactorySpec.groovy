@@ -17,8 +17,11 @@ package org.lightningj.paywall.requestpolicy
 import org.lightningj.paywall.InternalErrorException
 import org.lightningj.paywall.annotations.PaymentRequired
 import org.lightningj.paywall.util.BCUtils
+import org.lightningj.paywall.vo.RequestData
 import org.lightningj.paywall.web.CachableHttpServletRequest
 import spock.lang.Specification
+
+import java.time.Instant
 
 /**
  * Unit tests for RequestPolicyFactory
@@ -100,16 +103,16 @@ class RequestPolicyFactorySpec extends Specification {
     static class CustomRequestPolicy1 implements RequestPolicy{
 
         @Override
-        byte[] significantRequestDataDigest(CachableHttpServletRequest request) throws IllegalArgumentException, IOException, InternalErrorException {
-            return new byte[0]
+        RequestData significantRequestDataDigest(CachableHttpServletRequest request) throws IllegalArgumentException, IOException, InternalErrorException {
+            return new RequestData(byte[0],null)
         }
     }
 
     static class CustomRequestPolicy2 implements RequestPolicy{
 
         @Override
-        byte[] significantRequestDataDigest(CachableHttpServletRequest request) throws IllegalArgumentException, IOException, InternalErrorException {
-            return new byte[0]
+        RequestData significantRequestDataDigest(CachableHttpServletRequest request) throws IllegalArgumentException, IOException, InternalErrorException {
+            return new RequestData(byte[0], null)
         }
     }
     static class InvalidCustomRequestPolicy{

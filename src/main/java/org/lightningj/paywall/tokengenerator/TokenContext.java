@@ -12,7 +12,9 @@
  *  See terms of license at gnu.org.                                     *
  *                                                                       *
  *************************************************************************/
-package org.lightningj.paywall.keymgmt;
+package org.lightningj.paywall.tokengenerator;
+
+import org.lightningj.paywall.keymgmt.Context;
 
 /**
  * Cryptographic context specific for token generation specifying which
@@ -22,19 +24,21 @@ package org.lightningj.paywall.keymgmt;
  */
 public class TokenContext extends Context {
 
-    public static TokenContext CONTEXT_PAYMENT_TOKEN = new TokenContext("PAYMENT_TOKEN");
-    public static TokenContext CONTEXT_INVOICE_TOKEN = new TokenContext("INVOICE_TOKEN");
-    public static TokenContext CONTEXT_SETTLEMENT_TOKEN = new TokenContext("SETTLEMENT_TOKEN");
+    public static String CONTEXT_PAYMENT_TOKEN_TYPE = "PAYMENT_TOKEN";
+    public static String CONTEXT_INVOICE_TOKEN_TYPE = "INVOICE_TOKEN";
+    public static String CONTEXT_SETTLEMENT_TOKEN_TYPE = "SETTLEMENT_TOKEN";
 
     private String type;
+    private KeyUsage keyUsage;
 
     /**
      * Default constructor.
      *
      * @param type type of token context
      */
-    TokenContext(String type){
+    TokenContext(String type, KeyUsage keyUsage){
         this.type = type;
+        this.keyUsage = keyUsage;
     }
 
     /**
@@ -45,10 +49,17 @@ public class TokenContext extends Context {
         return type;
     }
 
+    /**
+     *
+     * @return returns the requested key usage.
+     */
+    public KeyUsage getKeyUsage(){ return keyUsage; }
+
     @Override
     public String toString() {
         return "TokenContext{" +
                 "type='" + type + '\'' +
+                ", keyUsage=" + keyUsage +
                 '}';
     }
 
@@ -57,13 +68,16 @@ public class TokenContext extends Context {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        TokenContext context = (TokenContext) o;
+        TokenContext that = (TokenContext) o;
 
-        return type != null ? type.equals(context.type) : context.type == null;
+        if (type != null ? !type.equals(that.type) : that.type != null) return false;
+        return keyUsage == that.keyUsage;
     }
 
     @Override
     public int hashCode() {
-        return type != null ? type.hashCode() : 0;
+        int result = type != null ? type.hashCode() : 0;
+        result = 31 * result + (keyUsage != null ? keyUsage.hashCode() : 0);
+        return result;
     }
 }

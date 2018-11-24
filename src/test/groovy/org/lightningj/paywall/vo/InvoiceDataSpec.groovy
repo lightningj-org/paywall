@@ -65,10 +65,12 @@ class InvoiceDataSpec extends Specification {
         id2.getInvoiceDate().toEpochMilli() == 2345L
     }
 
+    // JWTClaims constructor tested in BaseTokenGeneratorSpec
+
     def "Verify that toJsonAsString works as expected"(){
         expect:
-        new InvoiceData("123".getBytes(),"fksjeoskajduakdfhaskdismensuduajseusdke",new BTC(123),new NodeInfo("12312312@10.10.01.1"),Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(2345L)).toJsonAsString(false) == """{"preImageHash":"313233","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345}"""
-        new InvoiceData("123".getBytes(),"fksjeoskajduakdfhaskdismensuduajseusdke",null,null,Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(2345L)).toJsonAsString(false) == """{"preImageHash":"313233","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345,"invoiceDate":2345}"""
+        new InvoiceData("123".getBytes(),"fksjeoskajduakdfhaskdismensuduajseusdke",new BTC(123),new NodeInfo("12312312@10.10.01.1"),Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(2345L)).toJsonAsString(false) == """{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345}"""
+        new InvoiceData("123".getBytes(),"fksjeoskajduakdfhaskdismensuduajseusdke",null,null,Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(2345L)).toJsonAsString(false) == """{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345,"invoiceDate":2345}"""
         when:
         new InvoiceData(null,"fksjeoskajduakdfhaskdismensuduajseusdke",null,null,Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(2345L)).toJsonAsString(false)
         then:
@@ -93,7 +95,7 @@ class InvoiceDataSpec extends Specification {
 
     def "Verify that parsing of JSON data works as expected"(){
         when:
-        InvoiceData d = new InvoiceData(toJsonObject("""{"preImageHash":"313233","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345}"""))
+        InvoiceData d = new InvoiceData(toJsonObject("""{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345}"""))
         then:
         d.preImageHash == "123".getBytes()
         d.bolt11Invoice == "fksjeoskajduakdfhaskdismensuduajseusdke"
@@ -103,7 +105,7 @@ class InvoiceDataSpec extends Specification {
         d.getInvoiceDate().toEpochMilli() == 2345L
 
         when:
-        d = new InvoiceData(toJsonObject("""{"preImageHash":"313233","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345,"invoiceDate":2345}"""))
+        d = new InvoiceData(toJsonObject("""{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345,"invoiceDate":2345}"""))
         then:
         d.preImageHash == "123".getBytes()
         d.bolt11Invoice == "fksjeoskajduakdfhaskdismensuduajseusdke"
@@ -119,19 +121,19 @@ class InvoiceDataSpec extends Specification {
         e.message == "Error parsing JSON data, field key preImageHash is required."
 
         when:
-        new InvoiceData(toJsonObject("""{"preImageHash":"313233","expireDate":12345,"invoiceDate":2345}"""))
+        new InvoiceData(toJsonObject("""{"preImageHash":"MTIz","expireDate":12345,"invoiceDate":2345}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key bolt11Invoice is required."
 
         when:
-        new InvoiceData(toJsonObject("""{"preImageHash":"313233","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","invoiceDate":2345}"""))
+        new InvoiceData(toJsonObject("""{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","invoiceDate":2345}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key expireDate is required."
 
         when:
-        new InvoiceData(toJsonObject("""{"preImageHash":"313233","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345}"""))
+        new InvoiceData(toJsonObject("""{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key invoiceDate is required."
@@ -140,18 +142,23 @@ class InvoiceDataSpec extends Specification {
         new InvoiceData(toJsonObject("""{"preImageHash":"åäö","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345,"invoiceDate":2345}"""))
         then:
         e = thrown(JsonException)
-        e.message == "Error parsing JSON data, problem decoding hex data from field preImageHash."
+        e.message == "Error parsing JSON data, problem decoding base64 data from field preImageHash."
 
         when:
-        new InvoiceData(toJsonObject("""{"preImageHash":"313233","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":"abc","invoiceDate":2345}"""))
+        new InvoiceData(toJsonObject("""{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":"abc","invoiceDate":2345}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key expireDate is not a number."
 
         when:
-        new InvoiceData(toJsonObject("""{"preImageHash":"313233","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345,"invoiceDate":"cds"}"""))
+        new InvoiceData(toJsonObject("""{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345,"invoiceDate":"cds"}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key invoiceDate is not a number."
+    }
+
+    def "Verify getClaimName() returns correct value"(){
+        expect:
+        new InvoiceData().getClaimName() == InvoiceData.CLAIM_NAME
     }
 }

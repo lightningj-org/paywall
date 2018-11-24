@@ -15,10 +15,13 @@
 
 package org.lightningj.paywall.keymgmt;
 
+import org.jose4j.jwk.JsonWebKeySet;
 import org.lightningj.paywall.InternalErrorException;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Base interface for a KeyManager in charge of maintaining asymmetric keys.
@@ -50,14 +53,15 @@ public interface AsymmetricKeyManager extends KeyManager{
     PrivateKey getPrivateKey(Context context) throws UnsupportedOperationException, InternalErrorException;
 
     /**
-     * Method to verify if a given public key is trusted.
+     * Method retrieve a list of trusted public keys used to verify signatures..
      *
      * @param context related context.
-     * @param publicKey the public key to check if trusted.
-     * @return true if the public key is trusted for the given context.
+     * @return A map of keyId of trusted public keys.
      * @throws UnsupportedOperationException if operation in combination with given context isn't
      * supported.
-     * @throws InternalErrorException if internal error occurred checking trust.
+     * @throws InternalErrorException if internal error occurred retrieving the public keys.
      */
-    boolean isTrusted(Context context, PublicKey publicKey) throws UnsupportedOperationException, InternalErrorException;
+    Map<String,PublicKey> getTrustedKeys(Context context) throws UnsupportedOperationException, InternalErrorException;
+
+
 }

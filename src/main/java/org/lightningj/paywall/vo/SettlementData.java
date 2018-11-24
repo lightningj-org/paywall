@@ -14,7 +14,10 @@
  *************************************************************************/
 package org.lightningj.paywall.vo;
 
+import org.jose4j.jwt.JwtClaims;
 import org.lightningj.paywall.JSONParsable;
+import org.lightningj.paywall.tokengenerator.JWTClaim;
+import org.lightningj.paywall.util.Base64Utils;
 import org.lightningj.paywall.util.HexUtils;
 import org.lightningj.paywall.vo.amount.CryptoAmount;
 
@@ -22,6 +25,7 @@ import javax.json.JsonException;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import java.time.Instant;
+import java.util.Base64;
 
 /**
  * Value object class containing information about a payment that have been
@@ -29,7 +33,9 @@ import java.time.Instant;
  *
  * Created by Philip Vendil on 2018-11-12.
  */
-public class SettlementData extends JSONParsable {
+public class SettlementData extends JWTClaim {
+
+    public static final String CLAIM_NAME = "settlement";
 
     protected byte[] preImageHash;
     protected boolean isSettled;
@@ -65,6 +71,15 @@ public class SettlementData extends JSONParsable {
      */
     public SettlementData(JsonObject jsonObject) throws JsonException {
         super(jsonObject);
+    }
+
+    /**
+     * Parse from JWTClaims constructor
+     *
+     * @param jwtClaims the JWT Tokens Claim set to extract data from.
+     */
+    public SettlementData(JwtClaims jwtClaims) {
+        super(jwtClaims);
     }
 
     /**
@@ -155,7 +170,7 @@ public class SettlementData extends JSONParsable {
      */
     @Override
     public void convertToJson(JsonObjectBuilder jsonObjectBuilder) throws JsonException {
-        add(jsonObjectBuilder,"preImageHash", HexUtils.encodeHexString(preImageHash));
+        add(jsonObjectBuilder,"preImageHash", Base64Utils.encodeBase64String(preImageHash));
         add(jsonObjectBuilder,"isSettled",isSettled);
         add(jsonObjectBuilder,"settledAmount",settledAmount);
         add(jsonObjectBuilder,"validUntil",validUntil);
@@ -170,10 +185,15 @@ public class SettlementData extends JSONParsable {
      */
     @Override
     public void parseJson(JsonObject jsonObject) throws JsonException {
-        this.preImageHash = getByteArrayFromHex(jsonObject,"preImageHash",true);
+        this.preImageHash = getByteArrayFromB64(jsonObject,"preImageHash",true);
         this.isSettled = getBoolean(jsonObject,"isSettled", true);
         this.settledAmount = new CryptoAmount(getJsonObject(jsonObject, "settledAmount", true));
         this.validUntil = Instant.ofEpochMilli(getLong(jsonObject,"validUntil", true));
         this.settlementDate = Instant.ofEpochMilli(getLong(jsonObject,"settlementDate", true));
+    }
+
+    @Override
+    public String getClaimName() {
+        return CLAIM_NAME;
     }
 }

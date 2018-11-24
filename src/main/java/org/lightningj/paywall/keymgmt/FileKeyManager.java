@@ -90,6 +90,10 @@ public abstract class FileKeyManager implements KeyManager{
      */
     protected String getDirectory(String type, String tempSubDir) throws InternalErrorException{
         String configPath = getKeyStorePath();
+        return getDirectory(configPath,type,tempSubDir);
+    }
+
+    protected static String getDirectory(String configPath, String type, String tempSubDir) throws InternalErrorException{
         if(configPath == null || configPath.trim().equals("")){
             String tempDir = System.getProperty("java.io.tmpdir");
             log.warning( "No " + type + " configured, using temporary directory " + tempDir + ". THIS SHOULD NOT BE USED IN TEST ENVIRONMENTS.");
@@ -109,5 +113,4 @@ public abstract class FileKeyManager implements KeyManager{
 
         return targetDir.getPath();
     }
-
 }

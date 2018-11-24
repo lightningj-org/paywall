@@ -19,7 +19,6 @@ import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.btcpayserver.BTCPayServerKeyContext;
 import org.lightningj.paywall.btcpayserver.BTCPayServerHelper;
-import org.lightningj.paywall.util.HexUtils;
 
 
 import javax.crypto.KeyGenerator;
@@ -31,19 +30,19 @@ import java.nio.file.Files;
 import java.security.*;
 import java.security.interfaces.ECPublicKey;
 import java.time.Clock;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 /**
- * Asymmetric File Key Manager using a RSA 2048 but key stored on disk on a specified location.
+ * Asymmetric and Symmetric File Key Manager using a RSA 2048 but key stored on disk on a specified location.
  *
  * Created by Philip Vendil on 2018-09-17.
  */
 abstract class DefaultFileKeyManager extends FileKeyManager implements AsymmetricKeyManager, SymmetricKeyManager {
 
-    protected static final String ASYM_PRIVATE_KEYNAME = "/asymkey_prv.pem";
-    protected static final String ASYM_PUBLIC_KEYNAME = "/asymkey_pub.pem";
+    static final String ASYM_PRIVATE_KEYNAME = "/asymkey_prv.pem";
+    static final String ASYM_PUBLIC_KEYNAME = "/asymkey_pub.pem";
 
     protected static final String BTCPAY_SERVER_PRIVATE_KEYNAME = "/btcpayserver_key_prv.pem";
     protected static final String BTCPAY_SERVER_PUBLIC_KEYNAME = "/btcpayserver_key_pub_sin_@SIN@.pem";
@@ -64,8 +63,10 @@ abstract class DefaultFileKeyManager extends FileKeyManager implements Asymmetri
     KeyPair btcKeyPair;
     protected Key secretKey;
 
-    long cacheExpireDate = 0;
-    Set<String> trustedKeysCache = new HashSet<>();
+    long trustStoreCacheExpireDate = 0;
+    Map<String,PublicKey> trustedSigningKeysCache = new ConcurrentHashMap<>();
+    long reciepientsStoreCacheExpireDate = 0;
+    Map<String,PublicKey> trustedRecipientsKeysCache = new ConcurrentHashMap<>();
 
     protected Clock clock = Clock.systemDefaultZone();
 
@@ -104,31 +105,35 @@ abstract class DefaultFileKeyManager extends FileKeyManager implements Asymmetri
     }
 
     /**
-     * Method to verify if a given public key is trusted.
+     * Method retrieve a list of trusted public keys used to verify signatures..
      *
-     * @param context   related context.
-     * @param publicKey the public key to check if trusted.
-     * @return true if the public key is trusted for the given context.
-     * @throws UnsupportedOperationException
+     * @param context related context.
+     * @return A map of keyId of trusted public keys.
+     * @throws UnsupportedOperationException if operation in combination with given context isn't
+     * supported.
+     * @throws InternalErrorException if internal error occurred retrieving the public keys.
      */
     @Override
-    public boolean isTrusted(Context context, PublicKey publicKey) throws UnsupportedOperationException, InternalErrorException {
-        if(hasCacheExpired()){
-            trustedKeysCache.clear();
-            for(File trustedKeyFile : getAsymTrustStoreFiles()){
-                try {
-                    log.fine("Parsing trusted public key file: " + trustedKeyFile.getPath());
-                    PublicKey trustedKey = KeySerializationHelper.deserializePublicKey(Files.readAllBytes(trustedKeyFile.toPath()), getRSAKeyFactory());
-                    trustedKeysCache.add(HexUtils.encodeHexString(trustedKey.getEncoded()));
-                }catch(Exception e){
-                    log.log(Level.SEVERE,"Error parsing trusted public key file: "+ trustedKeyFile.getPath() + ", error: " + e.getMessage(),e);
+    public Map<String,PublicKey> getTrustedKeys(Context context) throws UnsupportedOperationException, InternalErrorException {
+        if(hasCacheExpired(trustStoreCacheExpireDate)){
+            synchronized (this){
+                trustedSigningKeysCache.clear();
+                for(File trustedKeyFile : getAsymTrustStoreFiles()){
+                    try {
+                        log.fine("Parsing trusted public key file: " + trustedKeyFile.getPath());
+                        PublicKey trustedKey = KeySerializationHelper.deserializePublicKey(Files.readAllBytes(trustedKeyFile.toPath()), getRSAKeyFactory());
+                        trustedSigningKeysCache.put(KeySerializationHelper.genKeyId(trustedKey.getEncoded()),trustedKey);
+                    }catch(Exception e){
+                        log.log(Level.SEVERE,"Error parsing trusted public key file: "+ trustedKeyFile.getPath() + ", error: " + e.getMessage(),e);
+                    }
                 }
+                trustStoreCacheExpireDate = clock.millis() + CACHE_TIME;
             }
-            cacheExpireDate = clock.millis() + CACHE_TIME;
         }
 
-        return trustedKeysCache.contains(HexUtils.encodeHexString(publicKey.getEncoded()));
+        return trustedSigningKeysCache;
     }
+
 
     /**
      * Returns the key that should be used for symmetric operations for the given context.
@@ -156,9 +161,10 @@ abstract class DefaultFileKeyManager extends FileKeyManager implements Asymmetri
      *
      * @return the path to the directory where trusted public key store files are stored. Or null
      * if not configured.
-     * @throws InternalErrorException if internal error occurred retrieving the key store path.
+     * @throws InternalErrorException if internal error occurred retrieving the trust store path.
      */
     protected abstract String getAsymTrustStorePath() throws InternalErrorException;
+
 
     /**
      * Help method to parse existing keys or generate new ones if not exists.
@@ -343,8 +349,9 @@ abstract class DefaultFileKeyManager extends FileKeyManager implements Asymmetri
 
         return dir.listFiles((d, name) -> name.toLowerCase().endsWith(".pem"));
     }
-    private boolean hasCacheExpired(){
-        return cacheExpireDate < clock.millis();
+
+    private boolean hasCacheExpired(long expireDate){
+        return expireDate < clock.millis();
     }
 
 

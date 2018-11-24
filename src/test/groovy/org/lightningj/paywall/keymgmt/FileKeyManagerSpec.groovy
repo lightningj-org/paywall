@@ -14,6 +14,7 @@
  *************************************************************************/
 package org.lightningj.paywall.keymgmt
 
+import org.lightningj.paywall.util.BCUtils
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -30,6 +31,7 @@ class FileKeyManagerSpec extends Specification {
 
     @Shared def originalLog
     def setupSpec(){
+        BCUtils.installBCProvider()
         originalLog = FileKeyManager.log
     }
 
@@ -57,7 +59,7 @@ class FileKeyManagerSpec extends Specification {
     def """Verify that getProtectPassphraseWithDefault() returns default
 passphrase and logs a warning if no pass phrase have been configured"""(){
         when:
-        km = new TestDefaultFileKeyManager("target/tmp", "target/tmp", null)
+        km = new TestDefaultFileKeyManager("target/tmp", "target/tmp",null)
         def result = km.getProtectPassphraseWithDefault()
         then:
         result == FileKeyManager.DEFAULT_PROTECT_PASSPHRASE.toCharArray()

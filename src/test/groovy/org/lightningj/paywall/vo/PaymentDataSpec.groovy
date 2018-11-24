@@ -57,10 +57,12 @@ class PaymentDataSpec extends Specification {
         pd2.getRequestedAmount() instanceof BTC
     }
 
+    // JWTClaims constructor tested in BaseTokenGeneratorSpec
+
     def "Verify that toJsonAsString works as expected"(){
         expect:
-        new PaymentData("123".getBytes(),"SomeDescription",new BTC(1234),Instant.ofEpochMilli(12345L)).toJsonAsString(false) == """{"preImageHash":"313233","description":"SomeDescription","requestedAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345}"""
-        new PaymentData("123".getBytes(),null,new BTC(1234),Instant.ofEpochMilli(12345L)).toJsonAsString(false) == """{"preImageHash":"313233","requestedAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345}"""
+        new PaymentData("123".getBytes(),"SomeDescription",new BTC(1234),Instant.ofEpochMilli(12345L)).toJsonAsString(false) == """{"preImageHash":"MTIz","description":"SomeDescription","requestedAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345}"""
+        new PaymentData("123".getBytes(),null,new BTC(1234),Instant.ofEpochMilli(12345L)).toJsonAsString(false) == """{"preImageHash":"MTIz","requestedAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345}"""
         when:
         new PaymentData(null,null,new BTC(1234),Instant.ofEpochMilli(12345L)).toJsonAsString(false)
         then:
@@ -80,7 +82,7 @@ class PaymentDataSpec extends Specification {
 
     def "Verify that parsing of JSON data works as expected"(){
         when:
-        PaymentData d = new PaymentData(toJsonObject("""{"preImageHash":"313233","description":"SomeDescription","requestedAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345}"""))
+        PaymentData d = new PaymentData(toJsonObject("""{"preImageHash":"MTIz","description":"SomeDescription","requestedAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345}"""))
         then:
         d.preImageHash == "123".getBytes()
         d.description == "SomeDescription"
@@ -89,7 +91,7 @@ class PaymentDataSpec extends Specification {
         d.expireDate == Instant.ofEpochMilli(12345L)
 
         when:
-        d = new PaymentData(toJsonObject("""{"preImageHash":"313233","requestedAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345}"""))
+        d = new PaymentData(toJsonObject("""{"preImageHash":"MTIz","requestedAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345}"""))
         then:
         d.preImageHash == "123".getBytes()
         d.description == null
@@ -101,13 +103,13 @@ class PaymentDataSpec extends Specification {
         e.message == "Error parsing JSON data, field key preImageHash is required."
 
         when:
-        new PaymentData(toJsonObject("""{"preImageHash":"313233","expireDate":12345}"""))
+        new PaymentData(toJsonObject("""{"preImageHash":"MTIz","expireDate":12345}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key requestedAmount is required."
 
         when:
-        new PaymentData(toJsonObject("""{"preImageHash":"313233","requestedAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"}}"""))
+        new PaymentData(toJsonObject("""{"preImageHash":"MTIz","requestedAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"}}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key expireDate is required."
@@ -116,12 +118,17 @@ class PaymentDataSpec extends Specification {
         new PaymentData(toJsonObject("""{"preImageHash":"åäö","requestedAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345}"""))
         then:
         e = thrown(JsonException)
-        e.message == "Error parsing JSON data, problem decoding hex data from field preImageHash."
+        e.message == "Error parsing JSON data, problem decoding base64 data from field preImageHash."
 
         when:
-        new PaymentData(toJsonObject("""{"preImageHash":"313233","requestedAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":"abc"}"""))
+        new PaymentData(toJsonObject("""{"preImageHash":"MTIz","requestedAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":"abc"}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key expireDate is not a number."
+    }
+
+    def "Verify getClaimName() returns correct value"(){
+        expect:
+        new PaymentData().getClaimName() == PaymentData.CLAIM_NAME
     }
 }

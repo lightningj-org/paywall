@@ -15,6 +15,7 @@
 package org.lightningj.paywall.requestpolicy
 
 import org.lightningj.paywall.util.BCUtils
+import org.lightningj.paywall.vo.RequestData
 import org.lightningj.paywall.web.CachableHttpServletRequest
 import spock.lang.Specification
 
@@ -34,17 +35,17 @@ class UrlMethodAndParametersSpec extends Specification {
 
     def "Verify that URL,Method and parameters are used for aggregation"(){
         when:
-        byte[] result1 = policy.significantRequestDataDigest(request)
+        RequestData result1 = policy.significantRequestDataDigest(request)
         then:
-        result1.length == 32
+        result1.significantData.length == 32
         1 * request.getMethod() >> { return "POST"}
         1 * request.getRequestURL() >> { return new StringBuffer("http://somehost/test")}
         1 * request.getParameterMap() >> { return ["param1" : null, "param2" : ["val1","val2"] as String[], "param3" : ["val1"] as String[]]}
         when:
-        byte[] result2 = policy.significantRequestDataDigest(request)
+        RequestData result2 = policy.significantRequestDataDigest(request)
         then:
         result1 != result2
-        result2.length == 32
+        result2.significantData.length == 32
         1 * request.getMethod() >> { return "POST"}
         1 * request.getRequestURL() >> { return new StringBuffer("http://somehost/test")}
         1 * request.getParameterMap() >> { return ["param1" : null, "param2" : ["val1","val3"] as String[], "param3" : ["val1"] as String[]]}

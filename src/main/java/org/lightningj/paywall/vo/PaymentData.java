@@ -14,7 +14,10 @@
  *************************************************************************/
 package org.lightningj.paywall.vo;
 
+import org.jose4j.jwt.JwtClaims;
 import org.lightningj.paywall.JSONParsable;
+import org.lightningj.paywall.tokengenerator.JWTClaim;
+import org.lightningj.paywall.util.Base64Utils;
 import org.lightningj.paywall.util.HexUtils;
 import org.lightningj.paywall.vo.amount.Amount;
 
@@ -22,6 +25,7 @@ import javax.json.JsonException;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import java.time.Instant;
+import java.util.Base64;
 
 /**
  * Value object containing information needed to create
@@ -29,7 +33,9 @@ import java.time.Instant;
  *
  * Created by Philip Vendil on 2018-10-29.
  */
-public class PaymentData extends JSONParsable {
+public class PaymentData extends JWTClaim {
+
+    public static final String CLAIM_NAME = "payment";
 
     protected byte[] preImageHash;
     protected String description;
@@ -63,6 +69,15 @@ public class PaymentData extends JSONParsable {
      */
     public PaymentData(JsonObject jsonObject) throws JsonException {
         super(jsonObject);
+    }
+
+    /**
+     * Parse from JWTClaims constructor
+     *
+     * @param jwtClaims the JWT Tokens Claim set to extract data from.
+     */
+    public PaymentData(JwtClaims jwtClaims) {
+        super(jwtClaims);
     }
 
     /**
@@ -137,7 +152,7 @@ public class PaymentData extends JSONParsable {
      */
     @Override
     public void convertToJson(JsonObjectBuilder jsonObjectBuilder) throws JsonException {
-        add(jsonObjectBuilder,"preImageHash", HexUtils.encodeHexString(preImageHash));
+        add(jsonObjectBuilder,"preImageHash", Base64Utils.encodeBase64String(preImageHash));
         addNotRequired(jsonObjectBuilder,"description",description);
         add(jsonObjectBuilder,"requestedAmount", requestedAmount);
         add(jsonObjectBuilder,"expireDate",expireDate);
@@ -151,9 +166,14 @@ public class PaymentData extends JSONParsable {
      */
     @Override
     public void parseJson(JsonObject jsonObject) throws JsonException {
-        preImageHash = getByteArrayFromHex(jsonObject,"preImageHash", true);
+        preImageHash = getByteArrayFromB64(jsonObject,"preImageHash", true);
         description = getStringIfSet(jsonObject,"description");
         requestedAmount = Amount.parseAmountObject(getJsonObject(jsonObject,"requestedAmount",true));
         expireDate = Instant.ofEpochMilli(getLong(jsonObject,"expireDate", true));
+    }
+
+    @Override
+    public String getClaimName() {
+        return CLAIM_NAME;
     }
 }

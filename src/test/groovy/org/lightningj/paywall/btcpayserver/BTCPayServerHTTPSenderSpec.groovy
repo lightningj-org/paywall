@@ -32,6 +32,7 @@ import io.netty.util.CharsetUtil
 import org.lightningj.paywall.InternalErrorException
 import org.lightningj.paywall.keymgmt.AsymmetricKeyManager
 import org.lightningj.paywall.keymgmt.DummyKeyManager
+import org.lightningj.paywall.keymgmt.DummyKeyManagerInstance
 import org.lightningj.paywall.util.BCUtils
 import org.lightningj.paywall.util.TestWebServer
 import spock.lang.Shared
@@ -54,11 +55,11 @@ class BTCPayServerHTTPSenderSpec extends Specification {
     BTCPayServerHTTPSender sender
     TestHandler handler = new TestHandler()
 
-    private static final int PORT = 39823
+    private static final int PORT = 39822
 
     def setupSpec(){
         BCUtils.installBCProvider()
-        keyManager = new DummyKeyManager()
+        keyManager =  DummyKeyManagerInstance.commonInstance
     }
 
     def setup(){

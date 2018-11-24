@@ -18,6 +18,7 @@ import org.lightningj.paywall.btcpayserver.vo.Invoice
 import org.lightningj.paywall.keymgmt.AsymmetricKeyManager
 import org.lightningj.paywall.keymgmt.TestDefaultFileKeyManager
 import org.lightningj.paywall.util.BCUtils
+import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -29,6 +30,7 @@ import java.util.logging.Logger
  *
  * Created by Philip Vendil on 2018-10-14.
  */
+@Ignore
 class BTCPayServerSpec extends Specification {
 
     @Shared TestBTCPayServer server

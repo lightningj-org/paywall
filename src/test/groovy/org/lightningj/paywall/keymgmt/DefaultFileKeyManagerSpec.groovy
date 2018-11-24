@@ -106,11 +106,11 @@ class DefaultFileKeyManagerSpec extends Specification {
         PublicKey trustedKey2 = KeySerializationHelper.deserializePublicKey(Files.readAllBytes(new File("src/test/resources/testtruststoredir/pubkey2.pEm").toPath()), km.RSAKeyFactory)
 
         when:
-        km.isTrusted(null,trustedKey1)
-        km.isTrusted(null,trustedKey2)
-        !km.isTrusted(null,untrustedKey)
-        km.trustedKeysCache.size() == 2
-        km.cacheExpireDate > 0
+        km.getTrustedKeys(null).values().contains(trustedKey1)
+        km.getTrustedKeys(null).values().contains(trustedKey2)
+        !km.getTrustedKeys(null).values().contains(untrustedKey)
+        km.trustedSigningKeysCache.size() == 2
+        km.trustStoreCacheExpireDate > 0
         then:
         1 * log.log(Level.SEVERE,"Error parsing trusted public key file: src/test/resources/testtruststoredir/invalid1.pEm, error: Error parsing public key: encoded key spec not recognized: unknown object in getInstance: org.bouncycastle.asn1.DERApplicationSpecific",_ as InternalErrorException)
         1 * log.log(Level.SEVERE,"Error parsing trusted public key file: src/test/resources/testtruststoredir/invalid2.pEm, error: Error parsing public key: encoded key spec not recognized: null",_ as InternalErrorException)
@@ -120,14 +120,14 @@ class DefaultFileKeyManagerSpec extends Specification {
         1 * log.fine("Parsing trusted public key file: src/test/resources/testtruststoredir/invalid2.pEm")
 
         when: // Verify that cache is recalculated after cache expires
-        km.trustedKeysCache.clear()
+        km.trustedSigningKeysCache.clear()
         km.forwardClock(Duration.parse("PT1M"))
         then:
-        !km.isTrusted(null,trustedKey1)
+        !km.getTrustedKeys(null).values().contains(trustedKey1)
         when:
         km.forwardClock(Duration.parse("PT5M"))
         then:
-        km.isTrusted(null,trustedKey1)
+        km.getTrustedKeys(null).values().contains(trustedKey1)
     }
 
     def "Verify that if no trust store directory have been configured is current public key trusted with warning"(){
@@ -136,10 +136,11 @@ class DefaultFileKeyManagerSpec extends Specification {
         PublicKey key1 = KeySerializationHelper.deserializePublicKey(Files.readAllBytes(new File("src/test/resources/testtruststoredir/pubkey1.pem").toPath()), km.RSAKeyFactory)
         when:
         PublicKey ownPk = km.getPublicKey(null)
-        boolean isTrusted = km.isTrusted(null,ownPk)
+        boolean isTrusted = km.getTrustedKeys(null).values().contains(ownPk)
         then:
-        !km.isTrusted(null,key1)
-        km.trustedKeysCache.size() == 1
+        isTrusted
+        !km.getTrustedKeys(null).values().contains(key1)
+        km.trustedSigningKeysCache.size() == 1
         1 * log.warning("Warning: no trust store directory configured, using own public key as trust. Should not be used in production.")
         1 * log.fine("Parsing trusted public key file: target/tmp/asymkey_pub.pem")
     }
@@ -149,13 +150,13 @@ class DefaultFileKeyManagerSpec extends Specification {
         km = new TestDefaultFileKeyManager("target/tmp", "invaliddir","foobar321")
         PublicKey key1 = KeySerializationHelper.deserializePublicKey(Files.readAllBytes(new File("src/test/resources/testtruststoredir/pubkey1.pem").toPath()), km.RSAKeyFactory)
         when:
-        km.isTrusted(null,key1)
+        km.getTrustedKeys(null).values().contains(key1)
         then:
         def e = thrown InternalErrorException
         e.message == "Internal error parsing public keys in trust store directory: invaliddir check that it exists and is readable"
-
-
     }
+
+
 
     def "Verify that a new symmetric key is generated if not exists"(){
         setup:
@@ -238,7 +239,7 @@ class DefaultFileKeyManagerSpec extends Specification {
         new File("target/tmp" + BTCPAY_SERVER_PRIVATE_KEYNAME).delete()
     }
 
-    def untrustedKey = """Id :617EDB5463CF4873
+    static def untrustedKey = """Id :617EDB5463CF4873
 Generated :2018-09-20 10:38:37
 Hostname :Philips-MBP
 -----BEGIN PUBLIC KEY-----

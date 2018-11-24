@@ -42,7 +42,7 @@ dependencies {
     compile 'org.bitbucket.b_c:jose4j:0.6.4' // JSON Web Token Generator, JWS and JWE
 
     compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
-    testCompileOnly 'javax.servlet:javax.servlet-api:4.0.1'
+    testCompile 'javax.servlet:javax.servlet-api:4.0.1'
 
     // mandatory dependencies for using Spock
     testCompile "org.spockframework:spock-core:1.1-groovy-2.4"

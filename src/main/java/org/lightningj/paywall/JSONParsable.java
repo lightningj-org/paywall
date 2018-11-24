@@ -15,10 +15,12 @@
 package org.lightningj.paywall;
 
 import org.lightningj.lnd.util.JsonGenUtils;
+import org.lightningj.paywall.util.Base64Utils;
 import org.lightningj.paywall.util.HexUtils;
 
 import javax.json.*;
 import java.time.Instant;
+import java.util.Base64;
 
 /**
  * Base class for value classes that should be JSON Parsable.
@@ -154,9 +156,38 @@ public abstract class JSONParsable {
             try {
                 return HexUtils.decodeHexString(object.getString(key));
             }catch (JsonException e){
-              throw e;
+                throw e;
             }catch (Exception e){
                 throw new JsonException("Error parsing JSON data, problem decoding hex data from field " + key + ".");
+            }
+        }
+        if(required){
+            throw new JsonException("Error parsing JSON data, field key " + key + " is required.");
+        }
+        return null;
+    }
+
+    /**
+     * Help method used in parseJson implementation to fetch a b64 string value and decode it into byte[]
+     * if set in JsonObject otherwise returns null.
+     */
+    protected byte[] getByteArrayFromB64IfSet(JsonObject object, String key){
+        return getByteArrayFromB64(object,key,false);
+    }
+
+    /**
+     * Help method used in parseJson implementation to fetch a b64 string value and decode
+     * it into byte array if set in JsonObject otherwise returns null or throws JsonException if required.
+     * @throws JSONParsable if field is not set but required.
+     */
+    protected byte[] getByteArrayFromB64(JsonObject object, String key, boolean required) throws JsonException{
+        if(object.containsKey(key) && !object.isNull(key)){
+            try {
+                return Base64Utils.decodeBase64String(object.getString(key));
+            }catch (JsonException e){
+                throw e;
+            }catch (Exception e){
+                throw new JsonException("Error parsing JSON data, problem decoding base64 data from field " + key + ".");
             }
         }
         if(required){

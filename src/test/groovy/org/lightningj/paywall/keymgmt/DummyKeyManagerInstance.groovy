@@ -1,5 +1,5 @@
 /*
- * ***********************************************************************
+ *************************************************************************
  *                                                                       *
  *  LightningJ                                                           *
  *                                                                       *
@@ -12,28 +12,27 @@
  *  See terms of license at gnu.org.                                     *
  *                                                                       *
  *************************************************************************/
-package org.lightningj.paywall.keymgmt;
+package org.lightningj.paywall.keymgmt
 
 /**
- * Extendable class specifying context of crytographic operations.
+ * Help class containing a common instance of dummy key manager to avoid regenerating new keys for each
+ * unit test and speed up run.
  *
- *  Created by Philip Vendil on 2018-10-06.
+ * Created by philip on 2018-11-22.
  */
-public abstract class Context {
+class DummyKeyManagerInstance {
 
+    private static DummyKeyManager commonInstance = null;
 
-    public enum KeyUsage{
-        /**
-         * Used to request an authentication key.
-         */
-        AUTH,
-        /**
-         * Used to request an signature key.
-         */
-        SIGN,
-        /**
-         * Used to request an encryption key.
-         */
-        ENC
+    /**
+     *
+     * @return returns a one common instance that can be reused in test scripts to avoid regenerating keys for each
+     * unit test.
+     */
+    static DummyKeyManager getCommonInstance(){
+        if(commonInstance == null){
+            commonInstance = new DummyKeyManager()
+        }
+        return commonInstance
     }
 }

@@ -12,28 +12,39 @@
  *  See terms of license at gnu.org.                                     *
  *                                                                       *
  *************************************************************************/
-package org.lightningj.paywall.keymgmt;
+package org.lightningj.paywall.util;
+
+import java.util.Base64;
 
 /**
- * Extendable class specifying context of crytographic operations.
+ * Help method for base64 encoding/decoding.
  *
- *  Created by Philip Vendil on 2018-10-06.
+ * Created by Philip Vendil on 2018-09-19.
  */
-public abstract class Context {
+public class Base64Utils {
 
+    /**
+     * Help method to encode the data into a hexadecimal String
+     * @param data the data to hex encode
+     * @return String representation of the hex encoded data.
+     */
+    public static String encodeBase64String(byte[] data){
+        if(data == null){
+            return null;
+        }
+        return Base64.getEncoder().encodeToString(data);
+    }
 
-    public enum KeyUsage{
-        /**
-         * Used to request an authentication key.
-         */
-        AUTH,
-        /**
-         * Used to request an signature key.
-         */
-        SIGN,
-        /**
-         * Used to request an encryption key.
-         */
-        ENC
+    /**
+     * Method to decode a base64 encoded string.
+     *
+     * @param b64String the base64 string to decode
+     * @return the decoded data.
+     */
+    public static byte[] decodeBase64String(String b64String){
+        if(b64String == null){
+            return null;
+        }
+        return Base64.getDecoder().decode(b64String);
     }
 }

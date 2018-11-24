@@ -52,17 +52,17 @@ class PreImageDataSpec extends Specification {
     def "Verify that toJsonAsString works as expected"(){
         expect:
         new PreImageData().toJsonAsString(false) == "{}"
-        genPreImageData().toJsonAsString(false) == """{"preImage":"313233","preImageHash":"333231"}"""
+        genPreImageData().toJsonAsString(false) == """{"preImage":"MTIz","preImageHash":"MzIx"}"""
     }
 
     def "Verify that parsing of JSON data works as expected"(){
         when:
-        PreImageData d = new PreImageData(toJsonObject("""{"preImageHash":"313233"}"""))
+        PreImageData d = new PreImageData(toJsonObject("""{"preImageHash":"MTIz"}"""))
         then:
         d.preImage == null
         d.preImageHash == "123".getBytes()
         when:
-        d = new PreImageData(toJsonObject("""{"preImage":"313233","preImageHash":"333231"}"""))
+        d = new PreImageData(toJsonObject("""{"preImage":"MTIz","preImageHash":"MzIx"}"""))
         then:
         new String(d.preImage) == "123"
         new String(d.preImageHash) == "321"

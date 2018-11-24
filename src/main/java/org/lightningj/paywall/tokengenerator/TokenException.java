@@ -1,5 +1,5 @@
 /*
- * ***********************************************************************
+ *************************************************************************
  *                                                                       *
  *  LightningJ                                                           *
  *                                                                       *
@@ -12,28 +12,32 @@
  *  See terms of license at gnu.org.                                     *
  *                                                                       *
  *************************************************************************/
-package org.lightningj.paywall.keymgmt;
+
+package org.lightningj.paywall.tokengenerator;
 
 /**
- * Extendable class specifying context of crytographic operations.
+ * Exception thrown by TokenGenerator if verification of a token failed.
  *
- *  Created by Philip Vendil on 2018-10-06.
+ * Created by Philip Vendil on 2018-11-11.
  */
-public abstract class Context {
+public class TokenException extends Exception {
 
+    /**
+     * Exception thrown by TokenGenerator if verification of a token failed.
+     *
+     * @param message descriptive message.
+     */
+    public TokenException(String message){
+        super(message);
+    }
 
-    public enum KeyUsage{
-        /**
-         * Used to request an authentication key.
-         */
-        AUTH,
-        /**
-         * Used to request an signature key.
-         */
-        SIGN,
-        /**
-         * Used to request an encryption key.
-         */
-        ENC
+    /**
+     * Exception thrown by TokenGenerator if verification of a token failed.
+     *
+     * @param message descriptive message.
+     * @param cause causing exception.
+     */
+    public TokenException(String message, Throwable cause){
+        super(message,cause);
     }
 }
