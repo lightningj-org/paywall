@@ -38,10 +38,9 @@ public class SettlementData extends JWTClaim {
     public static final String CLAIM_NAME = "settlement";
 
     protected byte[] preImageHash;
-    protected boolean isSettled;
-    protected CryptoAmount settledAmount;
+    protected InvoiceData invoice;
     protected Instant validUntil;
-    protected Instant settlementDate;
+    protected Instant validFrom;
 
     /**
      * Empty Constructor
@@ -51,17 +50,15 @@ public class SettlementData extends JWTClaim {
     /**
      * Default Constructor
      * @param preImageHash the generated preImageHash from PreImageData and used as primary key for the payment request.
-     * @param isSettled if the payment was done successfully.
-     * @param settledAmount the amount that was settled.
+     * @param invoice the related invoice. (Optional)
      * @param validUntil the time the payment is valid and the requested call can used.
-     * @param settlementDate the time the payment was settled with the LightningHandler.
+     * @param validFrom the time the payment is valid from. (Optional)
      */
-    public SettlementData(byte[] preImageHash, boolean isSettled, CryptoAmount settledAmount, Instant validUntil, Instant settlementDate) {
+    public SettlementData(byte[] preImageHash, InvoiceData invoice, Instant validUntil, Instant validFrom) {
         this.preImageHash = preImageHash;
-        this.isSettled = isSettled;
-        this.settledAmount = settledAmount;
+        this.invoice = invoice;
         this.validUntil = validUntil;
-        this.settlementDate = settlementDate;
+        this.validFrom = validFrom;
     }
 
     /**
@@ -100,34 +97,18 @@ public class SettlementData extends JWTClaim {
 
     /**
      *
-     * @return if the payment was done successfully.
+     * @return the related invoice. (Optional)
      */
-    public boolean isSettled() {
-        return isSettled;
+    public InvoiceData getInvoice() {
+        return invoice;
     }
 
     /**
      *
-     * @param settled if the payment was done successfully.
+     * @param invoice the related invoice. (Optional)
      */
-    public void setSettled(boolean settled) {
-        isSettled = settled;
-    }
-
-    /**
-     *
-     * @return the amount that was settled.
-     */
-    public CryptoAmount getSettledAmount() {
-        return settledAmount;
-    }
-
-    /**
-     *
-     * @param settledAmount the amount that was settled.
-     */
-    public void setSettledAmount(CryptoAmount settledAmount) {
-        this.settledAmount = settledAmount;
+    public void setInvoice(InvoiceData invoice) {
+        this.invoice = invoice;
     }
 
     /**
@@ -148,18 +129,27 @@ public class SettlementData extends JWTClaim {
 
     /**
      *
-     * @return the time the payment was settled with the LightningHandler.
+     * @return the time the payment is valid from. (Optional)
      */
-    public Instant getSettlementDate() {
-        return settlementDate;
+    public Instant getValidFrom() {
+        return validFrom;
     }
 
     /**
      *
-     * @param settlementDate the time the payment was settled with the LightningHandler.
+     * @param validFrom the time the payment is valid from. (Optional)
      */
-    public void setSettlementDate(Instant settlementDate) {
-        this.settlementDate = settlementDate;
+    public void setValidFrom(Instant validFrom) {
+        this.validFrom = validFrom;
+    }
+
+    /**
+     * Method that minimizes the amount of data (by removing the related invoice) if
+     * the settlement data is only needed to verify if a given preImageHash have been
+     * settled or not.
+     */
+    public void minimizeData(){
+        this.invoice = null;
     }
 
     /**
@@ -171,11 +161,17 @@ public class SettlementData extends JWTClaim {
     @Override
     public void convertToJson(JsonObjectBuilder jsonObjectBuilder) throws JsonException {
         add(jsonObjectBuilder,"preImageHash", Base64Utils.encodeBase64String(preImageHash));
-        add(jsonObjectBuilder,"isSettled",isSettled);
-        add(jsonObjectBuilder,"settledAmount",settledAmount);
+        addNotRequired(jsonObjectBuilder,"invoice", invoice);
         add(jsonObjectBuilder,"validUntil",validUntil);
-        add(jsonObjectBuilder,"settlementDate",settlementDate);
+        addNotRequired(jsonObjectBuilder,"validFrom",validFrom);
     }
+
+    //
+    // Fix test, getter and setter
+    //
+    // test mimimize data method, (removes invoice)
+    // test invoice
+    // Add converter methods to LNDHelper
 
     /**
      * Method to read all properties from a JsonObject into this value object.
@@ -186,10 +182,13 @@ public class SettlementData extends JWTClaim {
     @Override
     public void parseJson(JsonObject jsonObject) throws JsonException {
         this.preImageHash = getByteArrayFromB64(jsonObject,"preImageHash",true);
-        this.isSettled = getBoolean(jsonObject,"isSettled", true);
-        this.settledAmount = new CryptoAmount(getJsonObject(jsonObject, "settledAmount", true));
+        if(jsonObject.containsKey("invoice") && !jsonObject.isNull("invoice")) {
+            this.invoice = new InvoiceData(getJsonObject(jsonObject, "invoice", true));
+        }
         this.validUntil = Instant.ofEpochMilli(getLong(jsonObject,"validUntil", true));
-        this.settlementDate = Instant.ofEpochMilli(getLong(jsonObject,"settlementDate", true));
+        if(jsonObject.containsKey("validFrom") && !jsonObject.isNull("validFrom")) {
+            validFrom = Instant.ofEpochMilli(getLong(jsonObject,"validFrom", true));
+        }
     }
 
     @Override

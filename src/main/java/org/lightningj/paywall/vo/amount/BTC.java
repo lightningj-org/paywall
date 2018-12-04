@@ -10,8 +10,6 @@ import javax.json.JsonObject;
  */
 public class BTC extends CryptoAmount {
 
-    public static final String CURRENCY_CODE_BTC = "BTC";
-
     /**
      * Empty Constructor
      */

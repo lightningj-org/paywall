@@ -32,6 +32,7 @@ public class NodeInfo extends JSONParsable{
     protected String publicKeyInfo;
     protected String nodeAddress;
     protected Integer nodePort;
+    protected Boolean mainNet;
 
     /**
      * Empty Constructor
@@ -49,6 +50,20 @@ public class NodeInfo extends JSONParsable{
         this.publicKeyInfo = publicKeyInfo;
         this.nodeAddress = nodeAddress;
         this.nodePort = nodePort;
+    }
+
+    /**
+     * Default Constructor
+     * @param publicKeyInfo the public key info of the lightning handlers node. (Optional)
+     * @param nodeAddress address information to the lightning handlers node. (Optional)
+     * @param nodePort port the node is listening on for channel connections. (Optional)
+     * @param mainNet indicator if the network is on main net or some test net. (Optional)
+     */
+    public NodeInfo(String publicKeyInfo, String nodeAddress, Integer nodePort, Boolean mainNet) {
+        this.publicKeyInfo = publicKeyInfo;
+        this.nodeAddress = nodeAddress;
+        this.nodePort = nodePort;
+        this.mainNet = mainNet;
     }
 
     /**
@@ -117,6 +132,21 @@ public class NodeInfo extends JSONParsable{
         this.nodePort = nodePort;
     }
 
+    /**
+     *
+     * @return indicator if the network is on main net or some test net. (Optional)
+     */
+    public Boolean getMainNet() {
+        return mainNet;
+    }
+
+    /**
+     *
+     * @param mainNet indicator if the network is on main net or some test net. (Optional)
+     */
+    public void setMainNet(Boolean mainNet) {
+        this.mainNet = mainNet;
+    }
 
     /**
      *
@@ -169,6 +199,7 @@ public class NodeInfo extends JSONParsable{
         addNotRequired(jsonObjectBuilder,"publicKeyInfo",publicKeyInfo);
         addNotRequired(jsonObjectBuilder,"nodeAddress",nodeAddress);
         addNotRequired(jsonObjectBuilder,"nodePort",nodePort);
+        addNotRequired(jsonObjectBuilder,"mainNet",mainNet);
         if(publicKeyInfo != null && nodeAddress != null){
             add(jsonObjectBuilder,"connectString", getConnectString());
         }
@@ -185,6 +216,7 @@ public class NodeInfo extends JSONParsable{
         publicKeyInfo = getStringIfSet(jsonObject,"publicKeyInfo");
         nodeAddress = getStringIfSet(jsonObject,"nodeAddress");
         nodePort = getIntIfSet(jsonObject,"nodePort");
+        mainNet = getBooleanIfSet(jsonObject,"mainNet");
     }
 
 }

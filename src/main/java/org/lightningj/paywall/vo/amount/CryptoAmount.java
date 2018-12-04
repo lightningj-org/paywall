@@ -31,6 +31,9 @@ import javax.json.JsonObjectBuilder;
  */
 public class CryptoAmount extends Amount {
 
+    public static final String CURRENCY_CODE_BTC = "BTC";
+    public static final String CURRENCY_CODE_LTC = "LTC";
+
     protected long value;
     protected String currencyCode;
     protected Magnetude magnetude = Magnetude.NONE;

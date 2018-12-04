@@ -134,8 +134,8 @@ class BaseTokenGeneratorSpec extends Specification {
         Instant expireDate = Instant.now().plus(10, ChronoUnit.MINUTES)
         Instant notBefore = Instant.now().minus(10, ChronoUnit.MINUTES)
         def paymentData = new PaymentData("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
-        def invoiceData = new InvoiceData("abasrekwsdf".getBytes(), "abasdreser",new BTC(10000),new NodeInfo("1231232@10.10.10.1"),expireDate,Instant.now())
-        def settlementData = new SettlementData("abasrekwsdf".getBytes(),true,new BTC(10000),expireDate,Instant.now())
+        def invoiceData = new InvoiceData("abasrekwsdf".getBytes(), "abasdreser",null,new BTC(10000),new NodeInfo("1231232@10.10.10.1"),expireDate,Instant.now())
+        def settlementData = new SettlementData("abasrekwsdf".getBytes(),null,expireDate,null)
         when:
         String token = baseTokenGenerator.generateToken(ctx_type,expireDate,notBefore,false,null,paymentData,invoiceData,settlementData)
         //println token
@@ -223,7 +223,7 @@ class BaseTokenGeneratorSpec extends Specification {
         setup:
         Instant expireDate = Instant.now().plus(10, ChronoUnit.MINUTES)
         Instant requestDate = Instant.now().minus(10, ChronoUnit.MINUTES)
-        def invoiceData = new InvoiceData("abasrekwsdf".getBytes(), "abasdreser",new BTC(10000),new NodeInfo("1231232@10.10.10.1"),expireDate,Instant.now())
+        def invoiceData = new InvoiceData("abasrekwsdf".getBytes(), "abasdreser",null,new BTC(10000),new NodeInfo("1231232@10.10.10.1"),expireDate,Instant.now())
         def requestData = new RequestData("avksjedf".getBytes(),requestDate)
         when:
         String token = baseTokenGenerator.generateInvoiceToken(invoiceData,requestData,expireDate,null,null)
@@ -246,7 +246,7 @@ class BaseTokenGeneratorSpec extends Specification {
         setup:
         Instant expireDate = Instant.now().plus(10, ChronoUnit.MINUTES)
         Instant requestDate = Instant.now().minus(10, ChronoUnit.MINUTES)
-        def settlementData = new SettlementData("abasrekwsdf".getBytes(),true,new BTC(10000),expireDate,Instant.now())
+        def settlementData = new SettlementData("abasrekwsdf".getBytes(),null,expireDate,null)
         def requestData = new RequestData("avksjedf".getBytes(),requestDate)
         when:
         String token = baseTokenGenerator.generateSettlementToken(settlementData,requestData,expireDate,null,null)

@@ -314,11 +314,18 @@ public abstract class JSONParsable {
      * @throws JSONParsable if field is not set but required.
      */
     protected JsonObject getJsonObject(JsonObject object, String key, boolean required) throws JsonException{
-        if(object.containsKey(key) && !object.isNull(key)){
-            return object.getJsonObject(key);
-        }
-        if(required){
-            throw new JsonException("Error parsing JSON data, field key " + key + " is required.");
+        try {
+            if (object.containsKey(key) && !object.isNull(key)) {
+                return object.getJsonObject(key);
+            }
+            if (required) {
+                throw new JsonException("Error parsing JSON data, field key " + key + " is required.");
+            }
+        }catch(Exception e){
+            if(e instanceof JsonException){
+                throw (JsonException) e;
+            }
+            throw new JsonException("Error parsing json object " + key+ ", message: " + e.getMessage(),e);
         }
         return null;
     }

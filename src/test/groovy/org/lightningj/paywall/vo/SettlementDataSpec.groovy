@@ -14,8 +14,6 @@
  *************************************************************************/
 package org.lightningj.paywall.vo
 
-import org.lightningj.paywall.vo.amount.BTC
-import org.lightningj.paywall.vo.amount.CryptoAmount
 import spock.lang.Specification
 
 import javax.json.JsonException
@@ -34,119 +32,114 @@ class SettlementDataSpec extends Specification {
         def sd1 = new SettlementData()
         then:
         sd1.getPreImageHash() == null
-        sd1.isSettled() == false
-        sd1.getSettledAmount() == null
+        sd1.getInvoice() == null
         sd1.getValidUntil() == null
-        sd1.getSettlementDate() == null
+        sd1.getValidFrom() == null
 
         when:
         sd1.setPreImageHash("123".getBytes())
-        sd1.setSettled(true)
-        sd1.setSettledAmount(new BTC(1234));
+        sd1.setInvoice(InvoiceDataSpec.genFullInvoiceData(true))
         sd1.setValidUntil(Instant.ofEpochMilli(12345L))
-        sd1.setSettlementDate(Instant.ofEpochMilli(12344L))
+        sd1.setValidFrom(Instant.ofEpochMilli(12346L))
 
         then:
         sd1.getPreImageHash() == "123".getBytes()
-        sd1.isSettled()
-        sd1.getSettledAmount() instanceof BTC
+        sd1.getInvoice() instanceof InvoiceData
         sd1.getValidUntil().toEpochMilli() == 12345L
-        sd1.getSettlementDate().toEpochMilli() == 12344L
+        sd1.getValidFrom().toEpochMilli() == 12346L
 
         when:
-        def sd2 = new SettlementData("123".getBytes(),true,new BTC(1234),Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(12344L))
+        def sd2 = new SettlementData("123".getBytes(),InvoiceDataSpec.genFullInvoiceData(true),Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(12346L))
         then:
         sd2.getPreImageHash() == "123".getBytes()
-        sd2.isSettled()
-        sd2.getSettledAmount() instanceof BTC
+        sd2.getInvoice() instanceof InvoiceData
         sd2.getValidUntil().toEpochMilli() == 12345L
-        sd2.getSettlementDate().toEpochMilli() == 12344L
+        sd2.getValidFrom().toEpochMilli() == 12346L
     }
 
+
+    def "Verify that miminize() removes invoice field"(){
+        setup:
+        def sd = new SettlementData("123".getBytes(),InvoiceDataSpec.genFullInvoiceData(true),Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(12346L))
+        expect:
+        sd.invoice != null
+        when:
+        sd.minimizeData()
+        then:
+        sd.invoice == null
+
+    }
     // JWTClaims constructor tested in BaseTokenGeneratorSpec
 
     def "Verify that toJsonAsString works as expected"(){
         expect:
-        new SettlementData("123".getBytes(),true,new BTC(1234),Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(12344L)).toJsonAsString(false) == """{"preImageHash":"MTIz","isSettled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"validUntil":12345,"settlementDate":12344}"""
+        new SettlementData("123".getBytes(),InvoiceDataSpec.genFullInvoiceData(true),Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(123446)).toJsonAsString(false) == """{"preImageHash":"MTIz","invoice":{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","description":"test desc","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"settlementDate":12344},"validUntil":12345,"validFrom":123446}"""
+        new SettlementData("123".getBytes(),null,Instant.ofEpochMilli(12345L),null).toJsonAsString(false) == """{"preImageHash":"MTIz","validUntil":12345}"""
         when:
-        new SettlementData(null,true,new BTC(1234),Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(12344L)).toJsonAsString(false)
+        new SettlementData(null,null,Instant.ofEpochMilli(12345L),null).toJsonAsString(false)
         then:
         def e = thrown(JsonException)
         e.message == "Error building JSON object, required key preImageHash is null."
         when:
-        new SettlementData("123".getBytes(),true,null,Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(12344L)).toJsonAsString(false)
-        then:
-        e = thrown(JsonException)
-        e.message == "Error building JSON object, required key settledAmount is null."
-        when:
-        new SettlementData("123".getBytes(),true,new BTC(1234),null,Instant.ofEpochMilli(12344L)).toJsonAsString(false)
+        new SettlementData("123".getBytes(),null,null,null).toJsonAsString(false)
         then:
         e = thrown(JsonException)
         e.message == "Error building JSON object, required key validUntil is null."
-        when:
-        new SettlementData("123".getBytes(),true,new BTC(1234),Instant.ofEpochMilli(12345L),null).toJsonAsString(false)
-        then:
-        e = thrown(JsonException)
-        e.message == "Error building JSON object, required key settlementDate is null."
     }
 
     def "Verify that parsing of JSON data works as expected"(){
         when:
-        SettlementData d = new SettlementData(toJsonObject("""{"preImageHash":"MTIz","isSettled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"validUntil":12345,"settlementDate":12344}"""))
+        SettlementData d = new SettlementData(toJsonObject("""{"preImageHash":"MTIz","invoice":{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"settlementDate":12344},"validUntil":12345,"validFrom":12346}"""))
         then:
         d.getPreImageHash() == "123".getBytes()
-        d.isSettled()
-        d.getSettledAmount() instanceof CryptoAmount
+        d.getInvoice() instanceof InvoiceData
         d.getValidUntil().toEpochMilli() == 12345L
-        d.getSettlementDate().toEpochMilli() == 12344L
+        d.getValidFrom().toEpochMilli() == 12346L
 
         when:
-        new SettlementData(toJsonObject("""{"isSettled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"validUntil":12345,"settlementDate":12344}"""))
+        SettlementData d2 = new SettlementData(toJsonObject("""{"preImageHash":"MTIz","validUntil":12345}"""))
+        then:
+        d2.getPreImageHash() == "123".getBytes()
+        d2.getInvoice() == null
+        d2.getValidUntil().toEpochMilli() == 12345L
+        d2.getValidFrom() == null
+
+        when:
+        new SettlementData(toJsonObject("""{"validUntil":12345}"""))
         then:
         def e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key preImageHash is required."
 
         when:
-        new SettlementData(toJsonObject("""{"preImageHash":"313233","settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"validUntil":12345,"settlementDate":12344}"""))
-        then:
-        e = thrown(JsonException)
-        e.message == "Error parsing JSON data, field key isSettled is required."
-
-        when:
-        new SettlementData(toJsonObject("""{"preImageHash":"313233","isSettled":true,"validUntil":12345,"settlementDate":12344}"""))
-        then:
-        e = thrown(JsonException)
-        e.message == "Error parsing JSON data, field key settledAmount is required."
-
-        when:
-        new SettlementData(toJsonObject("""{"preImageHash":"313233","isSettled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"settlementDate":12344}"""))
+        new SettlementData(toJsonObject("""{"preImageHash":"MTIz"}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key validUntil is required."
 
-        when:
-        new SettlementData(toJsonObject("""{"preImageHash":"313233","isSettled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"validUntil":12345}"""))
-        then:
-        e = thrown(JsonException)
-        e.message == "Error parsing JSON data, field key settlementDate is required."
 
         when:
-        new SettlementData(toJsonObject("""{"preImageHash":"åäö","isSettled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"validUntil":12345,"settlementDate":12344}"""))
+        new SettlementData(toJsonObject("""{"preImageHash":"aäö","validUntil":12345}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, problem decoding base64 data from field preImageHash."
 
         when:
-        new SettlementData(toJsonObject("""{"preImageHash":"313233","isSettled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"validUntil":"abc","settlementDate":12344}"""))
+        new SettlementData(toJsonObject("""{"preImageHash":"MTIz","validUntil":"abc"}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key validUntil is not a number."
 
         when:
-        new SettlementData(toJsonObject("""{"preImageHash":"313233","isSettled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"validUntil":12345,"settlementDate":"cdf"}"""))
+        new SettlementData(toJsonObject("""{"preImageHash":"MTIz","validUntil":12345, "validFrom":"abc"}"""))
         then:
         e = thrown(JsonException)
-        e.message == "Error parsing JSON data, field key settlementDate is not a number."
+        e.message == "Error parsing JSON data, field key validFrom is not a number."
+
+        when:
+        new SettlementData(toJsonObject("""{"preImageHash":"MTIz","invoice":"invalidinvoice","validUntil":"abc"}"""))
+        then:
+        e = thrown(JsonException)
+        e.message == "Error parsing json object invoice, message: org.glassfish.json.JsonStringImpl cannot be cast to javax.json.JsonObject"
     }
 
     def "Verify getClaimName() returns correct value"(){

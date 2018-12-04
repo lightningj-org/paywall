@@ -32,14 +32,17 @@ class NodeInfoSpec extends Specification {
         ni1.getNodeAddress() == null
         ni1.getPublicKeyInfo() == null
         ni1.getNodePort() == null
+        ni1.getMainNet() == null
         when:
         ni1.setNodeAddress("10.10.10.1")
         ni1.setPublicKeyInfo("8371babdk9382719281722")
         ni1.setNodePort(123)
+        ni1.setMainNet(true)
         then:
         ni1.getNodeAddress() == "10.10.10.1"
         ni1.getPublicKeyInfo() == "8371babdk9382719281722"
         ni1.getNodePort() == 123
+        ni1.getMainNet() == true
         when:
         def ni2 = new NodeInfo("8371babdk9382719281722","10.10.10.1",123)
         then:
@@ -90,6 +93,7 @@ class NodeInfoSpec extends Specification {
     def "Verify that toJsonAsString works as expected"(){
         expect:
         new NodeInfo().toJsonAsString(false) == "{}"
+        new NodeInfo("8371babdk9382719281722","10.10.10.1",123, true).toJsonAsString(false) == """{"publicKeyInfo":"8371babdk9382719281722","nodeAddress":"10.10.10.1","nodePort":123,"mainNet":true,"connectString":"8371babdk9382719281722@10.10.10.1:123"}"""
         new NodeInfo("8371babdk9382719281722","10.10.10.1",123).toJsonAsString(false) == """{"publicKeyInfo":"8371babdk9382719281722","nodeAddress":"10.10.10.1","nodePort":123,"connectString":"8371babdk9382719281722@10.10.10.1:123"}"""
         new NodeInfo("8371babdk9382719281722","10.10.10.1",null).toJsonAsString(false) == """{"publicKeyInfo":"8371babdk9382719281722","nodeAddress":"10.10.10.1","connectString":"8371babdk9382719281722@10.10.10.1"}"""
         new NodeInfo("8371babdk9382719281722",null,null).toJsonAsString(false) == """{"publicKeyInfo":"8371babdk9382719281722"}"""
@@ -97,11 +101,12 @@ class NodeInfoSpec extends Specification {
 
     def "Verify that parsing of JSON data works as expected"(){
         when:
-        NodeInfo ni1 = new NodeInfo(toJsonObject("""{"publicKeyInfo":"8371babdk9382719281722","nodeAddress":"10.10.10.1","nodePort":123}"""))
+        NodeInfo ni1 = new NodeInfo(toJsonObject("""{"publicKeyInfo":"8371babdk9382719281722","nodeAddress":"10.10.10.1","nodePort":123,"mainNet":true}"""))
         then:
         ni1.getNodeAddress() == "10.10.10.1"
         ni1.getPublicKeyInfo() == "8371babdk9382719281722"
         ni1.getNodePort() == 123
+        ni1.getMainNet()
 
         when:
         NodeInfo ni2 = new NodeInfo(toJsonObject("""{}"""))
@@ -109,5 +114,6 @@ class NodeInfoSpec extends Specification {
         ni2.getNodeAddress() == null
         ni2.getPublicKeyInfo() == null
         ni2.getNodePort() == null
+        ni2.getMainNet() == null
     }
 }
