@@ -15,6 +15,7 @@
 package org.lightningj.paywall.vo;
 
 import org.jose4j.jwt.JwtClaims;
+import org.lightningj.paywall.paymenthandler.Payment;
 import org.lightningj.paywall.tokengenerator.JWTClaim;
 import org.lightningj.paywall.util.Base64Utils;
 import org.lightningj.paywall.vo.amount.CryptoAmount;
@@ -30,7 +31,7 @@ import java.time.Instant;
  *
  * Created by Philip Vendil on 2018-11-11.
  */
-public class InvoiceData extends JWTClaim {
+public class InvoiceData extends JWTClaim implements Payment {
 
     public static final String CLAIM_NAME = "invoice";
 

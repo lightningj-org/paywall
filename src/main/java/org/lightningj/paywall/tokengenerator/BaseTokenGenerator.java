@@ -27,7 +27,6 @@ import org.lightningj.paywall.keymgmt.Context;
 import org.lightningj.paywall.util.DigestUtils;
 import org.lightningj.paywall.vo.*;
 
-import javax.json.JsonException;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.Clock;
@@ -66,7 +65,7 @@ public abstract class BaseTokenGenerator implements TokenGenerator{
     /**
      * Help method to generate a JWT token containing a payment data claim.
      *
-     * @param paymentData the payment data to include in the token.
+     * @param orderData the payment data to include in the token.
      * @param requestData optional request data that could be set if workflow requires it.
      * @param expireDate the expire date of the token in the future.
      * @param notBefore an optional not before data, indicating when the token starts to become valid. Use null not to set.
@@ -77,8 +76,8 @@ public abstract class BaseTokenGenerator implements TokenGenerator{
      * @throws IOException if communication problems occurred with underlying systems.
      * @throws InternalErrorException if internal problems occurred processing the token.
      */
-    public String generatePaymentToken(PaymentData paymentData, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException{
-        return generateToken(TokenContext.CONTEXT_PAYMENT_TOKEN_TYPE,expireDate, notBefore, true, recipientSubject, paymentData, requestData);
+    public String generatePaymentToken(OrderData orderData, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException{
+        return generateToken(TokenContext.CONTEXT_PAYMENT_TOKEN_TYPE,expireDate, notBefore, true, recipientSubject, orderData, requestData);
     }
 
     /**

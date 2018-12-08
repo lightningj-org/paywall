@@ -22,22 +22,16 @@ import javax.json.JsonException
 import java.time.Instant
 
 import static org.lightningj.paywall.JSONParsableSpec.toJsonObject
-import static org.lightningj.paywall.JSONParsableSpec.toJsonObject
-import static org.lightningj.paywall.JSONParsableSpec.toJsonObject
-import static org.lightningj.paywall.JSONParsableSpec.toJsonObject
-import static org.lightningj.paywall.JSONParsableSpec.toJsonObject
-import static org.lightningj.paywall.JSONParsableSpec.toJsonObject
-import static org.lightningj.paywall.JSONParsableSpec.toJsonObject
 
 /**
- * Unit tests for ConvertedPaymentData
+ * Unit tests for ConvertedOrderData
  * Created by Philip Vendil on 2018-11-11.
  */
-class ConvertedPaymentDataSpec extends Specification {
+class ConvertedOrderDataSpec extends Specification {
 
     def "Verify constructors and getter and setters"(){
         when:
-        def pd1 = new ConvertedPaymentData()
+        def pd1 = new ConvertedOrderData()
         then:
         pd1.getPreImageHash() == null
         pd1.getExpireDate() == null
@@ -57,7 +51,7 @@ class ConvertedPaymentDataSpec extends Specification {
         pd1.getRequestedAmount() instanceof BTC
         pd1.getConvertedAmount().value == 2345L
         when:
-        def pd2 = new ConvertedPaymentData(new PaymentData("123".getBytes(),"SomeDescription",new BTC(1234),Instant.ofEpochMilli(12345L)),new BTC(2345))
+        def pd2 = new ConvertedOrderData(new OrderData("123".getBytes(),"SomeDescription",new BTC(1234),Instant.ofEpochMilli(12345L)),new BTC(2345))
         then:
         pd2.getPreImageHash() == "123".getBytes()
         pd2.getExpireDate().toEpochMilli() == 12345L
@@ -68,9 +62,9 @@ class ConvertedPaymentDataSpec extends Specification {
 
     def "Verify that toJsonAsString works as expected"(){
         expect:
-        new ConvertedPaymentData(new PaymentData("123".getBytes(),"SomeDescription",new BTC(1234),Instant.ofEpochMilli(12345L)),new BTC(2345)).toJsonAsString(false) == """{"preImageHash":"MTIz","description":"SomeDescription","requestedAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345,"convertedAmount":{"type":"CRYTOCURRENCY","value":2345,"currencyCode":"BTC","magnetude":"NONE"}}"""
+        new ConvertedOrderData(new OrderData("123".getBytes(),"SomeDescription",new BTC(1234),Instant.ofEpochMilli(12345L)),new BTC(2345)).toJsonAsString(false) == """{"preImageHash":"MTIz","description":"SomeDescription","requestedAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345,"convertedAmount":{"type":"CRYTOCURRENCY","value":2345,"currencyCode":"BTC","magnetude":"NONE"}}"""
         when:
-        new ConvertedPaymentData(new PaymentData("123".getBytes(),"SomeDescription",new BTC(1234),Instant.ofEpochMilli(12345L)),null).toJsonAsString(false)
+        new ConvertedOrderData(new OrderData("123".getBytes(),"SomeDescription",new BTC(1234),Instant.ofEpochMilli(12345L)),null).toJsonAsString(false)
         then:
         def e = thrown(JsonException)
         e.message == "Error building JSON object, required key convertedAmount is null."
@@ -78,7 +72,7 @@ class ConvertedPaymentDataSpec extends Specification {
 
     def "Verify that parsing of JSON data works as expected"(){
         when:
-        ConvertedPaymentData d = new ConvertedPaymentData(toJsonObject("""{"preImageHash":"MTIz","description":"SomeDescription","requestedAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345,"convertedAmount":{"type":"CRYTOCURRENCY","value":2345,"currencyCode":"BTC","magnetude":"NONE"}}"""))
+        ConvertedOrderData d = new ConvertedOrderData(toJsonObject("""{"preImageHash":"MTIz","description":"SomeDescription","requestedAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345,"convertedAmount":{"type":"CRYTOCURRENCY","value":2345,"currencyCode":"BTC","magnetude":"NONE"}}"""))
         then:
         d.preImageHash == "123".getBytes()
         d.description == "SomeDescription"
@@ -88,7 +82,7 @@ class ConvertedPaymentDataSpec extends Specification {
         d.getConvertedAmount().value == 2345L
 
         when:
-        new ConvertedPaymentData(toJsonObject("""{"preImageHash":"MTIz","description":"SomeDescription","requestedAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345}"""))
+        new ConvertedOrderData(toJsonObject("""{"preImageHash":"MTIz","description":"SomeDescription","requestedAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345}"""))
         then:
         def e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key convertedAmount is required."

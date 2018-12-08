@@ -20,7 +20,9 @@ import org.lightningj.paywall.util.HexUtils;
 
 import javax.json.*;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 /**
  * Base class for value classes that should be JSON Parsable.
@@ -104,9 +106,36 @@ public abstract class JSONParsable {
             if(value instanceof JSONParsable){
                 jsonObjectBuilder.add(key,((JSONParsable) value).toJson());
             }
-
+            if(value instanceof List){
+                JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+                for(Object val : (List) value){
+                    if(val instanceof String){
+                        arrayBuilder.add((String) val);
+                    }
+                    if(val instanceof Integer){
+                        arrayBuilder.add((Integer) val);
+                    }
+                    if(val instanceof Long){
+                        arrayBuilder.add((Long) val);
+                    }
+                    if(val instanceof Double){
+                        arrayBuilder.add((Double) val);
+                    }
+                    if(val instanceof Boolean){
+                        arrayBuilder.add((Boolean) val);
+                    }
+                    if(val instanceof Instant){
+                        arrayBuilder.add(((Instant) val).toEpochMilli());
+                    }
+                    if(val instanceof JSONParsable){
+                        arrayBuilder.add(((JSONParsable) val).toJson());
+                    }
+                }
+                jsonObjectBuilder.add(key,arrayBuilder);
+            }
         }
     }
+
 
     protected void add(JsonObjectBuilder jsonObjectBuilder, String key, Object value) throws JsonException{
         if(value == null){
@@ -326,6 +355,36 @@ public abstract class JSONParsable {
                 throw (JsonException) e;
             }
             throw new JsonException("Error parsing json object " + key+ ", message: " + e.getMessage(),e);
+        }
+        return null;
+    }
+
+    /**
+     * Help method used in parseJson implementation to fetch a json array
+     * if set in JsonObject otherwise returns null.
+     */
+    protected JsonArray getJsonArrayIfSet(JsonObject object, String key){
+        return getJsonArray(object,key,false);
+    }
+
+    /**
+     * Help method used in parseJson implementation to fetch a json array
+     * if set in JsonObject otherwise returns null.
+     * @throws JSONParsable if field is not set but required.
+     */
+    protected JsonArray getJsonArray(JsonObject object, String key, boolean required) throws JsonException{
+        try {
+            if (object.containsKey(key) && !object.isNull(key)) {
+                return object.getJsonArray(key);
+            }
+            if (required) {
+                throw new JsonException("Error parsing JSON data, field key " + key + " is required.");
+            }
+        }catch(Exception e){
+            if(e instanceof JsonException){
+                throw (JsonException) e;
+            }
+            throw new JsonException("Error parsing json array " + key+ ", message: " + e.getMessage(),e);
         }
         return null;
     }

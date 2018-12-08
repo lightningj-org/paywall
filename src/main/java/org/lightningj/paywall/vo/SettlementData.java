@@ -16,6 +16,7 @@ package org.lightningj.paywall.vo;
 
 import org.jose4j.jwt.JwtClaims;
 import org.lightningj.paywall.JSONParsable;
+import org.lightningj.paywall.paymenthandler.Payment;
 import org.lightningj.paywall.tokengenerator.JWTClaim;
 import org.lightningj.paywall.util.Base64Utils;
 import org.lightningj.paywall.util.HexUtils;
@@ -33,7 +34,7 @@ import java.util.Base64;
  *
  * Created by Philip Vendil on 2018-11-12.
  */
-public class SettlementData extends JWTClaim {
+public class SettlementData extends JWTClaim  implements Payment {
 
     public static final String CLAIM_NAME = "settlement";
 

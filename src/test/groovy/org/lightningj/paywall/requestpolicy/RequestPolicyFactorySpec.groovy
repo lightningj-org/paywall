@@ -78,25 +78,25 @@ class RequestPolicyFactorySpec extends Specification {
 
     static class AnnotationTest{
 
-        @PaymentRequired(id= "notused", requestPolicy = RequestPolicyType.URL_AND_METHOD)
+        @PaymentRequired(articleId = "notused", requestPolicy = RequestPolicyType.URL_AND_METHOD)
         void callUrlAndMethod(){}
 
-        @PaymentRequired(id= "notused", requestPolicy = RequestPolicyType.URL_METHOD_AND_PARAMETERS)
+        @PaymentRequired(articleId= "notused", requestPolicy = RequestPolicyType.URL_METHOD_AND_PARAMETERS)
         void callUrlMethodANDParameters(){}
 
-        @PaymentRequired(id= "notused", requestPolicy = RequestPolicyType.WITH_BODY)
+        @PaymentRequired(articleId= "notused", requestPolicy = RequestPolicyType.WITH_BODY)
         void callWithBody(){}
 
-        @PaymentRequired(id= "notused", requestPolicy = RequestPolicyType.CUSTOM, customPolicy = CustomRequestPolicy1)
+        @PaymentRequired(articleId= "notused", requestPolicy = RequestPolicyType.CUSTOM, customPolicy = CustomRequestPolicy1)
         void callWithCustom1(){}
 
-        @PaymentRequired(id= "notused", requestPolicy = RequestPolicyType.CUSTOM, customPolicy = CustomRequestPolicy2)
+        @PaymentRequired(articleId= "notused", requestPolicy = RequestPolicyType.CUSTOM, customPolicy = CustomRequestPolicy2)
         void callWithCustom2(){}
 
-        @PaymentRequired(id= "notused", requestPolicy = RequestPolicyType.CUSTOM)
+        @PaymentRequired(articleId= "notused", requestPolicy = RequestPolicyType.CUSTOM)
         void callWithInvalidCustom1(){}
 
-        @PaymentRequired(id= "notused", requestPolicy = RequestPolicyType.CUSTOM, customPolicy = InvalidCustomRequestPolicy)
+        @PaymentRequired(articleId= "notused", requestPolicy = RequestPolicyType.CUSTOM, customPolicy = InvalidCustomRequestPolicy)
         void callWithInvalidCustom2(){}
     }
 

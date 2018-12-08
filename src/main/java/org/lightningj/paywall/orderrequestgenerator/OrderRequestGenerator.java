@@ -12,9 +12,11 @@
  *  See terms of license at gnu.org.                                     *
  *                                                                       *
  *************************************************************************/
-package org.lightningj.paywall.unitcalculator;
+package org.lightningj.paywall.orderrequestgenerator;
 
+import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.annotations.PaymentRequired;
+import org.lightningj.paywall.vo.OrderRequest;
 import org.lightningj.paywall.web.CachableHttpServletRequest;
 
 /**
@@ -23,14 +25,17 @@ import org.lightningj.paywall.web.CachableHttpServletRequest;
  *
  * Created by philip on 2018-10-29.
  */
-public interface UnitCalculator {
+public interface OrderRequestGenerator {
 
     /**
-     * Method that should calculate the number of units that should
-     * be used for a given request with PaymentRequired annotation.
+     * Method that should populate a new OrderRequest to initiate a
+     * payment flow using the PaymentRequired annotation and the
+     * related HTTP request.
      * @param paymentRequired the related annotation.
      * @param request the HTTP request related to the call.
-     * @return the number of units that should be debited to the PaymentHandler
+     * @return a new OrderRequest.
+     * @throws IllegalArgumentException if user supplied data was invalid to generate order request.
+     * @throws InternalErrorException if problem occurred generated order request data due to internal miss configuration.
      */
-    int getUnits(PaymentRequired paymentRequired, CachableHttpServletRequest request);
+    OrderRequest generate(PaymentRequired paymentRequired, CachableHttpServletRequest request) throws IllegalArgumentException, InternalErrorException;
 }

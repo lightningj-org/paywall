@@ -12,29 +12,29 @@
  *  See terms of license at gnu.org.                                     *
  *                                                                       *
  *************************************************************************/
-package org.lightningj.paywall.unitcalculator;
-
-import org.lightningj.paywall.annotations.PaymentRequired;
-import org.lightningj.paywall.web.CachableHttpServletRequest;
+package org.lightningj.paywall.paymenthandler;
 
 /**
- * Default Magnetude Calculator takes the parameter units from the
- * PaymentRequired annotation (default 1)
+ * Enumeration describing the type of payment event that is signaled.
  *
- * Created by Philip Vendil on 2018-10-29.
+ * Created by Philip Vendil on 2018-12-04.
  */
-public class DefaultUnitCalculator implements UnitCalculator{
+public enum PaymentEventType {
+    /**
+     * Event signaling a order was created.
+     */
+    ORDER_CREATED,
+    /**
+     * Event signaling that a payments invoice have been created by lightning handler.
+     */
+    INVOICE_CREATED,
+    /**
+     * Event signaling that a invoice have been settled.
+     */
+    INVOICE_SETTLED;
 
     /**
-     * Default Magnetude Calculator takes the parameter units from the
-     * PaymentRequired annotation (default 1)
-     *
-     * @param paymentRequired the related annotation.
-     * @param request         the HTTP request related to the call.
-     * @return the number of units that should be debited to the PaymentHandler
+     * Special constant indicating ANY type is applicable.
      */
-    @Override
-    public int getUnits(PaymentRequired paymentRequired, CachableHttpServletRequest request) {
-        return paymentRequired.units();
-    }
+    public static final PaymentEventType ANY_TYPE = null;
 }

@@ -66,14 +66,14 @@ class BaseTokenGeneratorSpec extends Specification {
         setup:
         Instant expireDate = Instant.now().plus(10, ChronoUnit.MINUTES)
         Instant notBefore = Instant.now().minus(10, ChronoUnit.MINUTES)
-        def paymentData = new PaymentData("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
+        def paymentData = new OrderData("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
         when:
         String token = baseTokenGenerator.generateToken(ctx_type,expireDate,notBefore,false,null,paymentData)
         then:
         token != null
         when:
         JwtClaims jwtClaims = baseTokenGenerator.parseToken(ctx_type,token)
-        PaymentData d = new PaymentData(jwtClaims)
+        OrderData d = new OrderData(jwtClaims)
         then:
         jwtClaims.getIssuer() == KeySerializationHelper.genKeyId(keyManager.getSymmetricKey(null).encoded)
         jwtClaims.getSubject() == null
@@ -133,7 +133,7 @@ class BaseTokenGeneratorSpec extends Specification {
         setup:
         Instant expireDate = Instant.now().plus(10, ChronoUnit.MINUTES)
         Instant notBefore = Instant.now().minus(10, ChronoUnit.MINUTES)
-        def paymentData = new PaymentData("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
+        def paymentData = new OrderData("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
         def invoiceData = new InvoiceData("abasrekwsdf".getBytes(), "abasdreser",null,new BTC(10000),new NodeInfo("1231232@10.10.10.1"),expireDate,Instant.now())
         def settlementData = new SettlementData("abasrekwsdf".getBytes(),null,expireDate,null)
         when:
@@ -141,7 +141,7 @@ class BaseTokenGeneratorSpec extends Specification {
         //println token
         JwtClaims claims = baseTokenGenerator.parseToken(ctx_type,token)
 
-        PaymentData pd1 = new PaymentData(claims)
+        OrderData pd1 = new OrderData(claims)
         InvoiceData id1 = new InvoiceData(claims)
         SettlementData sd1 = new SettlementData(claims)
         then:
@@ -156,7 +156,7 @@ class BaseTokenGeneratorSpec extends Specification {
         setup:
         Instant expireDate = Instant.now().plus(10, ChronoUnit.MINUTES)
         Instant notBefore = Instant.now().minus(10, ChronoUnit.MINUTES)
-        def paymentData = new PaymentData("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
+        def paymentData = new OrderData("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
         when:
         String token = baseTokenGenerator.generateToken(ctx_type,expireDate,notBefore,false,null,paymentData)
         JwtClaims claims = baseTokenGenerator.parseToken(ctx_type,token)
@@ -170,7 +170,7 @@ class BaseTokenGeneratorSpec extends Specification {
         setup:
         Instant expireDate = Instant.now().plus(10, ChronoUnit.MINUTES)
         Instant notBefore = Instant.now().minus(10, ChronoUnit.MINUTES)
-        def paymentData = new PaymentData("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
+        def paymentData = new OrderData("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
         when:
         String token = baseTokenGenerator.generateToken(ctx_type,expireDate,notBefore,true,null,paymentData)
 
@@ -182,7 +182,7 @@ class BaseTokenGeneratorSpec extends Specification {
 
         when:
         JwtClaims claims = baseTokenGenerator.parseToken(ctx_type,token)
-        def paymentData1 = new PaymentData(claims)
+        def paymentData1 = new OrderData(claims)
         then:
         paymentData1.preImageHash == "abasrekwsdf".getBytes()
 
@@ -200,13 +200,13 @@ class BaseTokenGeneratorSpec extends Specification {
         setup:
         Instant expireDate = Instant.now().plus(10, ChronoUnit.MINUTES)
         Instant requestDate = Instant.now().minus(10, ChronoUnit.MINUTES)
-        def paymentData = new PaymentData("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
+        def paymentData = new OrderData("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
         def requestData = new RequestData("avksjedf".getBytes(),requestDate)
         when:
         String token = baseTokenGenerator.generatePaymentToken(paymentData,requestData,expireDate,null,null)
         JwtClaims claims = baseTokenGenerator.parseToken(TokenContext.CONTEXT_PAYMENT_TOKEN_TYPE,token)
         then:
-        def pd2 = new PaymentData(claims)
+        def pd2 = new OrderData(claims)
         def rd2 = new RequestData(claims)
         pd2.expireDate == expireDate
         rd2.requestDate == requestDate
@@ -215,7 +215,7 @@ class BaseTokenGeneratorSpec extends Specification {
         token = baseTokenGenerator.generatePaymentToken(paymentData,null,expireDate,null,null)
         claims = baseTokenGenerator.parseToken(TokenContext.CONTEXT_PAYMENT_TOKEN_TYPE,token)
         then:
-        def pd3 = new PaymentData(claims)
+        def pd3 = new OrderData(claims)
         pd3.expireDate == expireDate
     }
 

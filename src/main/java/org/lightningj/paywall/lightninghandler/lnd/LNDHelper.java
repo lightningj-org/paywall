@@ -98,13 +98,13 @@ public class LNDHelper {
     }
 
     /**
-     * Method to generate an LND Invoice from a PreImageData and ConvertedPaymentData
+     * Method to generate an LND Invoice from a PreImageData and ConvertedOrderData
      * @param preImageData the preImageData value object to the invoice preimage and hash from.
      * @param paymentData the payment data to generate invoice value and expire date from.
      * @return a newly generate LND Invoice object that can be used with lnd api to add.
      * @throws InternalErrorException if specified crypto amount is unsupported by LND implementation.
      */
-    public Invoice genLNDInvoice(PreImageData preImageData, ConvertedPaymentData paymentData) throws InternalErrorException{
+    public Invoice genLNDInvoice(PreImageData preImageData, ConvertedOrderData paymentData) throws InternalErrorException{
         checkCryptoAmount(paymentData.getConvertedAmount());
 
         Invoice retval = new Invoice();

@@ -14,10 +14,10 @@
  *************************************************************************/
 package org.lightningj.paywall.annotations;
 
-import org.lightningj.paywall.requestpolicy.RequestPolicy;
+import org.lightningj.paywall.annotations.vo.PaymentOption;
 import org.lightningj.paywall.requestpolicy.RequestPolicyType;
-import org.lightningj.paywall.unitcalculator.DefaultUnitCalculator;
-import org.lightningj.paywall.unitcalculator.UnitCalculator;
+import org.lightningj.paywall.orderrequestgenerator.DefaultOrderRequestGenerator;
+import org.lightningj.paywall.orderrequestgenerator.OrderRequestGenerator;
 
 import java.lang.annotation.*;
 
@@ -30,14 +30,16 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PaymentRequired {
 
-    String id();
+    String articleId() default "";
 
     int units() default 1;
 
-    Class<? extends UnitCalculator> unitCalculator() default DefaultUnitCalculator.class;
+    Class<? extends OrderRequestGenerator> orderRequestGenerator() default DefaultOrderRequestGenerator.class;
 
     RequestPolicyType requestPolicy() default RequestPolicyType.WITH_BODY;
 
     Class customPolicy() default Object.class;
+
+    PaymentOption[] paymentOptions() default {};
 
 }

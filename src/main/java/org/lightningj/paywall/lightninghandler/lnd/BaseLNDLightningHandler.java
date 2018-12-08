@@ -25,7 +25,7 @@ import org.lightningj.lnd.wrapper.message.InvoiceSubscription;
 import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.lightninghandler.*;
 import org.lightningj.paywall.util.Base64Utils;
-import org.lightningj.paywall.vo.ConvertedPaymentData;
+import org.lightningj.paywall.vo.ConvertedOrderData;
 import org.lightningj.paywall.vo.InvoiceData;
 import org.lightningj.paywall.vo.NodeInfo;
 import org.lightningj.paywall.vo.PreImageData;
@@ -65,7 +65,7 @@ public abstract class BaseLNDLightningHandler implements LightningHandler {
      * @throws InternalErrorException if problems occurred generating the invoice.
      */
     @Override
-    public InvoiceData generateInvoice(PreImageData preImageData, ConvertedPaymentData paymentData) throws IOException, InternalErrorException {
+    public InvoiceData generateInvoice(PreImageData preImageData, ConvertedOrderData paymentData) throws IOException, InternalErrorException {
         checkConnection();
         try {
             Invoice lndInvoice = getLndHelper().genLNDInvoice(preImageData,paymentData);

@@ -23,10 +23,10 @@ import org.lightningj.paywall.keymgmt.DummyKeyManager
 import org.lightningj.paywall.tokengenerator.SymmetricKeyTokenGenerator
 import org.lightningj.paywall.tokengenerator.TokenGenerator
 import org.lightningj.paywall.util.BCUtils
-import org.lightningj.paywall.vo.ConvertedPaymentData
+import org.lightningj.paywall.vo.ConvertedOrderData
 import org.lightningj.paywall.vo.InvoiceData
 import org.lightningj.paywall.vo.NodeInfo
-import org.lightningj.paywall.vo.PaymentData
+import org.lightningj.paywall.vo.OrderData
 import org.lightningj.paywall.vo.PreImageData
 import org.lightningj.paywall.vo.amount.BTC
 import org.lightningj.paywall.vo.amount.CryptoAmount
@@ -136,9 +136,9 @@ class LNDHelperSpec extends Specification {
         DummyKeyManager dummyKeyManager = new DummyKeyManager()
         TokenGenerator tokenGenerator = new SymmetricKeyTokenGenerator(dummyKeyManager)
         PreImageData preImageData = tokenGenerator.genPreImageData()
-        PaymentData paymentData = new PaymentData(preImageData.preImageHash, "Some Description", new BTC(10),Instant.now().plus(Duration.ofMinutes(5)))
+        OrderData paymentData = new OrderData(preImageData.preImageHash, "Some Description", new BTC(10),Instant.now().plus(Duration.ofMinutes(5)))
         CurrencyConverter currencyConverter = new SameCryptoCurrencyConverter()
-        ConvertedPaymentData convertedPaymentData = new ConvertedPaymentData(paymentData,currencyConverter.convert( new BTC(20)))
+        ConvertedOrderData convertedPaymentData = new ConvertedOrderData(paymentData,currencyConverter.convert( new BTC(20)))
         when:
         Invoice invoice = helper.genLNDInvoice(preImageData,convertedPaymentData)
         then:

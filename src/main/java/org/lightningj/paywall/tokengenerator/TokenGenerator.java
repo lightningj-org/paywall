@@ -14,17 +14,10 @@
  *************************************************************************/
 package org.lightningj.paywall.tokengenerator;
 
-import org.jose4j.json.JsonUtil;
-import org.jose4j.jwe.JsonWebEncryption;
-import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
-import org.jose4j.jwt.NumericDate;
-import org.jose4j.lang.JoseException;
 import org.lightningj.paywall.InternalErrorException;
-import org.lightningj.paywall.keymgmt.Context;
 import org.lightningj.paywall.vo.*;
 
-import javax.json.JsonException;
 import java.io.IOException;
 import java.time.Instant;
 
@@ -50,7 +43,7 @@ public interface TokenGenerator {
     /**
      * Help method to generate a JWT token containing a payment data claim.
      *
-     * @param paymentData the payment data to include in the token.
+     * @param orderData the payment data to include in the token.
      * @param requestData optional request data that could be set if workflow requires it.
      * @param expireDate the expire date of the token in the future.
      * @param notBefore an optional not before data, indicating when the token starts to become valid. Use null not to set.
@@ -61,7 +54,7 @@ public interface TokenGenerator {
      * @throws IOException if communication problems occurred with underlying systems.
      * @throws InternalErrorException if internal problems occurred processing the token.
      */
-    String generatePaymentToken(PaymentData paymentData, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException;
+    String generatePaymentToken(OrderData orderData, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException;
 
     /**
      * Help method to generate a JWT token containing a invoice data claim.

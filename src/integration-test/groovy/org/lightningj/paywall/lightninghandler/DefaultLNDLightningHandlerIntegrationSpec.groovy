@@ -21,9 +21,9 @@ import org.lightningj.paywall.lightninghandler.lnd.LNDHelper
 import org.lightningj.paywall.lightninghandler.lnd.SimpleBaseLNDLightningHandler
 import org.lightningj.paywall.tokengenerator.SymmetricKeyTokenGenerator
 import org.lightningj.paywall.util.BCUtils
-import org.lightningj.paywall.vo.ConvertedPaymentData
+import org.lightningj.paywall.vo.ConvertedOrderData
 import org.lightningj.paywall.vo.InvoiceData
-import org.lightningj.paywall.vo.PaymentData
+import org.lightningj.paywall.vo.OrderData
 import org.lightningj.paywall.vo.PreImageData
 import org.lightningj.paywall.vo.amount.BTC
 import org.lightningj.paywall.vo.amount.CryptoAmount
@@ -92,8 +92,8 @@ class DefaultLNDLightningHandlerIntegrationSpec extends Specification {
     def "Test to generateInvoice and verify the returned invoice data"(){
         setup:
         preImageData = tokenGenerator.genPreImageData()
-        PaymentData paymentData = new PaymentData(preImageData.preImageHash,"Some Memo",new BTC(10),Instant.now().plusSeconds(1800))
-        ConvertedPaymentData convertedPaymentData = new ConvertedPaymentData(paymentData,paymentData.requestedAmount)
+        OrderData paymentData = new OrderData(preImageData.preImageHash,"Some Memo",new BTC(10),Instant.now().plusSeconds(1800))
+        ConvertedOrderData convertedPaymentData = new ConvertedOrderData(paymentData,paymentData.requestedAmount)
         when:
         InvoiceData invoiceData = handler.generateInvoice(preImageData,convertedPaymentData)
         then:

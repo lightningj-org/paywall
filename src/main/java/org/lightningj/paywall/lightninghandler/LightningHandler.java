@@ -15,7 +15,7 @@
 package org.lightningj.paywall.lightninghandler;
 
 import org.lightningj.paywall.InternalErrorException;
-import org.lightningj.paywall.vo.ConvertedPaymentData;
+import org.lightningj.paywall.vo.ConvertedOrderData;
 import org.lightningj.paywall.vo.InvoiceData;
 import org.lightningj.paywall.vo.PreImageData;
 
@@ -47,7 +47,7 @@ public interface LightningHandler {
      * @throws IOException if communication problems occurred with underlying node.
      * @throws InternalErrorException if problems occurred generating the invoice.
      */
-    InvoiceData generateInvoice(PreImageData preImageData, ConvertedPaymentData paymentData) throws IOException, InternalErrorException;
+    InvoiceData generateInvoice(PreImageData preImageData, ConvertedOrderData paymentData) throws IOException, InternalErrorException;
 
     /**
      * Method to register a listener to recieve notification about updated invoices and settled invoices.

@@ -15,11 +15,10 @@
 package org.lightningj.paywall.tokengenerator
 
 import org.jose4j.jws.JsonWebSignature
-import org.lightningj.paywall.keymgmt.DummyKeyManager
 import org.lightningj.paywall.keymgmt.DummyKeyManagerInstance
 import org.lightningj.paywall.keymgmt.SymmetricKeyManager
 import org.lightningj.paywall.util.BCUtils
-import org.lightningj.paywall.vo.PaymentData
+import org.lightningj.paywall.vo.OrderData
 import org.lightningj.paywall.vo.amount.BTC
 import spock.lang.Specification
 
@@ -27,8 +26,6 @@ import javax.crypto.KeyGenerator
 import java.security.Key
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-
-import static org.lightningj.paywall.tokengenerator.BaseTokenGeneratorSpec.TestSymmetricKeyTokenGenerator
 
 /**
  * Unit tests for SymmetricKeyTokenGenerator
@@ -39,7 +36,7 @@ class SymmetricKeyTokenGeneratorSpec extends Specification {
     SymmetricKeyManager keyManager =  DummyKeyManagerInstance.commonInstance
     Instant expireDate = Instant.now().plus(10, ChronoUnit.MINUTES)
     Instant notBefore = Instant.now().minus(10, ChronoUnit.MINUTES)
-    def paymentData = new PaymentData("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
+    def paymentData = new OrderData("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
     def ctx = TokenContext.CONTEXT_PAYMENT_TOKEN_TYPE
 
     SymmetricKeyTokenGenerator tokenGenerator

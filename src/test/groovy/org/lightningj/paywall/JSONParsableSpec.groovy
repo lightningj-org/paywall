@@ -15,11 +15,14 @@
 package org.lightningj.paywall
 
 import org.lightningj.paywall.btcpayserver.vo.Invoice
+import org.lightningj.paywall.vo.InvoiceData
+import org.lightningj.paywall.vo.InvoiceDataSpec
 import spock.lang.Specification
 
 import javax.json.Json
 import javax.json.JsonException
 import javax.json.JsonObject
+import java.time.Instant
 
 /**
  * Unit tests for JSONParsable
@@ -60,6 +63,13 @@ class JSONParsableSpec extends Specification {
         i.addNotRequired(b,"someboolean",true)
         i.addNotRequired(b,"somelong",1234L)
         i.addNotRequired(b,"somedouble",(double) 1.0)
+        i.addNotRequired(b,"someintlist", [1,2,3])
+        i.addNotRequired(b,"somelonglist", [123L])
+        i.addNotRequired(b,"somestringlist", ["string1","string2"])
+        i.addNotRequired(b,"somedoublelist", [(double) 1.2,(double)2.3,(double)2.5])
+        i.addNotRequired(b,"somebooleanlist", [true,false])
+        i.addNotRequired(b,"someinstantlist", [Instant.ofEpochMilli(4000)])
+        i.addNotRequired(b,"someobjectlist", [InvoiceDataSpec.genFullInvoiceData(false)])
 
         JsonObject o  = b.build()
         then:
@@ -79,6 +89,19 @@ class JSONParsableSpec extends Specification {
         i.getLongIfSet(o,"somelong") == 1234L
         i.getDoubleIfSet(o,"notexists") == null
         i.getDoubleIfSet(o,"somedouble") == (double) 1.0
+        i.getJsonArray(o,"someintlist",true).size() == 3
+        i.getJsonArray(o,"someintlist",true).getInt(1) == 2
+        i.getJsonArray(o,"somelonglist",true).size() == 1
+        i.getJsonArray(o,"somelonglist",true).getJsonNumber(0).longValue() == 123L
+        i.getJsonArray(o,"somestringlist",true).size() == 2
+        i.getJsonArray(o,"somestringlist",true).getString(1) == "string2"
+        i.getJsonArray(o,"somedoublelist",true).size() == 3
+        i.getJsonArray(o,"somedoublelist",true).getJsonNumber(1).doubleValue() == 2.3
+        i.getJsonArray(o,"someinstantlist",true).size() == 1
+        i.getJsonArray(o,"someinstantlist",true).getJsonNumber(0).longValue() == 4000
+        i.getJsonArray(o,"someobjectlist",true).size() == 1
+        InvoiceData invoice = new InvoiceData(i.getJsonArray(o,"someobjectlist",true).getJsonObject(0))
+        invoice != null
     }
 
     def "Verify that add() throws JsonException if required value is null"(){

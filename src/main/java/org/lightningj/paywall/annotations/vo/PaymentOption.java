@@ -12,37 +12,34 @@
  *  See terms of license at gnu.org.                                     *
  *                                                                       *
  *************************************************************************/
-package org.lightningj.paywall.unitcalculator
+package org.lightningj.paywall.annotations.vo;
 
-import org.lightningj.paywall.annotations.PaymentRequired
-import spock.lang.Specification
+import java.lang.annotation.*;
 
 /**
- * Unit tests for DefaultUnitCalculator
- * Created by philip on 2018-10-29.
+ * Payment options is a way of addind extra option related to a
+ * payment order where the annotation can contain extra information
+ * that could be used by the PaymentHandler to create an order.
+ *
+ * Created by Philip Vendil on 2018-12-07.
  */
-class DefaultUnitCalculatorSpec extends Specification {
+@Documented
+@Target({ElementType.TYPE,ElementType.METHOD})
+@Inherited
+@Retention(RetentionPolicy.RUNTIME)
+public @interface PaymentOption {
 
-    DefaultUnitCalculator unitCalculator = new DefaultUnitCalculator()
+    /**
+     *
+     * @return
+     */
+    String option();
 
-    def "Verify that expect units are extracted from DefaultUnitCalculator"(){
-        expect:
-        unitCalculator.getUnits(findAnnotation("callWithDefaultUnits"),null) == 1
-        unitCalculator.getUnits(findAnnotation("callWith10Units"),null) == 10
-    }
+    /**
+     *
+     * @return  the options value. Values should be supported
+     * by the configured payment handler.
+     */
+    String value();
 
-    private findAnnotation(String method){
-        return AnnotationTest.class.getMethod(method).annotations[0]
-    }
-
-    static class AnnotationTest{
-
-        @PaymentRequired(id= "notused")
-        void callWithDefaultUnits(){}
-
-        @PaymentRequired(id= "notused", units = 10)
-        void callWith10Units(){}
-
-
-    }
 }
