@@ -20,13 +20,12 @@ import org.lightningj.lnd.wrapper.ServerSideException;
 import org.lightningj.lnd.wrapper.SynchronousLndAPI;
 import org.lightningj.lnd.wrapper.message.AddInvoiceResponse;
 import org.lightningj.lnd.wrapper.message.GetInfoResponse;
-import org.lightningj.lnd.wrapper.message.Invoice;
 import org.lightningj.lnd.wrapper.message.InvoiceSubscription;
 import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.lightninghandler.*;
 import org.lightningj.paywall.util.Base64Utils;
-import org.lightningj.paywall.vo.ConvertedOrderData;
-import org.lightningj.paywall.vo.InvoiceData;
+import org.lightningj.paywall.vo.ConvertedOrder;
+import org.lightningj.paywall.vo.Invoice;
 import org.lightningj.paywall.vo.NodeInfo;
 import org.lightningj.paywall.vo.PreImageData;
 
@@ -65,10 +64,10 @@ public abstract class BaseLNDLightningHandler implements LightningHandler {
      * @throws InternalErrorException if problems occurred generating the invoice.
      */
     @Override
-    public InvoiceData generateInvoice(PreImageData preImageData, ConvertedOrderData paymentData) throws IOException, InternalErrorException {
+    public Invoice generateInvoice(PreImageData preImageData, ConvertedOrder paymentData) throws IOException, InternalErrorException {
         checkConnection();
         try {
-            Invoice lndInvoice = getLndHelper().genLNDInvoice(preImageData,paymentData);
+            org.lightningj.lnd.wrapper.message.Invoice lndInvoice = getLndHelper().genLNDInvoice(preImageData,paymentData);
             AddInvoiceResponse addInvoiceResponse = getSyncAPI().addInvoice(lndInvoice);
             return getLndHelper().convert(getNodeInfo(),getSyncAPI().lookupInvoice(null,addInvoiceResponse.getRHash()));
         } catch (Exception e) {
@@ -84,7 +83,7 @@ public abstract class BaseLNDLightningHandler implements LightningHandler {
      * @throws InternalErrorException if internal problems occurred communication or parsing invoice with LND node.
      */
     @Override
-    public InvoiceData lookupInvoice(byte[] preImageHash) throws IOException, InternalErrorException{
+    public Invoice lookupInvoice(byte[] preImageHash) throws IOException, InternalErrorException{
         checkConnection();
         try {
             return getLndHelper().convert(getNodeInfo(),getSyncAPI().lookupInvoice(null,preImageHash));
@@ -128,26 +127,31 @@ public abstract class BaseLNDLightningHandler implements LightningHandler {
      * @throws InternalErrorException if internal problems occurred with subscribing to LND node.
      */
     protected void listenToInvoices(LightningHandlerContext context) throws IOException,InternalErrorException {
-        InvoiceSubscription invoiceSubscription = new InvoiceSubscription();
-        if(context.getAddIndex() != null) {
-            invoiceSubscription.setAddIndex(context.getAddIndex());
+        if(!(context instanceof LNDLightningHandlerContext)){
+            throw new InternalErrorException("Error initializing LightningHandler invoice subscription, LightningHandlerContext must be of type LNDLightningHandlerContext.");
         }
-        if(context.getSettleIndex() != null) {
-            invoiceSubscription.setSettleIndex(context.getSettleIndex());
+        LNDLightningHandlerContext ctx = (LNDLightningHandlerContext) context;
+        InvoiceSubscription invoiceSubscription = new InvoiceSubscription();
+        if(ctx.getAddIndex() != null) {
+            invoiceSubscription.setAddIndex(ctx.getAddIndex());
+        }
+        if(ctx.getSettleIndex() != null) {
+            invoiceSubscription.setSettleIndex(ctx.getSettleIndex());
         }
         try {
-            getAsyncAPI().subscribeInvoices(invoiceSubscription, new StreamObserver<Invoice>() {
+            getAsyncAPI().subscribeInvoices(invoiceSubscription, new StreamObserver<org.lightningj.lnd.wrapper.message.Invoice>() {
                 @Override
-                public void onNext(Invoice invoice) {
+                public void onNext(org.lightningj.lnd.wrapper.message.Invoice invoice) {
                     LightningEventType type = invoice.getSettled() ? LightningEventType.SETTLEMENT : LightningEventType.ADDED;
                     try {
-                        InvoiceData invoiceData = getLndHelper().convert(getNodeInfo(),invoice);
-                        LightningEvent event = new LightningEvent(type,invoiceData);
+                        Invoice invoiceData = getLndHelper().convert(getNodeInfo(),invoice);
+                        LNDLightningHandlerContext context = new LNDLightningHandlerContext(invoice.getAddIndex(),invoice.getSettleIndex());
+                        LightningEvent event = new LightningEvent(type,invoiceData,context);
                         for(LightningEventListener listener : listeners){
                             listener.onLightningEvent(event);
                         }
                     } catch (Exception e) {
-                        log.log(Level.SEVERE, "Error occurred converting LND Invoice into InvoiceData: " +e.getMessage(),e);
+                        log.log(Level.SEVERE, "Error occurred converting LND Invoice into Invoice: " +e.getMessage(),e);
                     }
                 }
 
@@ -183,6 +187,21 @@ public abstract class BaseLNDLightningHandler implements LightningHandler {
         cachedInfoResponse = null;
     }
 
+    private NodeInfo cachedNodeInfo = null;
+    /**
+     * Method to fetch the related lightning node's information to include in invoices.
+     * @return the related lightning node's information
+     * @throws IOException if communication problems occurred with underlying node.
+     * @throws InternalErrorException if internal problems occurred closing the connections with lightning node.
+     */
+    @Override
+    public NodeInfo getNodeInfo() throws IOException, InternalErrorException{
+        if(cachedNodeInfo == null){
+            cachedNodeInfo = getLndHelper().parseNodeInfo(getInfoResponse());
+        }
+        return cachedNodeInfo;
+    }
+
     private LNDHelper cachedLndHelper = null;
     protected LNDHelper getLndHelper() throws IOException, InternalErrorException{
         if(cachedLndHelper == null) {
@@ -190,14 +209,6 @@ public abstract class BaseLNDLightningHandler implements LightningHandler {
             cachedLndHelper = new LNDHelper(getInfoResponse());
         }
         return cachedLndHelper;
-    }
-
-    private NodeInfo cachedNodeInfo = null;
-    protected NodeInfo getNodeInfo() throws IOException, InternalErrorException{
-        if(cachedNodeInfo == null){
-            cachedNodeInfo = getLndHelper().parseNodeInfo(getInfoResponse());
-        }
-        return cachedNodeInfo;
     }
 
     private GetInfoResponse cachedInfoResponse = null;

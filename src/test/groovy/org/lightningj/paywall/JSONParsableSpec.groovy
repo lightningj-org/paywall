@@ -14,9 +14,9 @@
  *************************************************************************/
 package org.lightningj.paywall
 
-import org.lightningj.paywall.btcpayserver.vo.Invoice
-import org.lightningj.paywall.vo.InvoiceData
-import org.lightningj.paywall.vo.InvoiceDataSpec
+import org.lightningj.paywall.vo.Invoice
+import org.lightningj.paywall.vo.InvoiceSpec
+import org.lightningj.paywall.btcpayserver.vo.Invoice as BtcPayInvoice
 import spock.lang.Specification
 
 import javax.json.Json
@@ -33,7 +33,7 @@ class JSONParsableSpec extends Specification {
 
     def "Verify toJsonAsString and toJson"(){
         setup:
-        Invoice i = new Invoice()
+        BtcPayInvoice i = new BtcPayInvoice()
         i.token = "abc"
         i.currentTime = 126L
 
@@ -69,7 +69,7 @@ class JSONParsableSpec extends Specification {
         i.addNotRequired(b,"somedoublelist", [(double) 1.2,(double)2.3,(double)2.5])
         i.addNotRequired(b,"somebooleanlist", [true,false])
         i.addNotRequired(b,"someinstantlist", [Instant.ofEpochMilli(4000)])
-        i.addNotRequired(b,"someobjectlist", [InvoiceDataSpec.genFullInvoiceData(false)])
+        i.addNotRequired(b,"someobjectlist", [InvoiceSpec.genFullInvoiceData(false)])
 
         JsonObject o  = b.build()
         then:
@@ -100,7 +100,7 @@ class JSONParsableSpec extends Specification {
         i.getJsonArray(o,"someinstantlist",true).size() == 1
         i.getJsonArray(o,"someinstantlist",true).getJsonNumber(0).longValue() == 4000
         i.getJsonArray(o,"someobjectlist",true).size() == 1
-        InvoiceData invoice = new InvoiceData(i.getJsonArray(o,"someobjectlist",true).getJsonObject(0))
+        org.lightningj.paywall.vo.Invoice invoice = new org.lightningj.paywall.vo.Invoice(i.getJsonArray(o,"someobjectlist",true).getJsonObject(0))
         invoice != null
     }
 

@@ -15,7 +15,7 @@
 package org.lightningj.paywall.lightninghandler;
 
 import org.lightningj.paywall.JSONParsable;
-import org.lightningj.paywall.vo.InvoiceData;
+import org.lightningj.paywall.vo.Invoice;
 
 import javax.json.JsonException;
 import javax.json.JsonObject;
@@ -29,7 +29,8 @@ import javax.json.JsonObjectBuilder;
 public class LightningEvent extends JSONParsable {
 
     protected LightningEventType type;
-    protected InvoiceData invoice;
+    protected Invoice invoice;
+    protected LightningHandlerContext context;
 
     /**
      * Empty constructor
@@ -41,10 +42,12 @@ public class LightningEvent extends JSONParsable {
      *
      * @param type the type of event, added or settled.
      * @param invoice the related invoice
+     * @param context the latest context if the lightning handler.
      */
-    public LightningEvent(LightningEventType type, InvoiceData invoice) {
+    public LightningEvent(LightningEventType type, Invoice invoice, LightningHandlerContext context) {
         this.type = type;
         this.invoice = invoice;
+        this.context = context;
     }
 
     /**
@@ -76,7 +79,7 @@ public class LightningEvent extends JSONParsable {
      *
      * @return the related invoice
      */
-    public InvoiceData getInvoice() {
+    public Invoice getInvoice() {
         return invoice;
     }
 
@@ -84,8 +87,26 @@ public class LightningEvent extends JSONParsable {
      *
      * @param invoice the related invoice
      */
-    public void setInvoice(InvoiceData invoice) {
+    public void setInvoice(Invoice invoice) {
         this.invoice = invoice;
+    }
+
+    /**
+     *
+     * @return the latest context of the used lightning handler that
+     * contains the latest known state.
+     */
+    public LightningHandlerContext getContext() {
+        return context;
+    }
+
+    /**
+     *
+     * @param context the latest context of the used lightning handler that
+     * contains the latest known state.
+     */
+    public void setContext(LightningHandlerContext context) {
+        this.context = context;
     }
 
     /**
@@ -101,6 +122,7 @@ public class LightningEvent extends JSONParsable {
         }
         add(jsonObjectBuilder,"type",type.name());
         add(jsonObjectBuilder,"invoice",invoice);
+        addNotRequired(jsonObjectBuilder,"context",context);
     }
 
     /**
@@ -120,7 +142,9 @@ public class LightningEvent extends JSONParsable {
             }
             throw new JsonException("Error parsing JSON, invalid lightning event type " + typeValue + ".");
         }
-
-        invoice = new InvoiceData(getJsonObject(jsonObject,"invoice",true));
+        invoice = new Invoice(getJsonObject(jsonObject,"invoice",true));
+        if(jsonObject.containsKey("context")) {
+            context = LightningHandlerContext.parseContext(getJsonObject(jsonObject, "context", true));
+        }
     }
 }

@@ -16,7 +16,6 @@ package org.lightningj.paywall.lightninghandler.lnd;
 
 import org.lightningj.lnd.wrapper.AsynchronousLndAPI;
 import org.lightningj.lnd.wrapper.ClientSideException;
-import org.lightningj.lnd.wrapper.StatusException;
 import org.lightningj.lnd.wrapper.SynchronousLndAPI;
 import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.lightninghandler.LightningHandlerContext;

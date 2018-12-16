@@ -14,53 +14,47 @@
  *************************************************************************/
 package org.lightningj.paywall.lightninghandler
 
+import org.lightningj.paywall.lightninghandler.lnd.LNDLightningHandlerContext
 import spock.lang.Specification
 
-import static org.lightningj.paywall.JSONParsableSpec.toJsonObject
+import javax.json.Json
+import javax.json.JsonException
+import javax.json.JsonObject
 
 /**
  * Unit tests for LightningHandlerContext
- * Created by Philip Vendil on 2018-11-28.
+ *
+ * Created by Philip Vendil on 2018-12-15.
  */
 class LightningHandlerContextSpec extends Specification {
 
-    def "Verify constructors and getter and setters"(){
+    def "Verify that a correct LNDLightningHandlerContext is parsed if type is lnd."(){
+        setup:
+        JsonObject jsonObject = Json.createReader(new StringReader("""{"type":"lnd","addIndex":123,"settleIndex":234}""")).readObject()
         when:
-        def lc1 = new LightningHandlerContext()
+        LNDLightningHandlerContext ctx = LightningHandlerContext.parseContext(jsonObject)
         then:
-        lc1.getAddIndex() == null
-        lc1.getSettleIndex() == null
-        when:
-        lc1.setAddIndex(123)
-        lc1.setSettleIndex(234)
-        then:
-        lc1.getAddIndex() == 123
-        lc1.getSettleIndex() ==234
-
-        when:
-        def lc2 = new LightningHandlerContext(123,234)
-        then:
-        lc2.getAddIndex() == 123
-        lc2.getSettleIndex() ==234
+        ctx.addIndex == 123
+        ctx.settleIndex == 234
     }
 
-    def "Verify that toJsonAsString works as expected"(){
-        expect:
-        new LightningHandlerContext().toJsonAsString(false) == "{}"
-        new LightningHandlerContext(123,234).toJsonAsString(false) == """{"addIndex":123,"settleIndex":234}"""
+    def "Verify that parseContext throws JsonException if json data didn't contain any type."(){
+        setup:
+        JsonObject jsonObject = Json.createReader(new StringReader("""{"addIndex":123,"settleIndex":234}""")).readObject()
+        when:
+        LightningHandlerContext.parseContext(jsonObject)
+        then:
+        def e = thrown JsonException
+        e.message == "Error parsing LightningHandlerContext json data, no type field specified."
     }
 
-    def "Verify that parsing of JSON data works as expected"(){
+    def "Verify that parseContext throws JsonException if json data contained unsupported type."(){
+        setup:
+        JsonObject jsonObject = Json.createReader(new StringReader("""{"type":"unsupported","addIndex":123,"settleIndex":234}""")).readObject()
         when:
-        LightningHandlerContext d = new LightningHandlerContext(toJsonObject("""{}"""))
+        LightningHandlerContext.parseContext(jsonObject)
         then:
-        d.addIndex == null
-        d.settleIndex == null
-        when:
-        d = new LightningHandlerContext(toJsonObject("""{"addIndex":123,"settleIndex":234}"""))
-        then:
-        d.getAddIndex() == 123
-        d.getSettleIndex() ==234
+        def e = thrown JsonException
+        e.message == "Error parsing LightningHandlerContext json data, invalid type field 'unsupported' specified."
     }
-
 }

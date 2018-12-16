@@ -18,12 +18,13 @@ import org.lightningj.lnd.wrapper.message.GetInfoResponse
 import org.lightningj.paywall.InternalErrorException
 import org.lightningj.paywall.keymgmt.DummyKeyManager
 import org.lightningj.paywall.lightninghandler.lnd.LNDHelper
+import org.lightningj.paywall.lightninghandler.lnd.LNDLightningHandlerContext
 import org.lightningj.paywall.lightninghandler.lnd.SimpleBaseLNDLightningHandler
 import org.lightningj.paywall.tokengenerator.SymmetricKeyTokenGenerator
 import org.lightningj.paywall.util.BCUtils
-import org.lightningj.paywall.vo.ConvertedOrderData
-import org.lightningj.paywall.vo.InvoiceData
-import org.lightningj.paywall.vo.OrderData
+import org.lightningj.paywall.vo.ConvertedOrder
+import org.lightningj.paywall.vo.Invoice
+import org.lightningj.paywall.vo.Order
 import org.lightningj.paywall.vo.PreImageData
 import org.lightningj.paywall.vo.amount.BTC
 import org.lightningj.paywall.vo.amount.CryptoAmount
@@ -77,7 +78,7 @@ class DefaultLNDLightningHandlerIntegrationSpec extends Specification {
 
     def "Verify connect() is working and init helper initializes properly"(){
         when:
-        handler.connect(new LightningHandlerContext())
+        handler.connect(new LNDLightningHandlerContext())
         infoResponse = handler.getSyncAPI().getInfo()
         helper = new LNDHelper(infoResponse)
         then:
@@ -92,10 +93,10 @@ class DefaultLNDLightningHandlerIntegrationSpec extends Specification {
     def "Test to generateInvoice and verify the returned invoice data"(){
         setup:
         preImageData = tokenGenerator.genPreImageData()
-        OrderData paymentData = new OrderData(preImageData.preImageHash,"Some Memo",new BTC(10),Instant.now().plusSeconds(1800))
-        ConvertedOrderData convertedPaymentData = new ConvertedOrderData(paymentData,paymentData.requestedAmount)
+        Order paymentData = new Order(preImageData.preImageHash,"Some Memo",new BTC(10),Instant.now().plusSeconds(1800))
+        ConvertedOrder convertedPaymentData = new ConvertedOrder(paymentData,paymentData.orderAmount)
         when:
-        InvoiceData invoiceData = handler.generateInvoice(preImageData,convertedPaymentData)
+        Invoice invoiceData = handler.generateInvoice(preImageData,convertedPaymentData)
         then:
         invoiceData.preImageHash == preImageData.preImageHash
         invoiceData.bolt11Invoice != null
@@ -113,14 +114,14 @@ class DefaultLNDLightningHandlerIntegrationSpec extends Specification {
 
     def "Verify lookupInvoice returns correct invoice"(){
         when:
-        InvoiceData invoiceData = handler.lookupInvoice(preImageData.preImageHash)
+        Invoice invoiceData = handler.lookupInvoice(preImageData.preImageHash)
         then:
         invoiceData.preImageHash == preImageData.preImageHash
     }
 
     def "Verify that lookup invoice for nonexisting invoice returns null"(){
         when:
-        InvoiceData invoiceData = handler.lookupInvoice(new byte[32])
+        Invoice invoiceData = handler.lookupInvoice(new byte[32])
         then:
         invoiceData == null
     }
@@ -132,7 +133,7 @@ class DefaultLNDLightningHandlerIntegrationSpec extends Specification {
         LightningEvent event = listener.events.find{LightningEvent it -> it.invoice.preImageHash == preImageData.preImageHash }
         then:
         event != null
-        InvoiceData invoiceData = event.invoice
+        Invoice invoiceData = event.invoice
         event.type == LightningEventType.ADDED
         event.invoice.description == "Some Memo" // rest should be the
         invoiceData.preImageHash == preImageData.preImageHash

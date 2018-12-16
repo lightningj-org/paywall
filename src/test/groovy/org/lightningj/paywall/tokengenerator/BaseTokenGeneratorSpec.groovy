@@ -66,14 +66,14 @@ class BaseTokenGeneratorSpec extends Specification {
         setup:
         Instant expireDate = Instant.now().plus(10, ChronoUnit.MINUTES)
         Instant notBefore = Instant.now().minus(10, ChronoUnit.MINUTES)
-        def paymentData = new OrderData("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
+        def paymentData = new Order("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
         when:
         String token = baseTokenGenerator.generateToken(ctx_type,expireDate,notBefore,false,null,paymentData)
         then:
         token != null
         when:
         JwtClaims jwtClaims = baseTokenGenerator.parseToken(ctx_type,token)
-        OrderData d = new OrderData(jwtClaims)
+        Order d = new Order(jwtClaims)
         then:
         jwtClaims.getIssuer() == KeySerializationHelper.genKeyId(keyManager.getSymmetricKey(null).encoded)
         jwtClaims.getSubject() == null
@@ -133,17 +133,17 @@ class BaseTokenGeneratorSpec extends Specification {
         setup:
         Instant expireDate = Instant.now().plus(10, ChronoUnit.MINUTES)
         Instant notBefore = Instant.now().minus(10, ChronoUnit.MINUTES)
-        def paymentData = new OrderData("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
-        def invoiceData = new InvoiceData("abasrekwsdf".getBytes(), "abasdreser",null,new BTC(10000),new NodeInfo("1231232@10.10.10.1"),expireDate,Instant.now())
-        def settlementData = new SettlementData("abasrekwsdf".getBytes(),null,expireDate,null)
+        def paymentData = new Order("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
+        def invoiceData = new Invoice("abasrekwsdf".getBytes(), "abasdreser",null,new BTC(10000),new NodeInfo("1231232@10.10.10.1"),expireDate,Instant.now())
+        def settlementData = new Settlement("abasrekwsdf".getBytes(),null,expireDate,null)
         when:
         String token = baseTokenGenerator.generateToken(ctx_type,expireDate,notBefore,false,null,paymentData,invoiceData,settlementData)
         //println token
         JwtClaims claims = baseTokenGenerator.parseToken(ctx_type,token)
 
-        OrderData pd1 = new OrderData(claims)
-        InvoiceData id1 = new InvoiceData(claims)
-        SettlementData sd1 = new SettlementData(claims)
+        Order pd1 = new Order(claims)
+        Invoice id1 = new Invoice(claims)
+        Settlement sd1 = new Settlement(claims)
         then:
 
         pd1.preImageHash == paymentData.preImageHash
@@ -156,11 +156,11 @@ class BaseTokenGeneratorSpec extends Specification {
         setup:
         Instant expireDate = Instant.now().plus(10, ChronoUnit.MINUTES)
         Instant notBefore = Instant.now().minus(10, ChronoUnit.MINUTES)
-        def paymentData = new OrderData("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
+        def paymentData = new Order("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
         when:
         String token = baseTokenGenerator.generateToken(ctx_type,expireDate,notBefore,false,null,paymentData)
         JwtClaims claims = baseTokenGenerator.parseToken(ctx_type,token)
-        new InvoiceData(claims)
+        new Invoice(claims)
         then:
         def e = thrown JsonException
         e.message =~ "Exception parsing JSON data for claim invoice in JWT token:"
@@ -170,7 +170,7 @@ class BaseTokenGeneratorSpec extends Specification {
         setup:
         Instant expireDate = Instant.now().plus(10, ChronoUnit.MINUTES)
         Instant notBefore = Instant.now().minus(10, ChronoUnit.MINUTES)
-        def paymentData = new OrderData("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
+        def paymentData = new Order("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
         when:
         String token = baseTokenGenerator.generateToken(ctx_type,expireDate,notBefore,true,null,paymentData)
 
@@ -182,7 +182,7 @@ class BaseTokenGeneratorSpec extends Specification {
 
         when:
         JwtClaims claims = baseTokenGenerator.parseToken(ctx_type,token)
-        def paymentData1 = new OrderData(claims)
+        def paymentData1 = new Order(claims)
         then:
         paymentData1.preImageHash == "abasrekwsdf".getBytes()
 
@@ -200,13 +200,13 @@ class BaseTokenGeneratorSpec extends Specification {
         setup:
         Instant expireDate = Instant.now().plus(10, ChronoUnit.MINUTES)
         Instant requestDate = Instant.now().minus(10, ChronoUnit.MINUTES)
-        def paymentData = new OrderData("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
+        def paymentData = new Order("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
         def requestData = new RequestData("avksjedf".getBytes(),requestDate)
         when:
         String token = baseTokenGenerator.generatePaymentToken(paymentData,requestData,expireDate,null,null)
         JwtClaims claims = baseTokenGenerator.parseToken(TokenContext.CONTEXT_PAYMENT_TOKEN_TYPE,token)
         then:
-        def pd2 = new OrderData(claims)
+        def pd2 = new Order(claims)
         def rd2 = new RequestData(claims)
         pd2.expireDate == expireDate
         rd2.requestDate == requestDate
@@ -215,7 +215,7 @@ class BaseTokenGeneratorSpec extends Specification {
         token = baseTokenGenerator.generatePaymentToken(paymentData,null,expireDate,null,null)
         claims = baseTokenGenerator.parseToken(TokenContext.CONTEXT_PAYMENT_TOKEN_TYPE,token)
         then:
-        def pd3 = new OrderData(claims)
+        def pd3 = new Order(claims)
         pd3.expireDate == expireDate
     }
 
@@ -223,13 +223,13 @@ class BaseTokenGeneratorSpec extends Specification {
         setup:
         Instant expireDate = Instant.now().plus(10, ChronoUnit.MINUTES)
         Instant requestDate = Instant.now().minus(10, ChronoUnit.MINUTES)
-        def invoiceData = new InvoiceData("abasrekwsdf".getBytes(), "abasdreser",null,new BTC(10000),new NodeInfo("1231232@10.10.10.1"),expireDate,Instant.now())
+        def invoiceData = new Invoice("abasrekwsdf".getBytes(), "abasdreser",null,new BTC(10000),new NodeInfo("1231232@10.10.10.1"),expireDate,Instant.now())
         def requestData = new RequestData("avksjedf".getBytes(),requestDate)
         when:
         String token = baseTokenGenerator.generateInvoiceToken(invoiceData,requestData,expireDate,null,null)
         JwtClaims claims = baseTokenGenerator.parseToken(TokenContext.CONTEXT_INVOICE_TOKEN_TYPE,token)
         then:
-        def id2 = new InvoiceData(claims)
+        def id2 = new Invoice(claims)
         def rd2 = new RequestData(claims)
         id2.expireDate == expireDate
         rd2.requestDate == requestDate
@@ -238,7 +238,7 @@ class BaseTokenGeneratorSpec extends Specification {
         token = baseTokenGenerator.generateInvoiceToken(invoiceData,null,expireDate,null,null)
         claims = baseTokenGenerator.parseToken(TokenContext.CONTEXT_INVOICE_TOKEN_TYPE,token)
         then:
-        def id3 = new InvoiceData(claims)
+        def id3 = new Invoice(claims)
         id3.expireDate == expireDate
     }
 
@@ -246,13 +246,13 @@ class BaseTokenGeneratorSpec extends Specification {
         setup:
         Instant expireDate = Instant.now().plus(10, ChronoUnit.MINUTES)
         Instant requestDate = Instant.now().minus(10, ChronoUnit.MINUTES)
-        def settlementData = new SettlementData("abasrekwsdf".getBytes(),null,expireDate,null)
+        def settlementData = new Settlement("abasrekwsdf".getBytes(),null,expireDate,null)
         def requestData = new RequestData("avksjedf".getBytes(),requestDate)
         when:
         String token = baseTokenGenerator.generateSettlementToken(settlementData,requestData,expireDate,null,null)
         JwtClaims claims = baseTokenGenerator.parseToken(TokenContext.CONTEXT_INVOICE_TOKEN_TYPE,token)
         then:
-        def sd2 = new SettlementData(claims)
+        def sd2 = new Settlement(claims)
         def rd2 = new RequestData(claims)
         sd2.validUntil == expireDate
         rd2.requestDate == requestDate
@@ -261,7 +261,7 @@ class BaseTokenGeneratorSpec extends Specification {
         token = baseTokenGenerator.generateSettlementToken(settlementData,null,expireDate,null,null)
         claims = baseTokenGenerator.parseToken(TokenContext.CONTEXT_INVOICE_TOKEN_TYPE,token)
         then:
-        def sd3 = new SettlementData(claims)
+        def sd3 = new Settlement(claims)
         sd3.validUntil == expireDate
     }
 

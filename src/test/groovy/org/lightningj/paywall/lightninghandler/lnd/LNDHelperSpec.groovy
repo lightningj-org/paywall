@@ -15,7 +15,7 @@
 package org.lightningj.paywall.lightninghandler.lnd
 
 import org.lightningj.lnd.wrapper.message.GetInfoResponse
-import org.lightningj.lnd.wrapper.message.Invoice
+import org.lightningj.lnd.wrapper.message.Invoice as LndInvoice
 import org.lightningj.paywall.InternalErrorException
 import org.lightningj.paywall.currencyconverter.CurrencyConverter
 import org.lightningj.paywall.currencyconverter.SameCryptoCurrencyConverter
@@ -23,10 +23,10 @@ import org.lightningj.paywall.keymgmt.DummyKeyManager
 import org.lightningj.paywall.tokengenerator.SymmetricKeyTokenGenerator
 import org.lightningj.paywall.tokengenerator.TokenGenerator
 import org.lightningj.paywall.util.BCUtils
-import org.lightningj.paywall.vo.ConvertedOrderData
-import org.lightningj.paywall.vo.InvoiceData
+import org.lightningj.paywall.vo.ConvertedOrder
+import org.lightningj.paywall.vo.Invoice
 import org.lightningj.paywall.vo.NodeInfo
-import org.lightningj.paywall.vo.OrderData
+import org.lightningj.paywall.vo.Order
 import org.lightningj.paywall.vo.PreImageData
 import org.lightningj.paywall.vo.amount.BTC
 import org.lightningj.paywall.vo.amount.CryptoAmount
@@ -83,9 +83,9 @@ class LNDHelperSpec extends Specification {
     def "Verify that convert() converts unsettled invoice correctly"(){
         setup:
         NodeInfo nodeInfo = helper.parseNodeInfo(getInfoResponse(infoResponse))
-        Invoice lndInvoice = getLNDInvoice(unsettledInvoice)
+        LndInvoice lndInvoice = getLNDInvoice(unsettledInvoice)
         when:
-        InvoiceData invoiceData = helper.convert(nodeInfo,lndInvoice)
+        Invoice invoiceData = helper.convert(nodeInfo,lndInvoice)
         then:
         invoiceData.preImageHash == lndInvoice.getRHash()
         invoiceData.nodeInfo.connectString == "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa@82.196.97.86:9735"
@@ -102,9 +102,9 @@ class LNDHelperSpec extends Specification {
     def "Verify that convert() converts settled invoice correctly"(){
         setup:
         NodeInfo nodeInfo = helper.parseNodeInfo(getInfoResponse(infoResponse))
-        Invoice lndInvoice = getLNDInvoice(settledInvoice)
+        LndInvoice lndInvoice = getLNDInvoice(settledInvoice)
         when:
-        InvoiceData invoiceData = helper.convert(nodeInfo,lndInvoice)
+        Invoice invoiceData = helper.convert(nodeInfo,lndInvoice)
         then:
         invoiceData.preImageHash == lndInvoice.getRHash()
         invoiceData.nodeInfo.connectString == "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa@82.196.97.86:9735"
@@ -122,9 +122,9 @@ class LNDHelperSpec extends Specification {
     def "Verify that convert() converts settled with millisats paid correctly"(){
         setup:
         NodeInfo nodeInfo = helper.parseNodeInfo(getInfoResponse(infoResponse))
-        Invoice lndInvoice = getLNDInvoice(settledInvoiceWithMilliSat)
+        LndInvoice lndInvoice = getLNDInvoice(settledInvoiceWithMilliSat)
         when:
-        InvoiceData invoiceData = helper.convert(nodeInfo,lndInvoice)
+        Invoice invoiceData = helper.convert(nodeInfo,lndInvoice)
         then:
         invoiceData.settledAmount.value == lndInvoice.getAmtPaidMsat()
         invoiceData.settledAmount.magnetude == Magnetude.MILLI
@@ -136,11 +136,11 @@ class LNDHelperSpec extends Specification {
         DummyKeyManager dummyKeyManager = new DummyKeyManager()
         TokenGenerator tokenGenerator = new SymmetricKeyTokenGenerator(dummyKeyManager)
         PreImageData preImageData = tokenGenerator.genPreImageData()
-        OrderData paymentData = new OrderData(preImageData.preImageHash, "Some Description", new BTC(10),Instant.now().plus(Duration.ofMinutes(5)))
+        Order paymentData = new Order(preImageData.preImageHash, "Some Description", new BTC(10),Instant.now().plus(Duration.ofMinutes(5)))
         CurrencyConverter currencyConverter = new SameCryptoCurrencyConverter()
-        ConvertedOrderData convertedPaymentData = new ConvertedOrderData(paymentData,currencyConverter.convert( new BTC(20)))
+        ConvertedOrder convertedPaymentData = new ConvertedOrder(paymentData,currencyConverter.convert( new BTC(20)))
         when:
-        Invoice invoice = helper.genLNDInvoice(preImageData,convertedPaymentData)
+        LndInvoice invoice = helper.genLNDInvoice(preImageData,convertedPaymentData)
         then:
         invoice.RHash == preImageData.preImageHash
         invoice.RPreimage == preImageData.preImage
@@ -202,8 +202,8 @@ class LNDHelperSpec extends Specification {
         return new GetInfoResponse(Json.createReader(new StringReader(data)))
     }
 
-    private Invoice getLNDInvoice(String data = settledInvoice){
-        return new Invoice(Json.createReader(new StringReader(data)))
+    private LndInvoice getLNDInvoice(String data = settledInvoice){
+        return new LndInvoice(Json.createReader(new StringReader(data)))
     }
 
     def infoResponse = """{

@@ -16,7 +16,6 @@ package org.lightningj.paywall.lightninghandler.lnd;
 
 import org.lightningj.lnd.wrapper.ClientSideException;
 import org.lightningj.lnd.wrapper.message.GetInfoResponse;
-import org.lightningj.lnd.wrapper.message.Invoice;
 import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.vo.*;
 import org.lightningj.paywall.vo.amount.CryptoAmount;
@@ -70,44 +69,44 @@ public class LNDHelper {
     }
 
     /**
-     * Help method to convert a LND Invoice to a InvoiceData value object.
+     * Help method to convert a LND Invoice to a Invoice value object.
      * @param nodeInfo the related node info from LND node.
      * @param lndInvoice the LND invoice to convert.
-     * @return the converted InvoiceData.
+     * @return the converted Invoice.
      */
-    public InvoiceData convert(NodeInfo nodeInfo, Invoice lndInvoice) {
-        InvoiceData invoiceData = new InvoiceData();
-        invoiceData.setBolt11Invoice(lndInvoice.getPaymentRequest());
-        invoiceData.setExpireDate(Instant.ofEpochSecond(lndInvoice.getCreationDate() + lndInvoice.getExpiry()));
-        invoiceData.setInvoiceDate(Instant.ofEpochSecond(lndInvoice.getCreationDate()));
-        invoiceData.setPreImageHash(lndInvoice.getRHash());
-        invoiceData.setDescription(lndInvoice.getMemo());
-        invoiceData.setNodeInfo(nodeInfo);
-        invoiceData.setSettled(lndInvoice.getSettled());
+    public Invoice convert(NodeInfo nodeInfo, org.lightningj.lnd.wrapper.message.Invoice lndInvoice) {
+        Invoice invoice = new Invoice();
+        invoice.setBolt11Invoice(lndInvoice.getPaymentRequest());
+        invoice.setExpireDate(Instant.ofEpochSecond(lndInvoice.getCreationDate() + lndInvoice.getExpiry()));
+        invoice.setInvoiceDate(Instant.ofEpochSecond(lndInvoice.getCreationDate()));
+        invoice.setPreImageHash(lndInvoice.getRHash());
+        invoice.setDescription(lndInvoice.getMemo());
+        invoice.setNodeInfo(nodeInfo);
+        invoice.setSettled(lndInvoice.getSettled());
         if(lndInvoice.getSettled()){
-            invoiceData.setSettlementDate(Instant.ofEpochSecond(lndInvoice.getSettleDate()));
+            invoice.setSettlementDate(Instant.ofEpochSecond(lndInvoice.getSettleDate()));
         }
-        invoiceData.setInvoiceAmount(new CryptoAmount(lndInvoice.getValue(), supportedCurrency));
+        invoice.setInvoiceAmount(new CryptoAmount(lndInvoice.getValue(), supportedCurrency));
         if(lndInvoice.getAmtPaidMsat() % 1000 == 0){
-            invoiceData.setSettledAmount(new CryptoAmount(lndInvoice.getAmtPaidSat(), supportedCurrency));
+            invoice.setSettledAmount(new CryptoAmount(lndInvoice.getAmtPaidSat(), supportedCurrency));
         }else{
-            invoiceData.setSettledAmount(new CryptoAmount(lndInvoice.getAmtPaidMsat(), supportedCurrency, Magnetude.MILLI));
+            invoice.setSettledAmount(new CryptoAmount(lndInvoice.getAmtPaidMsat(), supportedCurrency, Magnetude.MILLI));
         }
 
-        return invoiceData;
+        return invoice;
     }
 
     /**
-     * Method to generate an LND Invoice from a PreImageData and ConvertedOrderData
+     * Method to generate an LND Invoice from a PreImageData and ConvertedOrder
      * @param preImageData the preImageData value object to the invoice preimage and hash from.
      * @param paymentData the payment data to generate invoice value and expire date from.
      * @return a newly generate LND Invoice object that can be used with lnd api to add.
      * @throws InternalErrorException if specified crypto amount is unsupported by LND implementation.
      */
-    public Invoice genLNDInvoice(PreImageData preImageData, ConvertedOrderData paymentData) throws InternalErrorException{
+    public org.lightningj.lnd.wrapper.message.Invoice genLNDInvoice(PreImageData preImageData, ConvertedOrder paymentData) throws InternalErrorException{
         checkCryptoAmount(paymentData.getConvertedAmount());
 
-        Invoice retval = new Invoice();
+        org.lightningj.lnd.wrapper.message.Invoice retval = new org.lightningj.lnd.wrapper.message.Invoice();
         retval.setRPreimage(preImageData.getPreImage());
         retval.setRHash(preImageData.getPreImageHash());
         // Only Magnitude NONE is supported, so no check is necessary.

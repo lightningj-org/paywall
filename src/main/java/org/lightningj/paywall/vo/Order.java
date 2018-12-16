@@ -15,18 +15,15 @@
 package org.lightningj.paywall.vo;
 
 import org.jose4j.jwt.JwtClaims;
-import org.lightningj.paywall.JSONParsable;
 import org.lightningj.paywall.paymenthandler.Payment;
 import org.lightningj.paywall.tokengenerator.JWTClaim;
 import org.lightningj.paywall.util.Base64Utils;
-import org.lightningj.paywall.util.HexUtils;
 import org.lightningj.paywall.vo.amount.Amount;
 
 import javax.json.JsonException;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import java.time.Instant;
-import java.util.Base64;
 
 /**
  * Value object containing information needed to create
@@ -34,32 +31,32 @@ import java.util.Base64;
  *
  * Created by Philip Vendil on 2018-10-29.
  */
-public class OrderData extends JWTClaim implements Payment {
+public class Order extends JWTClaim implements Payment {
 
     public static final String CLAIM_NAME = "payment";
 
     protected byte[] preImageHash;
     protected String description;
-    protected Amount requestedAmount;
+    protected Amount orderAmount;
     protected Instant expireDate;
 
     /**
      * Empty Constructor
      */
-    public OrderData(){}
+    public Order(){}
 
     /**
      * Default Constructor.
      *
      * @param preImageHash the generated preImageHash from PreImageData.
      * @param description description to display in the invoice. (Optional).
-     * @param requestedAmount the amount to create invoice for before eventual currency convertion. (Required)
+     * @param orderAmount the amount to create invoice for before eventual currency convertion. (Required)
      * @param expireDate the time when the payment should be considered expired and not accepted. (Required)
      */
-    public OrderData(byte[] preImageHash, String description, Amount requestedAmount, Instant expireDate) {
+    public Order(byte[] preImageHash, String description, Amount orderAmount, Instant expireDate) {
         this.preImageHash = preImageHash;
         this.description = description;
-        this.requestedAmount = requestedAmount;
+        this.orderAmount = orderAmount;
         this.expireDate = expireDate;
     }
 
@@ -68,7 +65,7 @@ public class OrderData extends JWTClaim implements Payment {
      *
      * @param jsonObject the json object to parse
      */
-    public OrderData(JsonObject jsonObject) throws JsonException {
+    public Order(JsonObject jsonObject) throws JsonException {
         super(jsonObject);
     }
 
@@ -77,7 +74,7 @@ public class OrderData extends JWTClaim implements Payment {
      *
      * @param jwtClaims the JWT Tokens Claim set to extract data from.
      */
-    public OrderData(JwtClaims jwtClaims) {
+    public Order(JwtClaims jwtClaims) {
         super(jwtClaims);
     }
 
@@ -117,16 +114,16 @@ public class OrderData extends JWTClaim implements Payment {
      *
      * @return the amount to create invoice for before eventual currency convertion. (Required)
      */
-    public Amount getRequestedAmount() {
-        return requestedAmount;
+    public Amount getOrderAmount() {
+        return orderAmount;
     }
 
     /**
      *
-     * @param requestedAmount the amount to create invoice for before eventual currency convertion. (Required)
+     * @param orderAmount the amount to create invoice for before eventual currency convertion. (Required)
      */
-    public void setRequestedAmount(Amount requestedAmount) {
-        this.requestedAmount = requestedAmount;
+    public void setOrderAmount(Amount orderAmount) {
+        this.orderAmount = orderAmount;
     }
 
     /**
@@ -155,7 +152,7 @@ public class OrderData extends JWTClaim implements Payment {
     public void convertToJson(JsonObjectBuilder jsonObjectBuilder) throws JsonException {
         add(jsonObjectBuilder,"preImageHash", Base64Utils.encodeBase64String(preImageHash));
         addNotRequired(jsonObjectBuilder,"description",description);
-        add(jsonObjectBuilder,"requestedAmount", requestedAmount);
+        add(jsonObjectBuilder,"orderAmount", orderAmount);
         add(jsonObjectBuilder,"expireDate",expireDate);
     }
 
@@ -169,7 +166,7 @@ public class OrderData extends JWTClaim implements Payment {
     public void parseJson(JsonObject jsonObject) throws JsonException {
         preImageHash = getByteArrayFromB64(jsonObject,"preImageHash", true);
         description = getStringIfSet(jsonObject,"description");
-        requestedAmount = Amount.parseAmountObject(getJsonObject(jsonObject,"requestedAmount",true));
+        orderAmount = Amount.parseAmountObject(getJsonObject(jsonObject,"orderAmount",true));
         expireDate = Instant.ofEpochMilli(getLong(jsonObject,"expireDate", true));
     }
 

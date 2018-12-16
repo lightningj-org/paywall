@@ -16,7 +16,7 @@ package org.lightningj.paywall.paymenthandler;
 
 import org.lightningj.paywall.JSONParsable;
 
-import org.lightningj.paywall.vo.InvoiceData;
+import org.lightningj.paywall.vo.Invoice;
 
 import javax.json.JsonException;
 import javax.json.JsonObject;
@@ -41,8 +41,8 @@ public class PaymentEvent  extends JSONParsable {
      * Default constructor
      *
      * @param type the type of payment event.
-     * @param payment the related payment, either OrderData, InvoiceData or
-     *                SettlementData depending on state of payment.
+     * @param payment the related payment, either Order, Invoice or
+     *                Settlement depending on state of payment.
      */
     public PaymentEvent(PaymentEventType type, Payment payment) {
         this.type = type;
@@ -76,8 +76,8 @@ public class PaymentEvent  extends JSONParsable {
 
     /**
      *
-     * @return the related payment, either OrderData, InvoiceData or
-     *                SettlementData depending on state of payment.
+     * @return the related payment, either Order, Invoice or
+     *                Settlement depending on state of payment.
      */
     public Payment getPayment() {
         return payment;
@@ -85,8 +85,8 @@ public class PaymentEvent  extends JSONParsable {
 
     /**
      *
-     * @param payment the related payment, either OrderData, InvoiceData or
-     *                SettlementData depending on state of payment.
+     * @param payment the related payment, either Order, Invoice or
+     *                Settlement depending on state of payment.
      */
     public void setPayment(Payment payment) {
         this.payment = payment;
@@ -125,6 +125,6 @@ public class PaymentEvent  extends JSONParsable {
             throw new JsonException("Error parsing JSON, invalid payment event type " + typeValue + ".");
         }
 
-        payment = new InvoiceData(getJsonObject(jsonObject,"payment",true));
+        payment = new Invoice(getJsonObject(jsonObject,"payment",true));
     }
 }

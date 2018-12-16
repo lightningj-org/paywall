@@ -31,7 +31,7 @@ import java.time.Instant;
  *
  * Created by Philip Vendil on 2018-11-11.
  */
-public class InvoiceData extends JWTClaim implements Payment {
+public class Invoice extends JWTClaim implements Payment {
 
     public static final String CLAIM_NAME = "invoice";
 
@@ -49,7 +49,7 @@ public class InvoiceData extends JWTClaim implements Payment {
     /**
      * Empty Constructor
      */
-    public InvoiceData(){}
+    public Invoice(){}
 
     /**
      * Default constructor, for unsettled invoice.
@@ -62,7 +62,7 @@ public class InvoiceData extends JWTClaim implements Payment {
      * @param expireDate the time the invoice will expire.
      * @param invoiceDate the time this invoice was created.
      */
-    public InvoiceData(byte[] preImageHash, String bolt11Invoice, String description, CryptoAmount invoiceAmount, NodeInfo nodeInfo, Instant expireDate, Instant invoiceDate) {
+    public Invoice(byte[] preImageHash, String bolt11Invoice, String description, CryptoAmount invoiceAmount, NodeInfo nodeInfo, Instant expireDate, Instant invoiceDate) {
         this.preImageHash = preImageHash;
         this.bolt11Invoice = bolt11Invoice;
         this.description = description;
@@ -86,9 +86,9 @@ public class InvoiceData extends JWTClaim implements Payment {
      * @param settledAmount the amount that was settled. (Optional)
      * @param settlementDate the time the payment was settled with the LightningHandler. (Optional)
      */
-    public InvoiceData(byte[] preImageHash, String bolt11Invoice, String description, CryptoAmount invoiceAmount, NodeInfo nodeInfo,
-                       Instant expireDate, Instant invoiceDate, boolean settled, CryptoAmount settledAmount,
-                       Instant settlementDate) {
+    public Invoice(byte[] preImageHash, String bolt11Invoice, String description, CryptoAmount invoiceAmount, NodeInfo nodeInfo,
+                   Instant expireDate, Instant invoiceDate, boolean settled, CryptoAmount settledAmount,
+                   Instant settlementDate) {
         this.preImageHash = preImageHash;
         this.bolt11Invoice = bolt11Invoice;
         this.description = description;
@@ -106,7 +106,7 @@ public class InvoiceData extends JWTClaim implements Payment {
      *
      * @param jsonObject the json object to parse
      */
-    public InvoiceData(JsonObject jsonObject) throws JsonException {
+    public Invoice(JsonObject jsonObject) throws JsonException {
         super(jsonObject);
     }
 
@@ -115,7 +115,7 @@ public class InvoiceData extends JWTClaim implements Payment {
      *
      * @param jwtClaims the JWT Tokens Claim set to extract data from.
      */
-    public InvoiceData(JwtClaims jwtClaims) {
+    public Invoice(JwtClaims jwtClaims) {
         super(jwtClaims);
     }
 

@@ -14,8 +14,8 @@
  *************************************************************************/
 package org.lightningj.paywall.paymenthandler
 
-import org.lightningj.paywall.vo.InvoiceData
-import org.lightningj.paywall.vo.InvoiceDataSpec
+import org.lightningj.paywall.vo.Invoice
+import org.lightningj.paywall.vo.InvoiceSpec
 import spock.lang.Specification
 
 import javax.json.JsonException
@@ -29,7 +29,7 @@ import static org.lightningj.paywall.JSONParsableSpec.toJsonObject
  */
 class PaymentEventSpec extends Specification {
 
-    InvoiceData invoiceData = InvoiceDataSpec.genFullInvoiceData()
+    Invoice invoiceData = InvoiceSpec.genFullInvoiceData()
 
     def "Verify constructors and getter and setters"(){
         when:

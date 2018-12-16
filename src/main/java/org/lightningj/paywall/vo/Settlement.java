@@ -15,18 +15,14 @@
 package org.lightningj.paywall.vo;
 
 import org.jose4j.jwt.JwtClaims;
-import org.lightningj.paywall.JSONParsable;
 import org.lightningj.paywall.paymenthandler.Payment;
 import org.lightningj.paywall.tokengenerator.JWTClaim;
 import org.lightningj.paywall.util.Base64Utils;
-import org.lightningj.paywall.util.HexUtils;
-import org.lightningj.paywall.vo.amount.CryptoAmount;
 
 import javax.json.JsonException;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import java.time.Instant;
-import java.util.Base64;
 
 /**
  * Value object class containing information about a payment that have been
@@ -34,19 +30,19 @@ import java.util.Base64;
  *
  * Created by Philip Vendil on 2018-11-12.
  */
-public class SettlementData extends JWTClaim  implements Payment {
+public class Settlement extends JWTClaim  implements Payment {
 
     public static final String CLAIM_NAME = "settlement";
 
     protected byte[] preImageHash;
-    protected InvoiceData invoice;
+    protected Invoice invoice;
     protected Instant validUntil;
     protected Instant validFrom;
 
     /**
      * Empty Constructor
      */
-    public SettlementData(){}
+    public Settlement(){}
 
     /**
      * Default Constructor
@@ -55,7 +51,7 @@ public class SettlementData extends JWTClaim  implements Payment {
      * @param validUntil the time the payment is valid and the requested call can used.
      * @param validFrom the time the payment is valid from. (Optional)
      */
-    public SettlementData(byte[] preImageHash, InvoiceData invoice, Instant validUntil, Instant validFrom) {
+    public Settlement(byte[] preImageHash, Invoice invoice, Instant validUntil, Instant validFrom) {
         this.preImageHash = preImageHash;
         this.invoice = invoice;
         this.validUntil = validUntil;
@@ -67,7 +63,7 @@ public class SettlementData extends JWTClaim  implements Payment {
      *
      * @param jsonObject the json object to parse
      */
-    public SettlementData(JsonObject jsonObject) throws JsonException {
+    public Settlement(JsonObject jsonObject) throws JsonException {
         super(jsonObject);
     }
 
@@ -76,7 +72,7 @@ public class SettlementData extends JWTClaim  implements Payment {
      *
      * @param jwtClaims the JWT Tokens Claim set to extract data from.
      */
-    public SettlementData(JwtClaims jwtClaims) {
+    public Settlement(JwtClaims jwtClaims) {
         super(jwtClaims);
     }
 
@@ -100,7 +96,7 @@ public class SettlementData extends JWTClaim  implements Payment {
      *
      * @return the related invoice. (Optional)
      */
-    public InvoiceData getInvoice() {
+    public Invoice getInvoice() {
         return invoice;
     }
 
@@ -108,7 +104,7 @@ public class SettlementData extends JWTClaim  implements Payment {
      *
      * @param invoice the related invoice. (Optional)
      */
-    public void setInvoice(InvoiceData invoice) {
+    public void setInvoice(Invoice invoice) {
         this.invoice = invoice;
     }
 
@@ -184,7 +180,7 @@ public class SettlementData extends JWTClaim  implements Payment {
     public void parseJson(JsonObject jsonObject) throws JsonException {
         this.preImageHash = getByteArrayFromB64(jsonObject,"preImageHash",true);
         if(jsonObject.containsKey("invoice") && !jsonObject.isNull("invoice")) {
-            this.invoice = new InvoiceData(getJsonObject(jsonObject, "invoice", true));
+            this.invoice = new Invoice(getJsonObject(jsonObject, "invoice", true));
         }
         this.validUntil = Instant.ofEpochMilli(getLong(jsonObject,"validUntil", true));
         if(jsonObject.containsKey("validFrom") && !jsonObject.isNull("validFrom")) {

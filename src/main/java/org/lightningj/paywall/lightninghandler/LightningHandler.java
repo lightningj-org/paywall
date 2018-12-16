@@ -15,8 +15,10 @@
 package org.lightningj.paywall.lightninghandler;
 
 import org.lightningj.paywall.InternalErrorException;
-import org.lightningj.paywall.vo.ConvertedOrderData;
-import org.lightningj.paywall.vo.InvoiceData;
+import org.lightningj.paywall.lightninghandler.lnd.LNDLightningHandlerContext;
+import org.lightningj.paywall.vo.ConvertedOrder;
+import org.lightningj.paywall.vo.Invoice;
+import org.lightningj.paywall.vo.NodeInfo;
 import org.lightningj.paywall.vo.PreImageData;
 
 import java.io.IOException;
@@ -47,7 +49,7 @@ public interface LightningHandler {
      * @throws IOException if communication problems occurred with underlying node.
      * @throws InternalErrorException if problems occurred generating the invoice.
      */
-    InvoiceData generateInvoice(PreImageData preImageData, ConvertedOrderData paymentData) throws IOException, InternalErrorException;
+    Invoice generateInvoice(PreImageData preImageData, ConvertedOrder paymentData) throws IOException, InternalErrorException;
 
     /**
      * Method to register a listener to recieve notification about updated invoices and settled invoices.
@@ -73,7 +75,7 @@ public interface LightningHandler {
      * @throws IOException if communication problems occurred with underlying node.
      * @throws InternalErrorException if internal problems occurred communication or parsing invoice with lightning node.
      */
-    InvoiceData lookupInvoice(byte[] preImageHash) throws IOException, InternalErrorException;
+    Invoice lookupInvoice(byte[] preImageHash) throws IOException, InternalErrorException;
 
     /**
      * Method to check if handler is connected to node.
@@ -91,4 +93,12 @@ public interface LightningHandler {
      * @throws InternalErrorException if internal problems occurred closing the connections with lightning node.
      */
     void close() throws IOException, InternalErrorException;
+
+    /**
+     * Method to fetch the related lightning node's information to include in invoices.
+     * @return the related lightning node's information
+     * @throws IOException if communication problems occurred with underlying node.
+     * @throws InternalErrorException if internal problems occurred closing the connections with lightning node.
+     */
+    NodeInfo getNodeInfo() throws IOException, InternalErrorException;
 }

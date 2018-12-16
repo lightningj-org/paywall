@@ -1,2 +1,5 @@
 .gradle
 build
+paywall-core.iml
+paywall-core.ipr
+paywall-core.iws

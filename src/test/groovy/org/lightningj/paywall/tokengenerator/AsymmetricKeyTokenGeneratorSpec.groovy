@@ -18,7 +18,7 @@ import org.jose4j.jws.JsonWebSignature
 import org.jose4j.jwt.JwtClaims
 import org.lightningj.paywall.keymgmt.*
 import org.lightningj.paywall.util.BCUtils
-import org.lightningj.paywall.vo.OrderData
+import org.lightningj.paywall.vo.Order
 import org.lightningj.paywall.vo.amount.BTC
 import spock.lang.Shared
 import spock.lang.Specification
@@ -42,7 +42,7 @@ class AsymmetricKeyTokenGeneratorSpec extends Specification {
     AsymmetricKeyManager keyManager =  DummyKeyManagerInstance.commonInstance
     Instant expireDate = Instant.now().plus(10, ChronoUnit.MINUTES)
     Instant notBefore = Instant.now().minus(10, ChronoUnit.MINUTES)
-    def paymentData = new OrderData("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
+    def paymentData = new Order("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
     def ctx_type = CONTEXT_PAYMENT_TOKEN_TYPE
 
     AsymmetricKeyTokenGenerator tokenGenerator
@@ -155,7 +155,7 @@ class AsymmetricKeyTokenGeneratorSpec extends Specification {
         token != null
         when:
         JwtClaims claims = tokenGenerator.parseToken(ctx_type,token)
-        OrderData pd = new OrderData(claims)
+        Order pd = new Order(claims)
         then:
         claims.subject == recipientKeyId
         pd != null

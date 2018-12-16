@@ -52,7 +52,7 @@ public class PaymentEventBus {
      * automatically removes all listeners that have unregisterAfterEvent flag
      * set.
      * @param type the type of event to trigger
-     * @param payment the payment value object either OrderData, InvoiceData or SettlementData.
+     * @param payment the payment value object either Order, Invoice or Settlement.
      */
     void triggerEvent(PaymentEventType type, Payment payment){
         PaymentEvent event = new PaymentEvent(type,payment);

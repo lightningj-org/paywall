@@ -14,8 +14,9 @@
  *************************************************************************/
 package org.lightningj.paywall.lightninghandler
 
-import org.lightningj.paywall.vo.InvoiceData
-import org.lightningj.paywall.vo.InvoiceDataSpec
+import org.lightningj.paywall.lightninghandler.lnd.LNDLightningHandlerContext
+import org.lightningj.paywall.vo.Invoice
+import org.lightningj.paywall.vo.InvoiceSpec
 import spock.lang.Specification
 
 import javax.json.JsonException
@@ -29,7 +30,7 @@ import static org.lightningj.paywall.JSONParsableSpec.toJsonObject
  */
 class LightningEventSpec extends Specification {
 
-    InvoiceData invoiceData = InvoiceDataSpec.genFullInvoiceData()
+    Invoice invoiceData = InvoiceSpec.genFullInvoiceData()
 
     def "Verify constructors and getter and setters"(){
         when:
@@ -45,22 +46,23 @@ class LightningEventSpec extends Specification {
         le1.getInvoice() != null
 
         when:
-        def le2 = new LightningEvent(LightningEventType.ADDED,invoiceData)
+        def le2 = new LightningEvent(LightningEventType.ADDED,invoiceData, new LNDLightningHandlerContext(123,321))
         then:
         le2.getType() == LightningEventType.ADDED
         le2.getInvoice() != null
+        le2.getContext().addIndex == 123
     }
 
     def "Verify that toJsonAsString works as expected"(){
         expect:
-        new LightningEvent(LightningEventType.ADDED,invoiceData).toJsonAsString(false) == """{"type":"ADDED","invoice":{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","description":"test desc","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"settlementDate":12344}}"""
+        new LightningEvent(LightningEventType.ADDED,invoiceData,new LNDLightningHandlerContext(123,321)).toJsonAsString(false) == """{"type":"ADDED","invoice":{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","description":"test desc","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"settlementDate":12344},"context":{"type":"lnd","addIndex":123,"settleIndex":321}}"""
         when:
-        new LightningEvent(null,invoiceData).toJsonAsString(false)
+        new LightningEvent(null,invoiceData, null).toJsonAsString(false)
         then:
         def e = thrown(JsonException)
         e.message == "Error building JSON object, required key type is null."
         when:
-        new LightningEvent(LightningEventType.ADDED,null).toJsonAsString(false)
+        new LightningEvent(LightningEventType.ADDED,null, null).toJsonAsString(false)
         then:
         e = thrown(JsonException)
         e.message == "Error building JSON object, required key invoice is null."
@@ -68,10 +70,11 @@ class LightningEventSpec extends Specification {
 
     def "Verify that parsing of JSON data works as expected"(){
         when:
-        LightningEvent d = new LightningEvent(toJsonObject("""{"type":"ADDED","invoice":{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","description":"test desc","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"settlementDate":12344}}"""))
+        LightningEvent d = new LightningEvent(toJsonObject("""{"type":"ADDED","invoice":{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","description":"test desc","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"settlementDate":12344},"context":{"type":"lnd","addIndex":123,"settleIndex":321}}"""))
         then:
         d.type == LightningEventType.ADDED
         d.invoice != null
+        d.context.addIndex == 123
         when:
         new LightningEvent(toJsonObject("""{"type":"INVALID","invoice":{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","description":"test desc","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"settlementDate":12344}}"""))
         then:

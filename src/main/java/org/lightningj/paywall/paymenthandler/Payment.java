@@ -2,8 +2,8 @@ package org.lightningj.paywall.paymenthandler;
 
 /**
  * Generic interface of value object that can be handled
- * by the PaymentHandler. Either an OrderData, InvoiceData
- * or and SettlementData
+ * by the PaymentHandler. Either an Order, Invoice
+ * or and Settlement
  * Created by philip on 2018-12-05.
  */
 public interface Payment {

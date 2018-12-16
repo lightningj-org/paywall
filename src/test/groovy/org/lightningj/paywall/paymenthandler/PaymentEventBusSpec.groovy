@@ -15,7 +15,7 @@
 
 package org.lightningj.paywall.paymenthandler
 
-import org.lightningj.paywall.vo.OrderData
+import org.lightningj.paywall.vo.Order
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -57,7 +57,7 @@ class PaymentEventBusSpec extends Specification {
 
     def "Verify that listeners are notified for matching events and that listeners that are marked for unregistration is removed."(){
         setup:
-        Payment payment = new OrderData()
+        Payment payment = new Order()
         payment.preImageHash = "abc".bytes
 
         eventBus.registerListener(listener_for_preHash1_OrderCreated_unregister)
@@ -98,7 +98,7 @@ class PaymentEventBusSpec extends Specification {
     @Unroll
     def "Verify that matches returns #expected if #description"(){
         setup:
-        Payment payment = new OrderData()
+        Payment payment = new Order()
         payment.preImageHash = eventPreImageHash
         expect:
         eventBus.matches(new TestPaymentEventListener(listenPreImageHash,listenType,false), new PaymentEvent(eventType, payment)) == expected

@@ -17,14 +17,14 @@ package org.lightningj.paywall.lightninghandler.lnd
 import io.grpc.stub.StreamObserver
 import org.lightningj.lnd.wrapper.AsynchronousLndAPI
 import org.lightningj.lnd.wrapper.SynchronousLndAPI
-import org.lightningj.lnd.wrapper.message.Invoice
 import org.lightningj.lnd.wrapper.message.InvoiceSubscription
+import org.lightningj.lnd.wrapper.message.Invoice as LndInvoice
 import org.lightningj.paywall.InternalErrorException
 import org.lightningj.paywall.lightninghandler.LightningEvent
 import org.lightningj.paywall.lightninghandler.LightningEventListener
 import org.lightningj.paywall.lightninghandler.LightningEventType
 import org.lightningj.paywall.lightninghandler.LightningHandlerContext
-import org.lightningj.paywall.vo.InvoiceData
+import org.lightningj.paywall.vo.Invoice
 import org.lightningj.paywall.vo.NodeInfo
 import spock.lang.Specification
 
@@ -53,17 +53,25 @@ class BaseLNDLightningHandlerSpec extends Specification {
         BaseLNDLightningHandler.log = Mock(Logger)
     }
 
+    def "check that listenToInvoices throws InternalErrorException if DLightningHandlerContext is not of type LNDLightningHandlerContext"(){
+        when:
+        handler.listenToInvoices(Mock(LightningHandlerContext))
+        then:
+        def e = thrown InternalErrorException
+        e.message == "Error initializing LightningHandler invoice subscription, LightningHandlerContext must be of type LNDLightningHandlerContext."
+
+    }
     def "check that listenToInvoices detects added and settled invoices correclty"(){
         setup:
-        def ctx = new LightningHandlerContext(20,10)
+        def ctx = new LNDLightningHandlerContext(20,10)
         def eventListener = new TestLightningEventListener()
         StreamObserver<Invoice> observer = null
         handler.nodeInfo = new NodeInfo("abc@10.10.10.11:9001")
         // Add listener
         handler.registerListener(eventListener)
 
-        Invoice unsettled = toInvoice(unsettledInvoice)
-        Invoice settled = toInvoice(settledInvoice)
+        LndInvoice unsettled = toInvoice(unsettledInvoice)
+        LndInvoice settled = toInvoice(settledInvoice)
         when:
         handler.listenToInvoices(ctx)
         then:
@@ -77,7 +85,7 @@ class BaseLNDLightningHandlerSpec extends Specification {
         when:
         observer.onNext(unsettled)
         then:
-        1 * handler.lndHelper.convert(handler.nodeInfo,unsettled) >> new InvoiceData()
+        1 * handler.lndHelper.convert(handler.nodeInfo,unsettled) >> new Invoice()
         eventListener.eventList.size() == 1
         eventListener.eventList[0].type == LightningEventType.ADDED
         eventListener.eventList[0].invoice != null
@@ -85,7 +93,7 @@ class BaseLNDLightningHandlerSpec extends Specification {
         when:
         observer.onNext(settled)
         then:
-        1 * handler.lndHelper.convert(handler.nodeInfo,settled) >> new InvoiceData()
+        1 * handler.lndHelper.convert(handler.nodeInfo,settled) >> new Invoice()
         eventListener.eventList.size() == 2
         eventListener.eventList[1].type == LightningEventType.SETTLEMENT
         eventListener.eventList[1].invoice != null
@@ -102,10 +110,10 @@ class BaseLNDLightningHandlerSpec extends Specification {
         1 * BaseLNDLightningHandler.log.info( "LND Invoice subscription completed. This shouldn't happen.")
     }
 
-    Invoice toInvoice(String invoiceData){
+    static LndInvoice toInvoice(String invoiceData){
         def reader = Json.createReader(new StringReader(invoiceData))
 
-        Invoice i = new Invoice(reader)
+        LndInvoice i = new LndInvoice(reader)
         return i
     }
 
@@ -128,7 +136,7 @@ class BaseLNDLightningHandlerSpec extends Specification {
 
         AsynchronousLndAPI asynchronousLndAPI
         SynchronousLndAPI synchronousLndAPI
-        LightningHandlerContext context
+        LNDLightningHandlerContext context
         LNDHelper lndHelper
         NodeInfo nodeInfo
 
@@ -170,7 +178,7 @@ class BaseLNDLightningHandlerSpec extends Specification {
 
     }
 
-    def unsettledInvoice = """{
+    static def unsettledInvoice = """{
     "memo": "",
     "receipt": "",
     "r_preimage": "X2M1ep3aqXQhThnlvNzdOYUcYQ5D03Ghl6xmgLiEI9c=",
@@ -194,7 +202,7 @@ class BaseLNDLightningHandlerSpec extends Specification {
     "amt_paid_msat": 0
 }"""
 
-    def settledInvoice = """{
+    static def settledInvoice = """{
     "memo": "",
     "receipt": "",
     "r_preimage": "04Ryp26Gji635V20d4VMy/s/3AeIvv+0l+t3ps9EUjs=",

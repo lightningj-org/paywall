@@ -65,7 +65,7 @@ public abstract class BaseTokenGenerator implements TokenGenerator{
     /**
      * Help method to generate a JWT token containing a payment data claim.
      *
-     * @param orderData the payment data to include in the token.
+     * @param order the payment data to include in the token.
      * @param requestData optional request data that could be set if workflow requires it.
      * @param expireDate the expire date of the token in the future.
      * @param notBefore an optional not before data, indicating when the token starts to become valid. Use null not to set.
@@ -76,14 +76,14 @@ public abstract class BaseTokenGenerator implements TokenGenerator{
      * @throws IOException if communication problems occurred with underlying systems.
      * @throws InternalErrorException if internal problems occurred processing the token.
      */
-    public String generatePaymentToken(OrderData orderData, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException{
-        return generateToken(TokenContext.CONTEXT_PAYMENT_TOKEN_TYPE,expireDate, notBefore, true, recipientSubject, orderData, requestData);
+    public String generatePaymentToken(Order order, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException{
+        return generateToken(TokenContext.CONTEXT_PAYMENT_TOKEN_TYPE,expireDate, notBefore, true, recipientSubject, order, requestData);
     }
 
     /**
      * Help method to generate a JWT token containing a invoice data claim.
      *
-     * @param invoiceData the invoice data to include in the token.
+     * @param invoice the invoice data to include in the token.
      * @param requestData optional request data that could be set if workflow requires it.
      * @param expireDate the expire date of the token in the future.
      * @param notBefore an optional not before data, indicating when the token starts to become valid. Use null not to set.
@@ -94,14 +94,14 @@ public abstract class BaseTokenGenerator implements TokenGenerator{
      * @throws IOException if communication problems occurred with underlying systems.
      * @throws InternalErrorException if internal problems occurred processing the token.
      */
-    public String generateInvoiceToken(InvoiceData invoiceData, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException{
-        return generateToken(TokenContext.CONTEXT_INVOICE_TOKEN_TYPE,expireDate, notBefore, true, recipientSubject, invoiceData, requestData);
+    public String generateInvoiceToken(Invoice invoice, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException{
+        return generateToken(TokenContext.CONTEXT_INVOICE_TOKEN_TYPE,expireDate, notBefore, true, recipientSubject, invoice, requestData);
     }
 
     /**
      * Help method to generate a JWT token containing a settlement data claim.
      *
-     * @param settlementData the settlement data to include in the token.
+     * @param settlement the settlement data to include in the token.
      * @param requestData optional request data that could be set if workflow requires it.
      * @param expireDate the expire date of the token in the future.
      * @param notBefore an optional not before data, indicating when the token starts to become valid. Use null not to set.
@@ -112,8 +112,8 @@ public abstract class BaseTokenGenerator implements TokenGenerator{
      * @throws IOException if communication problems occurred with underlying systems.
      * @throws InternalErrorException if internal problems occurred processing the token.
      */
-    public String generateSettlementToken(SettlementData settlementData, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException{
-        return generateToken(TokenContext.CONTEXT_INVOICE_TOKEN_TYPE,expireDate, notBefore, true, recipientSubject, settlementData, requestData);
+    public String generateSettlementToken(Settlement settlement, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException{
+        return generateToken(TokenContext.CONTEXT_INVOICE_TOKEN_TYPE,expireDate, notBefore, true, recipientSubject, settlement, requestData);
     }
 
 
