@@ -14,26 +14,46 @@
  *************************************************************************/
 package org.lightningj.paywall.paymenthandler.data;
 
-import org.lightningj.paywall.vo.amount.Amount;
-
 import java.time.Instant;
 
 /**
- * TODO
+ * Interface defining the complete set of fields in a payment data and can
+ * be implemented for best performance of the system.
+ *
+ * If the payment contains all fields necessary in a payment flow it will
+ * not perform lookups of invoices in LightningHandler to the same extent which
+ * may boost performance.
  *
  * Created by Philip Vendil on 2018-12-10.
  */
 public interface FullPaymentData extends StandardPaymentData {
 
-
+    /**
+     *
+     * @return the bolt11 lightning invoice displayed to the end user before
+     * paying and invoice.
+     */
     String getBolt11Invoice();
 
+    /**
+     *
+     * @param bolt11Invoice the bolt11 lightning invoice displayed to the end user before
+     * paying and invoice.
+     */
     void setBolt11Invoice(String bolt11Invoice);
 
+    /**
+     *
+     * @return the valid from timestamp used in generated settlement tokens. If null is
+     * no valid from used, only validUntil.
+     */
     Instant getSettlementValidFrom();
 
+    /**
+     *
+     * @param settlementValidFrom the valid from timestamp used in generated settlement tokens. If null is
+     * no valid from used, only validUntil.
+     */
     void setSettlementValidFrom(Instant settlementValidFrom);
-
-
 
 }

@@ -104,15 +104,7 @@ public class PaymentDataConverter {
             FullPaymentData pd = (FullPaymentData) paymentData;
 
             NodeInfo nodeInfo = lightningHandler.getNodeInfo();
-            if(!(pd.getInvoiceAmount() instanceof CryptoAmount)){
-                throw new InternalErrorException("Error converting PaymentData into invoice value object, invoiceAmount " +
-                        "must be of type CryptoAmount.");
-            }
-            if(pd.getSettledAmount() != null && !(pd.getSettledAmount() instanceof CryptoAmount)){
-                throw new InternalErrorException("Error converting PaymentData into invoice value object, settledAmount " +
-                        "must be of type CryptoAmount.");
-            }
-            CryptoAmount invoiceAmoint = (CryptoAmount) pd.getInvoiceAmount();
+            CryptoAmount invoiceAmoint = pd.getInvoiceAmount();
             return new Invoice(pd.getPreImageHash(),
                     pd.getBolt11Invoice(),
                     pd.getDescription(),
@@ -121,7 +113,7 @@ public class PaymentDataConverter {
                     pd.getInvoiceExpireDate(),
                     pd.getInvoiceDate(),
                     pd.isSettled(),
-                    (CryptoAmount) pd.getSettledAmount(),
+                    pd.getSettledAmount(),
                     pd.getSettlementDate());
 
         }else{

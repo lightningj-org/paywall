@@ -27,6 +27,7 @@ import org.lightningj.paywall.vo.Order
 import org.lightningj.paywall.vo.Settlement
 import org.lightningj.paywall.vo.amount.Amount
 import org.lightningj.paywall.vo.amount.BTC
+import org.lightningj.paywall.vo.amount.CryptoAmount
 import org.lightningj.paywall.vo.amount.FiatAmount
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -140,30 +141,6 @@ class PaymentDataConverterSpec extends Specification {
         invoice.settlementDate == null
         invoice.settledAmount == null
         invoice.nodeInfo.connectString == "abcdef@10.10.10.1:1444"
-    }
-
-    def "Verify that convertToInvoice throws InternalErrorException if FullPaymentData with settled amount in FiatAmount"(){
-        setup:
-        def pd = new TestFullData(settled: true, preImageHash: "abc".bytes, invoiceAmount: new BTC(123),
-                bolt11Invoice: "somebolt", description: "Some Description", invoiceExpireDate:  Instant.ofEpochMilli(3000),
-                invoiceDate: Instant.ofEpochMilli(1000), settlementDate: Instant.ofEpochMilli(5000), settledAmount: new FiatAmount(123.0,"USD"))
-        when:
-        converter.convertToInvoice(pd)
-        then:
-        def e = thrown InternalErrorException
-        e.message == "Error converting PaymentData into invoice value object, settledAmount must be of type CryptoAmount."
-    }
-
-    def "Verify that convertToInvoice throws InternalErrorException if FullPaymentData with invoice amount in FiatAmount"(){
-        setup:
-        def pd = new TestFullData(settled: false, preImageHash: "abc".bytes, invoiceAmount: new FiatAmount(123.0,"USD"),
-                bolt11Invoice: "somebolt", description: "Some Description", invoiceExpireDate:  Instant.ofEpochMilli(3000),
-                invoiceDate: Instant.ofEpochMilli(1000))
-        when:
-        converter.convertToInvoice(pd)
-        then:
-        def e = thrown InternalErrorException
-        e.message == "Error converting PaymentData into invoice value object, invoiceAmount must be of type CryptoAmount."
     }
 
     def "Verify that convertToInvoice fetches the invoice from LightningHandler if payment data is of type StandardPaymentData."(){
@@ -357,10 +334,10 @@ class PaymentDataConverterSpec extends Specification {
 
     static class TestStandardData extends TestMinimalData implements StandardPaymentData{
         String description
-        Amount invoiceAmount
+        CryptoAmount invoiceAmount
         Instant invoiceDate
         Instant invoiceExpireDate
-        Amount settledAmount
+        CryptoAmount settledAmount
         Instant settlementDate
         Instant settlementExpireDate
     }
