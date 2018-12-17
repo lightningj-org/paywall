@@ -21,12 +21,16 @@ import java.time.Instant;
  * be implemented for best performance of the system.
  *
  * If the payment contains all fields necessary in a payment flow it will
- * not perform lookups of invoices in LightningHandler to the same extent which
+ * not perform look-ups of invoices in LightningHandler to the same extent which
  * may boost performance.
+ *
+ * @see MinimalPaymentData
+ * @see PerRequestPaymentData
+ * @see StandardPaymentData
  *
  * Created by Philip Vendil on 2018-12-10.
  */
-public interface FullPaymentData extends StandardPaymentData {
+public interface FullPaymentData extends StandardPaymentData, PerRequestPaymentData {
 
     /**
      *

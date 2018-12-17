@@ -46,7 +46,7 @@ public class DefaultOrderRequestGenerator implements OrderRequestGenerator {
         if(paymentRequired.articleId().equals("")){
             throw new InternalErrorException("Internal error in DefaultOrderRequestGenerator, error in PaymentRequired annotation, article id is mandatory.");
         }
-        return new OrderRequest(paymentRequired.articleId(), paymentRequired.units(), convertPaymentOptions(paymentRequired));
+        return new OrderRequest(paymentRequired.articleId(), paymentRequired.units(), convertPaymentOptions(paymentRequired), paymentRequired.payPerRequest());
     }
 
     /**

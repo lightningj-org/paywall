@@ -36,32 +36,35 @@ class OrderRequestSpec extends Specification {
         or1.getArticleId() == null
         or1.getUnits() == 0
         or1.getPaymentOptions() == null
+        !or1.isPayPerRequest()
         when:
         or1.setArticleId("someartid")
         or1.setUnits(2)
         or1.setPaymentOptions(paymentOptions)
+        or1.setPayPerRequest(true)
         then:
         or1.getArticleId() == "someartid"
         or1.getUnits() == 2
         or1.getPaymentOptions() == paymentOptions
-
+        or1.isPayPerRequest()
         when:
-        def or2 = new OrderRequest("someartid",2,paymentOptions)
+        def or2 = new OrderRequest("someartid",2,paymentOptions, true)
         then:
         or2.getArticleId() == "someartid"
         or2.getUnits() == 2
         or2.getPaymentOptions() == paymentOptions
+        or2.isPayPerRequest()
     }
 
     def "Verify that toJsonAsString works as expected"(){
         expect:
-        new OrderRequest().toJsonAsString(false) == """{"units":0}"""
-        new OrderRequest("someartid",2,paymentOptions).toJsonAsString(false) == """{"articleId":"someartid","units":2,"paymentOptions":[{"option":"testoption1","value":"testvalue1"},{"option":"testoption2","value":"testvalue2"}]}"""
+        new OrderRequest().toJsonAsString(false) == """{"units":0,"payPerRequest":false}"""
+        new OrderRequest("someartid",2,paymentOptions, true).toJsonAsString(false) == """{"articleId":"someartid","units":2,"paymentOptions":[{"option":"testoption1","value":"testvalue1"},{"option":"testoption2","value":"testvalue2"}],"payPerRequest":true}"""
     }
 
     def "Verify that parsing of JSON data works as expected"(){
         when:
-        OrderRequest or = new OrderRequest(toJsonObject("""{"articleId":"someartid","units":2,"paymentOptions":[{"option":"testoption1","value":"testvalue1"},{"option":"testoption2","value":"testvalue2"}]}"""))
+        OrderRequest or = new OrderRequest(toJsonObject("""{"articleId":"someartid","units":2,"paymentOptions":[{"option":"testoption1","value":"testvalue1"},{"option":"testoption2","value":"testvalue2"}],"payPerRequest":true}"""))
         then:
         or.getArticleId() == "someartid"
         or.getUnits() == 2
@@ -70,6 +73,7 @@ class OrderRequestSpec extends Specification {
         or.getPaymentOptions()[0].value == "testvalue1"
         or.getPaymentOptions()[1].option == "testoption2"
         or.getPaymentOptions()[1].value == "testvalue2"
+        or.isPayPerRequest()
         when:
         or = new OrderRequest(toJsonObject("""{}"""))
         then:

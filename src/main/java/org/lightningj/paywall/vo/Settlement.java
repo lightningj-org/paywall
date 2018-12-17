@@ -38,6 +38,7 @@ public class Settlement extends JWTClaim  implements Payment {
     protected Invoice invoice;
     protected Instant validUntil;
     protected Instant validFrom;
+    protected boolean payPerRequest;
 
     /**
      * Empty Constructor
@@ -50,12 +51,14 @@ public class Settlement extends JWTClaim  implements Payment {
      * @param invoice the related invoice. (Optional)
      * @param validUntil the time the payment is valid and the requested call can used.
      * @param validFrom the time the payment is valid from. (Optional)
+     * @param payPerRequest if the settlement is one time only, i.e only valid for one request.
      */
-    public Settlement(byte[] preImageHash, Invoice invoice, Instant validUntil, Instant validFrom) {
+    public Settlement(byte[] preImageHash, Invoice invoice, Instant validUntil, Instant validFrom, boolean payPerRequest) {
         this.preImageHash = preImageHash;
         this.invoice = invoice;
         this.validUntil = validUntil;
         this.validFrom = validFrom;
+        this.payPerRequest = payPerRequest;
     }
 
     /**
@@ -141,6 +144,22 @@ public class Settlement extends JWTClaim  implements Payment {
     }
 
     /**
+     *
+     * @return if the settlement is one time only, i.e only valid for one request.
+     */
+    public boolean isPayPerRequest() {
+        return payPerRequest;
+    }
+
+    /**
+     *
+     * @param payPerRequest if the settlement is one time only, i.e only valid for one request.
+     */
+    public void setPayPerRequest(boolean payPerRequest) {
+        this.payPerRequest = payPerRequest;
+    }
+
+    /**
      * Method that minimizes the amount of data (by removing the related invoice) if
      * the settlement data is only needed to verify if a given preImageHash have been
      * settled or not.
@@ -161,14 +180,8 @@ public class Settlement extends JWTClaim  implements Payment {
         addNotRequired(jsonObjectBuilder,"invoice", invoice);
         add(jsonObjectBuilder,"validUntil",validUntil);
         addNotRequired(jsonObjectBuilder,"validFrom",validFrom);
+        add(jsonObjectBuilder,"payPerRequest",payPerRequest);
     }
-
-    //
-    // Fix test, getter and setter
-    //
-    // test mimimize data method, (removes invoice)
-    // test invoice
-    // Add converter methods to LNDHelper
 
     /**
      * Method to read all properties from a JsonObject into this value object.
@@ -186,6 +199,7 @@ public class Settlement extends JWTClaim  implements Payment {
         if(jsonObject.containsKey("validFrom") && !jsonObject.isNull("validFrom")) {
             validFrom = Instant.ofEpochMilli(getLong(jsonObject,"validFrom", true));
         }
+        payPerRequest = getBoolean(jsonObject,"payPerRequest",true);
     }
 
     @Override

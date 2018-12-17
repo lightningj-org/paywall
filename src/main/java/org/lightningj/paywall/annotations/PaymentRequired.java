@@ -34,6 +34,8 @@ public @interface PaymentRequired {
 
     int units() default 1;
 
+    boolean payPerRequest() default false;
+
     Class<? extends OrderRequestGenerator> orderRequestGenerator() default DefaultOrderRequestGenerator.class;
 
     RequestPolicyType requestPolicy() default RequestPolicyType.WITH_BODY;

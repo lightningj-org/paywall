@@ -18,6 +18,7 @@ import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.lightninghandler.*;
 import org.lightningj.paywall.lightninghandler.lnd.LNDLightningHandlerContext;
 import org.lightningj.paywall.paymenthandler.data.PaymentData;
+import org.lightningj.paywall.paymenthandler.data.PerRequestPaymentData;
 import org.lightningj.paywall.util.Base64Utils;
 import org.lightningj.paywall.vo.Invoice;
 import org.lightningj.paywall.vo.Order;
@@ -84,6 +85,8 @@ public abstract class BasePaymentHandler implements PaymentHandler, LightningEve
     @Override
     public Order createOrder(byte[] preImageHash, OrderRequest orderRequest) throws IOException, InternalErrorException {
         PaymentData paymentData = newPaymentData(preImageHash,orderRequest);
+        checkIfPayPerRequest(paymentData, orderRequest);
+
         Order order =  paymentDataConverter.convertToOrder(paymentData);
         if(log.isLoggable(Level.FINE)) {
             log.log(Level.FINE, "Created order: " + order);
@@ -121,14 +124,20 @@ public abstract class BasePaymentHandler implements PaymentHandler, LightningEve
      * @param includeInvoice if a invoice should be included in the settlement response. This might
      *                       consume more resources.
      * @return a settlement value object of related preImageHash if invoice is settled, otherwise null.
+     * @throws IllegalArgumentException if related payment is per request and is already executed.
      * @throws IOException if communication exception occurred in underlying components.
      * @throws InternalErrorException if internal exception occurred looking up the settlement.
      */
     @Override
-    public Settlement checkSettlement(byte[] preImageHash, boolean includeInvoice) throws IOException, InternalErrorException {
+    public Settlement checkSettlement(byte[] preImageHash, boolean includeInvoice) throws IllegalArgumentException, IOException, InternalErrorException {
         Settlement retval = null;
         PaymentData paymentData = findPaymentData(preImageHash);
         if(paymentData != null){
+            if(paymentData instanceof PerRequestPaymentData && ((PerRequestPaymentData) paymentData).isPayPerRequest()){
+                if(((PerRequestPaymentData) paymentData).isExecuted()){
+                    throw new IllegalArgumentException("Invalid request with preImageHash: " + Base64Utils.encodeBase64String(preImageHash) + ", request have already been processed.");
+                }
+            }
             if(paymentDataConverter.isSettled(paymentData)){
                 retval = paymentDataConverter.convertToSettlement(paymentData, includeInvoice);
             }
@@ -146,6 +155,9 @@ public abstract class BasePaymentHandler implements PaymentHandler, LightningEve
      * @param settledInvoice a settled invoice that should be registered in the payment handler.
      * @param registerNew if a new payment data should be created if no prior object existed for related
      *                    preImageHash.
+     * @param orderRequest the specification of the order that should be created calculated
+     *                     from data in the PaymentRequired annotation. Only used if new payment data needs to be
+     *                     registered.
      * @param context the latest known state of the lightning handler.  Null if no known state exists.
      * @return a settlement value object for the given settledInvoice.
      * @throws IllegalArgumentException if settled invoices preImageHash does exists as payment data and registerNew
@@ -154,7 +166,7 @@ public abstract class BasePaymentHandler implements PaymentHandler, LightningEve
      * @throws InternalErrorException  if internal exception occurred registering a settled invoice.
      */
     @Override
-    public Settlement registerSettledInvoice(Invoice settledInvoice, boolean registerNew,
+    public Settlement registerSettledInvoice(Invoice settledInvoice, boolean registerNew, OrderRequest orderRequest,
                                              LightningHandlerContext context) throws IllegalArgumentException,IOException,InternalErrorException{
         if(!settledInvoice.isSettled()){
             throw new IllegalArgumentException("Error trying to register settled invoice with preImageHash " + Base64Utils.encodeBase64String(settledInvoice.getPreImageHash()) + ". Invoice is not settled.");
@@ -165,7 +177,8 @@ public abstract class BasePaymentHandler implements PaymentHandler, LightningEve
         }
         if(paymentData == null){
             if(registerNew){
-                paymentData = newPaymentData(settledInvoice.getPreImageHash(), null);
+                paymentData = newPaymentData(settledInvoice.getPreImageHash(), orderRequest);
+                checkIfPayPerRequest(paymentData,orderRequest);
             }else{
                 throw new IllegalArgumentException("Error trying to register unknown settled invoice. Invoice preImageHash: " + Base64Utils.encodeBase64String(settledInvoice.getPreImageHash()));
             }
@@ -179,6 +192,25 @@ public abstract class BasePaymentHandler implements PaymentHandler, LightningEve
             log.log(Level.FINE, "Register settled invoice of preImageHash: " + Base64Utils.encodeBase64String(settledInvoice.getPreImageHash()) + " resulted in settlement: " + settlement);
         }
         return settlement;
+    }
+
+    /**
+     * Method to flag a related payment flow is a pay per request type and has been processed successfully.
+     * @param preImageHash the preImageHash of the payment to mark as processed.
+     * @throws IOException if communication exception occurred in underlying components.
+     * @throws InternalErrorException if internal exception occurred updating the payment or no related payment found.
+     */
+    public void markAsExecuted(byte[] preImageHash) throws IOException, InternalErrorException{
+        PaymentData paymentData = findPaymentData(preImageHash);
+        if(paymentData == null){
+            throw new InternalErrorException("Internal Error marking payment with preImageHash " + Base64Utils.encodeBase64String(preImageHash) + " as executed. Payment not found.");
+        }
+        if(paymentData instanceof PerRequestPaymentData){
+            ((PerRequestPaymentData) paymentData).setExecuted(true);
+            updatePaymentData(PaymentEventType.REQUEST_EXECUTED,paymentData,null);
+        }else{
+            throw new InternalErrorException("Internal Error marking payment with preImageHash " + Base64Utils.encodeBase64String(preImageHash) + " as executed. Related PaymentData doesn't implement PerRequestPaymentData.");
+        }
     }
 
     /**
@@ -259,8 +291,7 @@ public abstract class BasePaymentHandler implements PaymentHandler, LightningEve
      * @param preImageHash the unique preImageHash used to identify a payment flow
      *                     withing a lightning payment.
      * @param orderRequest the specification of the payment data that should be created calculated
-     *                     from data in the PaymentRequired annotation. Can be null in the special
-     *                     case of a settled invoice that is registered directly.
+     *                     from data in the PaymentRequired annotation.
      * @return a newly generated PaymentData signaling a new payment flow used to
      * create an Order value object.
      * @throws IOException if communication exception occurred in underlying components.
@@ -327,6 +358,17 @@ public abstract class BasePaymentHandler implements PaymentHandler, LightningEve
             paymentEventBus.triggerEvent(type, eventPayment);
         }catch(Exception e){
             log.log(Level.SEVERE, "Error updating payment data on Lightning event of type " + event.getType() + ", invoice preimage hash: " + Base64Utils.encodeBase64String(event.getInvoice().getPreImageHash()) + ", message: " + e.getMessage(),e);
+        }
+    }
+
+    /**
+     * Help method that verifies that if order request has payPerRequest flag, then
+     * the related PaymentData implements PerRequestPaymentData otherwise throws
+     * InternalErrorException.
+     */
+    private void checkIfPayPerRequest(PaymentData paymentData, OrderRequest orderRequest) throws InternalErrorException {
+        if(orderRequest.isPayPerRequest() && !(paymentData instanceof PerRequestPaymentData)){
+            throw new InternalErrorException("Internal error, order request specified payPerRequest but generated PaymentData by PaymentHandler doesn't implement PerRequestPaymentData.");
         }
     }
 }

@@ -16,10 +16,7 @@ package org.lightningj.paywall.paymenthandler;
 
 import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.lightninghandler.LightningHandler;
-import org.lightningj.paywall.paymenthandler.data.FullPaymentData;
-import org.lightningj.paywall.paymenthandler.data.MinimalPaymentData;
-import org.lightningj.paywall.paymenthandler.data.PaymentData;
-import org.lightningj.paywall.paymenthandler.data.StandardPaymentData;
+import org.lightningj.paywall.paymenthandler.data.*;
 import org.lightningj.paywall.util.Base64Utils;
 import org.lightningj.paywall.vo.Invoice;
 import org.lightningj.paywall.vo.NodeInfo;
@@ -146,6 +143,10 @@ public class PaymentDataConverter {
             if(!(paymentData instanceof StandardPaymentData)){
                 settlement.setValidUntil(clock.instant().plus(defaultSettlementValidity));
             }
+        }
+        if(paymentData instanceof PerRequestPaymentData){
+            PerRequestPaymentData prpd = (PerRequestPaymentData) paymentData;
+            settlement.setPayPerRequest(prpd.isPayPerRequest());
         }
         if(paymentData instanceof StandardPaymentData){
             StandardPaymentData spd = (StandardPaymentData) paymentData;

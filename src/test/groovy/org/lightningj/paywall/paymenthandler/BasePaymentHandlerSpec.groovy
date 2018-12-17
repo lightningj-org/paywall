@@ -89,6 +89,19 @@ class BasePaymentHandlerSpec extends Specification {
         1 * BasePaymentHandler.log.log(Level.FINE, {it =~ "Created order:"})
     }
 
+    def """Verify that createOrder throws InternalErrorException if orderRequest has payPerRequest flag and newPaymentData
+doesn't return PaymentData implementing PerRequestPaymentData"""(){
+        setup:
+        OrderRequest or = new OrderRequest()
+        or.articleId = "article1"
+        or.payPerRequest = true
+        when:
+        paymentHandler.createOrder("abc".bytes, or)
+        then:
+        def e = thrown InternalErrorException
+        e.message == "Internal error, order request specified payPerRequest but generated PaymentData by PaymentHandler doesn't implement PerRequestPaymentData."
+    }
+
     def "Verify that lookupInvoice returns calls findPaymentData and converts the PaymentData into an invoice."(){
         setup:
         Invoice invoice = genFullInvoiceData(true)
@@ -130,6 +143,7 @@ was returned with the includeInvoice flag."""(){
         result.invoice.bolt11Invoice == invoice.bolt11Invoice
         result.validFrom == null
         result.validUntil.toEpochMilli() == 1544917414514L
+        !result.payPerRequest
         1 * BasePaymentHandler.log.log(Level.FINE, {it =~ "Check settlement of preImageHash:"})
     }
 
@@ -149,6 +163,7 @@ was returned without the includeInvoice flag."""(){
         result.invoice == null
         result.validFrom == null
         result.validUntil.toEpochMilli() == 1544917414514L
+        !result.payPerRequest
         1 * BasePaymentHandler.log.log(Level.FINE, {it =~ "Check settlement of preImageHash:"})
     }
 
@@ -182,12 +197,45 @@ was returned without the includeInvoice flag."""(){
         1 * BasePaymentHandler.log.log(Level.FINE, {it =~ "Check settlement of preImageHash:"})
     }
 
+    def """Verify that checkSettlement returns a Settlement if related invoice was found and was settled and is payPerRequest"""(){
+        setup:
+        Invoice invoice = genFullInvoiceData(true)
+        byte[] preImageHash = "PerReqSettled".bytes
+        invoice.preImageHash = preImageHash
+        when:
+        Settlement result = paymentHandler.checkSettlement(preImageHash, false)
+        then:
+        paymentHandler.findPaymentDataCalls.size() == 1
+        paymentHandler.findPaymentDataCalls[0].preImageHash == preImageHash
+        0 * lightningHandler.lookupInvoice(preImageHash)
+        result.preImageHash == preImageHash
+        result.invoice == null
+        result.validFrom == null
+        result.validUntil.toEpochMilli() == 1544917414514L
+        result.payPerRequest
+        1 * BasePaymentHandler.log.log(Level.FINE, {it =~ "Check settlement of preImageHash:"})
+    }
+
+    def """Verify that checkSettlement throws IllegalArgumentException if related invoice is payPerRequest and already executed"""(){
+        setup:
+        Invoice invoice = genFullInvoiceData(true)
+        byte[] preImageHash = "PerReqSettledExecuted".bytes
+        invoice.preImageHash = preImageHash
+        when:
+        Settlement result = paymentHandler.checkSettlement(preImageHash, false)
+        then:
+        def e = thrown IllegalArgumentException
+        e.message == "Invalid request with preImageHash: UGVyUmVxU2V0dGxlZEV4ZWN1dGVk, request have already been processed."
+        paymentHandler.findPaymentDataCalls.size() == 1
+        paymentHandler.findPaymentDataCalls[0].preImageHash == preImageHash
+    }
+
     def "Verify that registerSettledInvoice throws IllegalArgumentException if payment is already settled in the system."(){
         setup:
         Invoice invoice = genFullInvoiceData(true)
         invoice.preImageHash = Base64Utils.decodeBase64String("MTIzSettled")
         when:
-        paymentHandler.registerSettledInvoice(invoice,false, context)
+        paymentHandler.registerSettledInvoice(invoice,false,  new OrderRequest(), context)
         then:
         def e = thrown IllegalArgumentException
         e.message == "Error trying to register settled invoice with preImageHash MTIzSettlec=. Payment is already settled."
@@ -197,7 +245,7 @@ was returned without the includeInvoice flag."""(){
         setup:
         Invoice invoice = genFullInvoiceData(true)
         when:
-        Settlement settlement = paymentHandler.registerSettledInvoice(invoice,false,context)
+        Settlement settlement = paymentHandler.registerSettledInvoice(invoice,false, new OrderRequest(),context)
         then:
         paymentHandler.updatePaymentDataCalls.size() == 1
         paymentHandler.updatePaymentDataCalls[0].type == PaymentEventType.INVOICE_SETTLED
@@ -210,16 +258,17 @@ was returned without the includeInvoice flag."""(){
         0 * lightningHandler.lookupInvoice(_)
     }
 
-    def "Verify that registerSettledInvoice registers new payment data if not exists and registerNew flag set.."(){
+    def "Verify that registerSettledInvoice registers new payment data if not exists and registerNew flag set."(){
         setup:
+        OrderRequest orderRequest = new OrderRequest()
         Invoice invoice = genFullInvoiceData(true)
         invoice.preImageHash = Base64Utils.decodeBase64String("akdamdns")
         when:
-        Settlement settlement = paymentHandler.registerSettledInvoice(invoice,true,context)
+        Settlement settlement = paymentHandler.registerSettledInvoice(invoice,true,orderRequest,context)
         then:
         paymentHandler.newPaymentDataCalls.size() == 1
         paymentHandler.newPaymentDataCalls[0].preImageHash == invoice.preImageHash
-        paymentHandler.newPaymentDataCalls[0].orderRequst == null
+        paymentHandler.newPaymentDataCalls[0].orderRequest == orderRequest
         paymentHandler.updatePaymentDataCalls.size() == 1
         paymentHandler.updatePaymentDataCalls[0].type == PaymentEventType.INVOICE_SETTLED
         paymentHandler.updatePaymentDataCalls[0].paymentData.preImageHash == invoice.preImageHash
@@ -228,6 +277,21 @@ was returned without the includeInvoice flag."""(){
         settlement.validFrom == null
         settlement.validUntil.toEpochMilli() == 1544917414514L
         settlement.invoice == invoice
+        0 * lightningHandler.lookupInvoice(_)
+    }
+
+    def """Verify that registerSettledInvoice throws InternalErrorExcpetion if new payment data doesn't implement
+PerRequestPaymentData even though OrderRequest contains payPerRequest flag."""(){
+        setup:
+        OrderRequest orderRequest = new OrderRequest()
+        orderRequest.payPerRequest = true
+        Invoice invoice = genFullInvoiceData(true)
+        invoice.preImageHash = Base64Utils.decodeBase64String("akdamdns")
+        when:
+        paymentHandler.registerSettledInvoice(invoice,true,orderRequest,context)
+        then:
+        def e = thrown InternalErrorException
+        e.message == "Internal error, order request specified payPerRequest but generated PaymentData by PaymentHandler doesn't implement PerRequestPaymentData."
         0 * lightningHandler.lookupInvoice(_)
     }
 
@@ -236,10 +300,37 @@ was returned without the includeInvoice flag."""(){
         Invoice invoice = genFullInvoiceData(true)
         invoice.preImageHash = "unknown".bytes
         when:
-        paymentHandler.registerSettledInvoice(invoice,false, context)
+        paymentHandler.registerSettledInvoice(invoice,false, new OrderRequest(), context)
         then:
         def e = thrown IllegalArgumentException
         e.message == "Error trying to register unknown settled invoice. Invoice preImageHash: dW5rbm93bg=="
+    }
+
+    def "Verify that markAsExecuted updates a PerRequestPaymentData with executed flag if related payment exists"(){
+        when:
+        paymentHandler.markAsExecuted("PerReqSettled".bytes)
+        then:
+        paymentHandler.updatePaymentDataCalls.size() == 1
+        paymentHandler.updatePaymentDataCalls[0].type == PaymentEventType.REQUEST_EXECUTED
+        paymentHandler.updatePaymentDataCalls[0].paymentData.preImageHash == "PerReqSettled".bytes
+        paymentHandler.updatePaymentDataCalls[0].paymentData.executed == true
+        paymentHandler.updatePaymentDataCalls[0].context == null
+    }
+
+    def "Verify that markAsExecuted throws InternalErrorException if preImageHash couldn't be found."(){
+        when:
+        paymentHandler.markAsExecuted("unknown".bytes)
+        then:
+        def e = thrown InternalErrorException
+        e.message == "Internal Error marking payment with preImageHash dW5rbm93bg== as executed. Payment not found."
+    }
+
+    def "Verify that markAsExecuted throws InternalErrorException if related payment doesn't implement PerRequestPaymentData."(){
+        when:
+        paymentHandler.markAsExecuted("abc".bytes)
+        then:
+        def e = thrown InternalErrorException
+        e.message == "Internal Error marking payment with preImageHash YWJj as executed. Related PaymentData doesn't implement PerRequestPaymentData."
     }
 
     def "Verify that registerListener calls register in event bus."(){
@@ -366,6 +457,12 @@ was returned without the includeInvoice flag."""(){
             }
             if(preImageHash == Base64Utils.decodeBase64String("MTIzSettled")) {
                 return new TestMinimalData(preImageHash: preImageHash, orderAmount: new BTC(1000), settled: true)
+            }
+            if(preImageHash == "PerReqSettled".bytes) {
+                return new TestMinimalPayPerRequestData(preImageHash: preImageHash, orderAmount: new BTC(1000), settled: true, payPerRequest: true, executed: false)
+            }
+            if(preImageHash =="PerReqSettledExecuted".bytes) {
+                return new TestMinimalPayPerRequestData(preImageHash: preImageHash, orderAmount: new BTC(1000), settled: true, payPerRequest: true, executed: true)
             }
             return null
         }

@@ -35,6 +35,7 @@ public class OrderRequest extends JSONParsable {
     String articleId;
     int units;
     List<PaymentOption> paymentOptions;
+    boolean payPerRequest;
 
     /**
      * Empty Constructor
@@ -49,11 +50,15 @@ public class OrderRequest extends JSONParsable {
      * @param calculatedUnits the calculated units for paymentRequiredAnnotation unit calculator.
      * @param paymentOptions optional payment options which can be custom values defined between
      * PaymentRequired annotation and used PaymentHandler.
+     * @param payPerRequest true if payment only should be valid for one payment, set by annotation, but
+     *                      PaymentHandler might override this setting. Important: If used must PaymentData implementation
+     *                      implement PerRequestPaymentData.
      */
-    public OrderRequest(String articleId, int calculatedUnits, List<PaymentOption> paymentOptions){
+    public OrderRequest(String articleId, int calculatedUnits, List<PaymentOption> paymentOptions, boolean payPerRequest){
         this.articleId = articleId;
         this.units = calculatedUnits;
         this.paymentOptions = paymentOptions;
+        this.payPerRequest = payPerRequest;
     }
 
     /**
@@ -115,6 +120,25 @@ public class OrderRequest extends JSONParsable {
         this.paymentOptions = paymentOptions;
     }
 
+    /**
+     *
+     * @return true if payment only should be valid for one payment, set by annotation, but
+     *                      PaymentHandler might override this setting. Important: If used must PaymentData implementation
+     *                      implement PerRequestPaymentData.
+     */
+    public boolean isPayPerRequest() {
+        return payPerRequest;
+    }
+
+    /**
+     *
+     * @param payPerRequest true if payment only should be valid for one payment, set by annotation, but
+     *                      PaymentHandler might override this setting. Important: If used must PaymentData implementation
+     *                      implement PerRequestPaymentData.
+     */
+    public void setPayPerRequest(boolean payPerRequest) {
+        this.payPerRequest = payPerRequest;
+    }
 
     /**
      * Method that should set the objects property to Json representation.
@@ -127,6 +151,7 @@ public class OrderRequest extends JSONParsable {
         addNotRequired(jsonObjectBuilder,"articleId",articleId);
         addNotRequired(jsonObjectBuilder,"units",units);
         addNotRequired(jsonObjectBuilder, "paymentOptions",paymentOptions);
+        add(jsonObjectBuilder, "payPerRequest",payPerRequest);
     }
 
     /**
@@ -154,6 +179,9 @@ public class OrderRequest extends JSONParsable {
             } catch (Exception e) {
                 throw new JsonException("Error parsing json paymentOptions field on OrderRequest : " + e.getMessage(), e);
             }
+        }
+        if(jsonObject.containsKey("payPerRequest")){
+            payPerRequest = getBoolean(jsonObject, "payPerRequest", payPerRequest);
         }
     }
 }

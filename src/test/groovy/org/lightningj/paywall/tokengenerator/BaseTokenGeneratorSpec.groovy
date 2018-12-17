@@ -135,7 +135,7 @@ class BaseTokenGeneratorSpec extends Specification {
         Instant notBefore = Instant.now().minus(10, ChronoUnit.MINUTES)
         def paymentData = new Order("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
         def invoiceData = new Invoice("abasrekwsdf".getBytes(), "abasdreser",null,new BTC(10000),new NodeInfo("1231232@10.10.10.1"),expireDate,Instant.now())
-        def settlementData = new Settlement("abasrekwsdf".getBytes(),null,expireDate,null)
+        def settlementData = new Settlement("abasrekwsdf".getBytes(),null,expireDate,null, true)
         when:
         String token = baseTokenGenerator.generateToken(ctx_type,expireDate,notBefore,false,null,paymentData,invoiceData,settlementData)
         //println token
@@ -246,7 +246,7 @@ class BaseTokenGeneratorSpec extends Specification {
         setup:
         Instant expireDate = Instant.now().plus(10, ChronoUnit.MINUTES)
         Instant requestDate = Instant.now().minus(10, ChronoUnit.MINUTES)
-        def settlementData = new Settlement("abasrekwsdf".getBytes(),null,expireDate,null)
+        def settlementData = new Settlement("abasrekwsdf".getBytes(),null,expireDate,null, true)
         def requestData = new RequestData("avksjedf".getBytes(),requestDate)
         when:
         String token = baseTokenGenerator.generateSettlementToken(settlementData,requestData,expireDate,null,null)

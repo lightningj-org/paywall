@@ -31,7 +31,14 @@ public enum PaymentEventType {
     /**
      * Event signaling that a invoice have been settled.
      */
-    INVOICE_SETTLED;
+    INVOICE_SETTLED,
+    /**
+     * Event signaling that a payed request has been executed. Only used for payment
+     * flows with payPerRequest flag set.
+     */
+    REQUEST_EXECUTED;
+
+
 
     /**
      * Special constant indicating ANY type is applicable.

@@ -34,6 +34,7 @@ class DefaultOrderRequestGeneratorSpec extends Specification {
         or1.getArticleId() == "someArticleId"
         or1.getUnits() == 1
         or1.getPaymentOptions().size() == 0
+        !or1.isPayPerRequest()
         when:
         def or2 = orderRequestGenerator.generate(findAnnotation("callWith10UnitsAndPaymentOptions"),null)
         then:
@@ -44,6 +45,7 @@ class DefaultOrderRequestGeneratorSpec extends Specification {
         or2.getPaymentOptions()[0].value == "value1"
         or2.getPaymentOptions()[1].option == "option2"
         or2.getPaymentOptions()[1].value == "value2"
+        or2.isPayPerRequest()
     }
 
     def "Verify that InternalErrorException is thrown if no articleId was specified"(){
@@ -68,7 +70,7 @@ class DefaultOrderRequestGeneratorSpec extends Specification {
         @PaymentRequired(articleId = "someArticleId")
         void callWithDefaultUnits(){}
 
-        @PaymentRequired(articleId= "someArticleId", units = 10, paymentOptions = [
+        @PaymentRequired(articleId= "someArticleId", units = 10, payPerRequest = true, paymentOptions = [
             @PaymentOption(option = "option1",value = "value1"), @PaymentOption(option = "option2",value = "value2")])
         void callWith10UnitsAndPaymentOptions(){}
 

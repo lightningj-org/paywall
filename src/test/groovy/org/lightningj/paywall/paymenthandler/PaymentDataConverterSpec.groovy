@@ -19,6 +19,7 @@ import org.lightningj.paywall.lightninghandler.LightningHandler
 import org.lightningj.paywall.paymenthandler.data.FullPaymentData
 import org.lightningj.paywall.paymenthandler.data.MinimalPaymentData
 import org.lightningj.paywall.paymenthandler.data.PaymentData
+import org.lightningj.paywall.paymenthandler.data.PerRequestPaymentData
 import org.lightningj.paywall.paymenthandler.data.StandardPaymentData
 import org.lightningj.paywall.vo.Invoice
 import org.lightningj.paywall.vo.InvoiceSpec
@@ -182,6 +183,7 @@ class PaymentDataConverterSpec extends Specification {
         settlement.invoice == null
         settlement.validUntil.toEpochMilli() == 3605000
         settlement.validFrom == null
+        !settlement.payPerRequest
     }
 
     def "Verify that convertToSettlement includes invoice if includeInvoice is set."(){
@@ -207,6 +209,7 @@ class PaymentDataConverterSpec extends Specification {
         settlement.invoice == null
         settlement.validUntil.toEpochMilli() == 3605000
         settlement.validFrom == null
+        !settlement.payPerRequest
     }
 
     def "Verify that convertToSettlement converts StandardPaymentData with payment data validity if set."(){
@@ -219,12 +222,13 @@ class PaymentDataConverterSpec extends Specification {
         settlement.invoice == null
         settlement.validUntil.toEpochMilli() == 7000
         settlement.validFrom == null
+        !settlement.payPerRequest
     }
 
     def "Verify that convertToSettlement converts FullPaymentData with payment data valid from set in settlement."(){
         setup:
         def pd = new TestFullData(settled: true, preImageHash: "abc".bytes, orderAmount: new BTC(123),
-                settlementExpireDate: Instant.ofEpochMilli(7000), settlementValidFrom: Instant.ofEpochMilli(1000))
+                settlementExpireDate: Instant.ofEpochMilli(7000), settlementValidFrom: Instant.ofEpochMilli(1000), payPerRequest: true)
         when:
         Settlement settlement = converter.convertToSettlement(pd,false)
         then:
@@ -232,6 +236,7 @@ class PaymentDataConverterSpec extends Specification {
         settlement.invoice == null
         settlement.validUntil.toEpochMilli() == 7000
         settlement.validFrom.toEpochMilli() == 1000
+        settlement.payPerRequest
     }
 
 
@@ -332,6 +337,14 @@ class PaymentDataConverterSpec extends Specification {
         Amount orderAmount
     }
 
+    static class TestMinimalPayPerRequestData implements MinimalPaymentData, PerRequestPaymentData{
+        byte[] preImageHash
+        boolean settled
+        Amount orderAmount
+        boolean payPerRequest
+        boolean executed
+    }
+
     static class TestStandardData extends TestMinimalData implements StandardPaymentData{
         String description
         CryptoAmount invoiceAmount
@@ -345,5 +358,7 @@ class PaymentDataConverterSpec extends Specification {
     static class TestFullData extends TestStandardData implements FullPaymentData{
         Instant settlementValidFrom
         String bolt11Invoice
+        boolean payPerRequest
+        boolean executed
     }
 }

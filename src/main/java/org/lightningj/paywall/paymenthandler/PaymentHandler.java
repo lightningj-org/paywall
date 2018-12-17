@@ -60,7 +60,7 @@ public interface PaymentHandler {
      * @throws IOException if communication exception occurred in underlying components.
      * @throws InternalErrorException if internal exception occurred creating the order.
      */
-    Order   createOrder(byte[] preImageHash, OrderRequest orderRequest) throws IOException,InternalErrorException;// TODO check
+    Order createOrder(byte[] preImageHash, OrderRequest orderRequest) throws IOException,InternalErrorException;// TODO check
 
     /**
      * Method to lookup an invoice in the PaymentHandler. The payment handler might
@@ -81,10 +81,11 @@ public interface PaymentHandler {
      * @param includeInvoice if a invoice should be included in the settlement response. This might
      *                       consume more resources.
      * @return a settlement value object of related preImageHash if invoice is settled, otherwise null.
+     * @throws IllegalArgumentException if related payment is per request and is already executed.
      * @throws IOException if communication exception occurred in underlying components.
      * @throws InternalErrorException if internal exception occurred looking up the settlement.
      */
-    Settlement checkSettlement(byte[] preImageHash, boolean includeInvoice) throws IOException,InternalErrorException;
+    Settlement checkSettlement(byte[] preImageHash, boolean includeInvoice) throws IllegalArgumentException, IOException,InternalErrorException;
 
     /**
      * Method to manually register an invoice as settled (isSettled must be set to true) used
@@ -93,14 +94,25 @@ public interface PaymentHandler {
      * @param settledInvoice a settled invoice that should be registered in the payment handler.
      * @param registerNew if a new payment data should be created if no prior object existed for related
      *                    preImageHash.
+     * @param orderRequest the specification of the order that should be created calculated
+     *                     from data in the PaymentRequired annotation. Only used if new payment data needs to be
+     *                     registered.
      * @param context the latest known state of the lightning handler. Null if no known state exists.
      * @return a settlement value object for the given settledInvoice.
      * @throws IllegalArgumentException if settled invoices preImageHash does exists as payment data and registerNew is false.
      * @throws IOException if communication exception occurred in underlying components.
      * @throws InternalErrorException  if internal exception occurred registering a settled invoice.
      */
-    Settlement registerSettledInvoice(Invoice settledInvoice, boolean registerNew,
+    Settlement registerSettledInvoice(Invoice settledInvoice, boolean registerNew, OrderRequest orderRequest,
                                       LightningHandlerContext context) throws IllegalArgumentException,IOException,InternalErrorException;
+
+    /**
+     * Method to flag a related payment flow is a pay per request type and has been processed successfully.
+     * @param preImageHash the preImageHash of the payment to mark as processed.
+     * @throws IOException if communication exception occurred in underlying components.
+     * @throws InternalErrorException if internal exception occurred updating the payment or no related payment found.
+     */
+    void markAsExecuted(byte[] preImageHash) throws IOException, InternalErrorException;
 
     /**
      * Method to add the listener to the set of listeners listening

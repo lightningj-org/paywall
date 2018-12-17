@@ -26,6 +26,11 @@ import java.time.Instant;
  * When only implementing the minimal payment data it is assumed that the order
  * amount is the same as later invoice amount and settled amount.
  *
+ * If system should support payPerRequest payments should the implementing data
+ * also implement the PerRequestPaymentData.
+ *
+ * @see PerRequestPaymentData
+ *
  * Created by Philip Vendil on 2018-12-09.
  */
 public interface MinimalPaymentData extends PaymentData{
