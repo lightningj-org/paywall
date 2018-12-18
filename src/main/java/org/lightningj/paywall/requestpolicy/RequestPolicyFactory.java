@@ -59,7 +59,7 @@ public class RequestPolicyFactory {
 
 
     private RequestPolicy getCustomPolicy(PaymentRequired paymentRequired) throws InternalErrorException{
-        if(paymentRequired.customPolicy() == Object.class){
+        if(paymentRequired.customPolicy() == NoCustomRequestPolicy.class){
             throw new InternalErrorException("Error in PaymentRequired annotation, class path to custom RequestPolicy implementation is required for RequestPolicyType CUSTOM.");
         }
 

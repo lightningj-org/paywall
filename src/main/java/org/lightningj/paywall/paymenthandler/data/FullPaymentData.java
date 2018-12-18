@@ -19,7 +19,7 @@ import java.time.Instant;
 /**
  * Interface defining the complete set of fields in a payment data and can
  * be implemented for best performance of the system.
- *
+ * <p>
  * If the payment contains all fields necessary in a payment flow it will
  * not perform look-ups of invoices in LightningHandler to the same extent which
  * may boost performance.

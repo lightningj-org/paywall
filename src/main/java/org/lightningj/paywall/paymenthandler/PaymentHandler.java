@@ -26,14 +26,14 @@ import java.io.IOException;
 
 /**
  * Interface for a PaymentHandler handling orders, invoices and settlements.
- *
+ * <p>
  * All payment flows need a custom implementations of a payment handler persisting
  * generated invoices and constructing orders from an order request constructed
  * from a WebService with PaymentRequired annotation.
- *
+ * <p>
  * It is recommended to implement a class that inherits the BasePaymentHandler
  * that takes care of most of the logic.
- *
+ * <p>
  * Created by Philip Vendil on 2018-12-04.
  */
 public interface PaymentHandler {

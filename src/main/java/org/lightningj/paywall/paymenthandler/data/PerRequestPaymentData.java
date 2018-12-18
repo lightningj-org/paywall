@@ -17,7 +17,7 @@ package org.lightningj.paywall.paymenthandler.data;
 /**
  * Special interface for payment workflow that should support pay per request
  * billing. All implementing class must also at least implement MinimalPaymentData.
- *
+ * <p>
  * Contains two fields: payPerRequest indicating if related invoice is only valid
  * for one request and executed which is a flag set to true after a request have
  * actually been processed (and related payment had pay per request to true) so

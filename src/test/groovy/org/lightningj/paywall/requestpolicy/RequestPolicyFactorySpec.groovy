@@ -63,14 +63,6 @@ class RequestPolicyFactorySpec extends Specification {
         e.message == "Error in PaymentRequired annotation, class path to custom RequestPolicy implementation is required for RequestPolicyType CUSTOM."
     }
 
-    def "Verify that custom request policy with invalid implementation class specified throws InternalErrorException"(){
-        when:
-        factory.getRequestPolicy(findAnnotation("callWithInvalidCustom2"))
-        then:
-        def e = thrown InternalErrorException
-        e.message == 'Error constructing custom request policy: class org.lightningj.paywall.requestpolicy.RequestPolicyFactorySpec$InvalidCustomRequestPolicy, message: org.lightningj.paywall.requestpolicy.RequestPolicyFactorySpec$InvalidCustomRequestPolicy cannot be cast to org.lightningj.paywall.requestpolicy.RequestPolicy'
-        e.cause != null
-    }
 
     private findAnnotation(String method){
         return AnnotationTest.class.getMethod(method).annotations[0]
@@ -115,8 +107,12 @@ class RequestPolicyFactorySpec extends Specification {
             return new RequestData(byte[0], null)
         }
     }
-    static class InvalidCustomRequestPolicy{
+    static class InvalidCustomRequestPolicy implements RequestPolicy{
 
+        @Override
+        RequestData significantRequestDataDigest(CachableHttpServletRequest request) throws IllegalArgumentException, IOException, InternalErrorException {
+            return null
+        }
     }
 
 }

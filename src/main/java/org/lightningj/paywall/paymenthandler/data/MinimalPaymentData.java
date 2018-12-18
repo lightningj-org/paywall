@@ -22,10 +22,10 @@ import java.time.Instant;
  * Interface defining the minimal amount of information that needs to be stored
  * for a given payment flow. Should generally only be used in test environments
  * or proof of concepts.
- *
+ * <p>
  * When only implementing the minimal payment data it is assumed that the order
  * amount is the same as later invoice amount and settled amount.
- *
+ * <p>
  * If system should support payPerRequest payments should the implementing data
  * also implement the PerRequestPaymentData.
  *

@@ -155,7 +155,7 @@ public abstract class JSONParsable {
     /**
      * Help method used in parseJson implementation to fetch a string value
      * if set in JsonObject otherwise returns null or throws JsonException if required.
-     * @throws JSONParsable if field is not set but required.
+     * @throws JsonException if field is not set but required.
      */
     protected String getString(JsonObject object, String key, boolean required) throws JsonException{
         if(object.containsKey(key) && !object.isNull(key)){
@@ -178,7 +178,7 @@ public abstract class JSONParsable {
     /**
      * Help method used in parseJson implementation to fetch a hex string value and decode
      * it into byte array if set in JsonObject otherwise returns null or throws JsonException if required.
-     * @throws JSONParsable if field is not set but required.
+     * @throws JsonException if field is not set but required.
      */
     protected byte[] getByteArrayFromHex(JsonObject object, String key, boolean required) throws JsonException{
         if(object.containsKey(key) && !object.isNull(key)){
@@ -207,7 +207,7 @@ public abstract class JSONParsable {
     /**
      * Help method used in parseJson implementation to fetch a b64 string value and decode
      * it into byte array if set in JsonObject otherwise returns null or throws JsonException if required.
-     * @throws JSONParsable if field is not set but required.
+     * @throws JsonException if field is not set but required.
      */
     protected byte[] getByteArrayFromB64(JsonObject object, String key, boolean required) throws JsonException{
         if(object.containsKey(key) && !object.isNull(key)){
@@ -236,7 +236,7 @@ public abstract class JSONParsable {
     /**
      * Help method used in parseJson implementation to fetch a long value
      * if set in JsonObject otherwise returns null or throws JsonException if required.
-     * @throws JSONParsable if field is not set but required.
+     * @throws JsonException if field is not set but required.
      */
     protected Long getLong(JsonObject object, String key, boolean required) throws JsonException{
         if(object.containsKey(key) && !object.isNull(key)){
@@ -263,7 +263,7 @@ public abstract class JSONParsable {
     /**
      * Help method used in parseJson implementation to fetch a int value
      * if set in JsonObject otherwise returns null or throws JsonException if required.
-     * @throws JSONParsable if field is not set but required.
+     * @throws JsonException if field is not set but required.
      */
     protected Integer getInt(JsonObject object, String key, boolean required) throws JsonException{
         if(object.containsKey(key) && !object.isNull(key)){
@@ -290,7 +290,7 @@ public abstract class JSONParsable {
     /**
      * Help method used in parseJson implementation to fetch a boolean value
      * if set in JsonObject otherwise returns null.
-     * @throws JSONParsable if field is not set but required.
+     * @throws JsonException if field is not set but required.
      */
     protected Boolean getBoolean(JsonObject object, String key, boolean required) throws JsonException{
         if(object.containsKey(key) && !object.isNull(key)){
@@ -313,7 +313,7 @@ public abstract class JSONParsable {
     /**
      * Help method used in parseJson implementation to fetch a double value
      * if set in JsonObject otherwise returns null.
-     * @throws JSONParsable if field is not set but required.
+     * @throws JsonException if field is not set but required.
      */
     protected Double getDouble(JsonObject object, String key, boolean required) throws JsonException{
         if(object.containsKey(key) && !object.isNull(key)){
@@ -340,7 +340,7 @@ public abstract class JSONParsable {
     /**
      * Help method used in parseJson implementation to fetch a json object
      * if set in JsonObject otherwise returns null.
-     * @throws JSONParsable if field is not set but required.
+     * @throws JsonException if field is not set but required.
      */
     protected JsonObject getJsonObject(JsonObject object, String key, boolean required) throws JsonException{
         try {
@@ -370,7 +370,7 @@ public abstract class JSONParsable {
     /**
      * Help method used in parseJson implementation to fetch a json array
      * if set in JsonObject otherwise returns null.
-     * @throws JSONParsable if field is not set but required.
+     * @throws JsonException if field is not set but required.
      */
     protected JsonArray getJsonArray(JsonObject object, String key, boolean required) throws JsonException{
         try {

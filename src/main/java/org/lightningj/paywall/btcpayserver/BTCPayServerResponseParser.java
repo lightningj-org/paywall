@@ -44,7 +44,7 @@ public class BTCPayServerResponseParser {
      * invoice.
      * @param jsonResponse the jsonResponse as a string.
      * @return the related invoice value object.
-     * @throws InternalErrorException if problems occurred parsing the json data.
+     * @throws JsonException if problems occurred parsing the json data.
      */
     public Invoice parseInvoice(byte[] jsonResponse) throws JsonException {
         if(jsonResponse == null){
@@ -58,7 +58,7 @@ public class BTCPayServerResponseParser {
      * invoice.
      * @param jsonResponse the jsonResponse as a string.
      * @return the related invoice value object.
-     * @throws InternalErrorException if problems occurred parsing the json data.
+     * @throws JsonException if problems occurred parsing the json data.
      */
     public Token parseToken(byte[] jsonResponse) throws JsonException {
         if(jsonResponse == null){

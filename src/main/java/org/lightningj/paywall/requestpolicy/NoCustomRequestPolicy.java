@@ -12,35 +12,27 @@
  *  See terms of license at gnu.org.                                     *
  *                                                                       *
  *************************************************************************/
-package org.lightningj.paywall.annotations.vo;
+package org.lightningj.paywall.requestpolicy;
 
-import java.lang.annotation.*;
+import org.lightningj.paywall.InternalErrorException;
+import org.lightningj.paywall.vo.RequestData;
+import org.lightningj.paywall.web.CachableHttpServletRequest;
+
+import java.io.IOException;
 
 /**
- * Payment options is a way of adding extra option related to a
- * payment order where the annotation can contain extra information
- * that could be used by the PaymentHandler to create an order.
- * <p>
- * Created by Philip Vendil on 2018-12-07.
+ * Special class used as default custom Request Policy that signal that
+ * one of the default defined request policys should be used.
+ *
+ * Created by philip on 2018-12-18.
  */
-@Documented
-@Target({ElementType.TYPE,ElementType.METHOD})
-@Inherited
-@Retention(RetentionPolicy.RUNTIME)
-public @interface PaymentOption {
+public class NoCustomRequestPolicy implements RequestPolicy {
 
     /**
-     *
-     * @return The option name, a key to type of option set defined
-     * by the PaymentHandler used.
+     * This method is not used.
      */
-    String option();
-
-    /**
-     *
-     * @return  the options value. Values should be supported
-     * by the configured payment handler.
-     */
-    String value();
-
+    @Override
+    public RequestData significantRequestDataDigest(CachableHttpServletRequest request) throws IllegalArgumentException, IOException, InternalErrorException {
+        return null;
+    }
 }

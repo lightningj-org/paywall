@@ -36,7 +36,7 @@ import static org.lightningj.paywall.paymenthandler.PaymentEventType.*;
  * Abstract Base PaymentHandler containing common logic to simplify implementation
  * of specific implementation and let them focus on persisting payment data and
  * looking up information for a given order from an order request.
- *
+ * <p>
  * Created by Philip Vendil on 2018-12-09.
  */
 public abstract class BasePaymentHandler implements PaymentHandler, LightningEventListener{

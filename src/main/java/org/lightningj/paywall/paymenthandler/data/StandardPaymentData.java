@@ -21,7 +21,7 @@ import java.time.Instant;
 /**
  * A Standard PaymentData contains most of the needed data fields to be stored
  * in a normal lightning related invoicing solution.
- *
+ * <p>
  * If system should support payPerRequest payments should the implementing data
  * also implement the PerRequestPaymentData.
  *
