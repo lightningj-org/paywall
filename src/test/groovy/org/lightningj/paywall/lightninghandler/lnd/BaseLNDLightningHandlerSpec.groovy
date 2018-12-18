@@ -24,6 +24,7 @@ import org.lightningj.paywall.lightninghandler.LightningEvent
 import org.lightningj.paywall.lightninghandler.LightningEventListener
 import org.lightningj.paywall.lightninghandler.LightningEventType
 import org.lightningj.paywall.lightninghandler.LightningHandlerContext
+import org.lightningj.paywall.paymenthandler.BasePaymentHandler
 import org.lightningj.paywall.vo.Invoice
 import org.lightningj.paywall.vo.NodeInfo
 import spock.lang.Specification
@@ -51,9 +52,10 @@ class BaseLNDLightningHandlerSpec extends Specification {
         handler.synchronousLndAPI = Mock(SynchronousLndAPI)
         handler.lndHelper = Mock(LNDHelper)
         BaseLNDLightningHandler.log = Mock(Logger)
+        BaseLNDLightningHandler.log.isLoggable(Level.FINE) >> true
     }
 
-    def "check that listenToInvoices throws InternalErrorException if DLightningHandlerContext is not of type LNDLightningHandlerContext"(){
+    def "check that listenToInvoices throws InternalErrorException if LightningHandlerContext is not of type LNDLightningHandlerContext"(){
         when:
         handler.listenToInvoices(Mock(LightningHandlerContext))
         then:
@@ -61,7 +63,7 @@ class BaseLNDLightningHandlerSpec extends Specification {
         e.message == "Error initializing LightningHandler invoice subscription, LightningHandlerContext must be of type LNDLightningHandlerContext."
 
     }
-    def "check that listenToInvoices detects added and settled invoices correclty"(){
+    def "check that listenToInvoices detects added and settled invoices correctly"(){
         setup:
         def ctx = new LNDLightningHandlerContext(20,10)
         def eventListener = new TestLightningEventListener()
@@ -82,6 +84,7 @@ class BaseLNDLightningHandlerSpec extends Specification {
                 assert o != null
                 observer = o
         }
+        1 * BaseLNDLightningHandler.log.log(Level.FINE,{ it =~ "Subscribed to invoices in LND, context:"} )
         when:
         observer.onNext(unsettled)
         then:
@@ -89,7 +92,7 @@ class BaseLNDLightningHandlerSpec extends Specification {
         eventListener.eventList.size() == 1
         eventListener.eventList[0].type == LightningEventType.ADDED
         eventListener.eventList[0].invoice != null
-
+        1 * BaseLNDLightningHandler.log.log(Level.FINE,{ it =~ "Received invoice event from LND, invoice:"} )
         when:
         observer.onNext(settled)
         then:

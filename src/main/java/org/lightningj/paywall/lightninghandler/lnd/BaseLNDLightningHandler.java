@@ -69,7 +69,11 @@ public abstract class BaseLNDLightningHandler implements LightningHandler {
         try {
             org.lightningj.lnd.wrapper.message.Invoice lndInvoice = getLndHelper().genLNDInvoice(preImageData,paymentData);
             AddInvoiceResponse addInvoiceResponse = getSyncAPI().addInvoice(lndInvoice);
-            return getLndHelper().convert(getNodeInfo(),getSyncAPI().lookupInvoice(null,addInvoiceResponse.getRHash()));
+            Invoice invoice = getLndHelper().convert(getNodeInfo(),getSyncAPI().lookupInvoice(null,addInvoiceResponse.getRHash()));
+            if(log.isLoggable(Level.FINE)) {
+                log.log(Level.FINE, "Generated Invoice in LND: " + invoice);
+            }
+            return invoice;
         } catch (Exception e) {
             throw new InternalErrorException("Internal error adding invoice to LND, preImageHash: " + Base64Utils.encodeBase64String(paymentData.getPreImageHash()) + ", message: " + e.getMessage(),e);
         }
@@ -86,7 +90,11 @@ public abstract class BaseLNDLightningHandler implements LightningHandler {
     public Invoice lookupInvoice(byte[] preImageHash) throws IOException, InternalErrorException{
         checkConnection();
         try {
-            return getLndHelper().convert(getNodeInfo(),getSyncAPI().lookupInvoice(null,preImageHash));
+            Invoice invoice = getLndHelper().convert(getNodeInfo(),getSyncAPI().lookupInvoice(null,preImageHash));
+            if(log.isLoggable(Level.FINE)) {
+                log.log(Level.FINE, "Lookup Invoice in LND: " + invoice);
+            }
+            return invoice;
         } catch (Exception e) {
             if(e instanceof ServerSideException){
                 if(((ServerSideException) e).getStatus().getCode() == UNKNOWN || ((ServerSideException) e).getStatus().getCode() == NOT_FOUND){
@@ -146,6 +154,9 @@ public abstract class BaseLNDLightningHandler implements LightningHandler {
                     try {
                         Invoice invoiceData = getLndHelper().convert(getNodeInfo(),invoice);
                         LNDLightningHandlerContext context = new LNDLightningHandlerContext(invoice.getAddIndex(),invoice.getSettleIndex());
+                        if(log.isLoggable(Level.FINE)) {
+                            log.log(Level.FINE, "Received invoice event from LND, invoice: " + invoice + "\ncontext: " + context);
+                        }
                         LightningEvent event = new LightningEvent(type,invoiceData,context);
                         for(LightningEventListener listener : listeners){
                             listener.onLightningEvent(event);
@@ -166,6 +177,9 @@ public abstract class BaseLNDLightningHandler implements LightningHandler {
                     log.info("LND Invoice subscription completed. This shouldn't happen.");
                 }
             });
+            if(log.isLoggable(Level.FINE)) {
+                log.log(Level.FINE, "Subscribed to invoices in LND, context: " + context);
+            }
         } catch (Exception e) {
             throw new InternalErrorException("Internal error subscribing to LND Invoice events, message: " + e.getMessage(),e);
         }
