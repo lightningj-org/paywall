@@ -98,6 +98,7 @@ class AsymmetricKeyTokenGeneratorSpec extends Specification {
         then:
         def e = thrown TokenException
         e.message == "Error verifying token signature, signature key is not trusted."
+        e.reason == TokenException.Reason.INVALID
     }
 
     def "Verify that altered token data throws TokenVerifyException"(){
@@ -111,6 +112,7 @@ class AsymmetricKeyTokenGeneratorSpec extends Specification {
         then:
         def e = thrown TokenException
         e.message == "Invalid signature for token."
+        e.reason == TokenException.Reason.INVALID
     }
 
     def "Verify that getTrustedKeysAsJWTKeys builds cache correctly"(){
@@ -173,6 +175,7 @@ class AsymmetricKeyTokenGeneratorSpec extends Specification {
         then:
         def e = thrown TokenException
         e.message =~ "Unable to decrypt token: Authentication tag check failed."
+        e.reason == TokenException.Reason.INVALID
     }
 
     def "Verify that it is not possible to decrypt altered data"(){
@@ -187,6 +190,7 @@ class AsymmetricKeyTokenGeneratorSpec extends Specification {
         then:
         def e = thrown TokenException
         e.message =~ "Unable to decrypt token: Authentication tag check failed."
+        e.reason == TokenException.Reason.INVALID
     }
 
     def "Verify that getIssuerName returns the public key id"(){

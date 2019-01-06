@@ -32,6 +32,7 @@ import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.Instant;
 
+import static org.lightningj.paywall.tokengenerator.TokenException.Reason.*;
 /**
  * Default abstract base class containing help method for implementing
  * TokenGenerators.
@@ -65,6 +66,7 @@ public abstract class BaseTokenGenerator implements TokenGenerator{
     /**
      * Help method to generate a JWT token containing a payment data claim.
      *
+     * @param orderRequest the order request derived from the payment required annotation.
      * @param order the payment data to include in the token.
      * @param requestData optional request data that could be set if workflow requires it.
      * @param expireDate the expire date of the token in the future.
@@ -76,13 +78,14 @@ public abstract class BaseTokenGenerator implements TokenGenerator{
      * @throws IOException if communication problems occurred with underlying systems.
      * @throws InternalErrorException if internal problems occurred processing the token.
      */
-    public String generatePaymentToken(Order order, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException{
-        return generateToken(TokenContext.CONTEXT_PAYMENT_TOKEN_TYPE,expireDate, notBefore, true, recipientSubject, order, requestData);
+    public String generatePaymentToken(OrderRequest orderRequest, Order order, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException{
+        return generateToken(TokenContext.CONTEXT_PAYMENT_TOKEN_TYPE,expireDate, notBefore, true, recipientSubject, orderRequest, order, requestData);
     }
 
     /**
      * Help method to generate a JWT token containing a invoice data claim.
      *
+     * @param orderRequest the order request derived from the payment required annotation.
      * @param invoice the invoice data to include in the token.
      * @param requestData optional request data that could be set if workflow requires it.
      * @param expireDate the expire date of the token in the future.
@@ -94,13 +97,14 @@ public abstract class BaseTokenGenerator implements TokenGenerator{
      * @throws IOException if communication problems occurred with underlying systems.
      * @throws InternalErrorException if internal problems occurred processing the token.
      */
-    public String generateInvoiceToken(Invoice invoice, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException{
-        return generateToken(TokenContext.CONTEXT_INVOICE_TOKEN_TYPE,expireDate, notBefore, true, recipientSubject, invoice, requestData);
+    public String generateInvoiceToken(OrderRequest orderRequest, Invoice invoice, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException{
+        return generateToken(TokenContext.CONTEXT_INVOICE_TOKEN_TYPE,expireDate, notBefore, true, recipientSubject, orderRequest, invoice, requestData);
     }
 
     /**
      * Help method to generate a JWT token containing a settlement data claim.
      *
+     * @param orderRequest the order request derived from the payment required annotation.
      * @param settlement the settlement data to include in the token.
      * @param requestData optional request data that could be set if workflow requires it.
      * @param expireDate the expire date of the token in the future.
@@ -112,13 +116,10 @@ public abstract class BaseTokenGenerator implements TokenGenerator{
      * @throws IOException if communication problems occurred with underlying systems.
      * @throws InternalErrorException if internal problems occurred processing the token.
      */
-    public String generateSettlementToken(Settlement settlement, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException{
-        return generateToken(TokenContext.CONTEXT_INVOICE_TOKEN_TYPE,expireDate, notBefore, true, recipientSubject, settlement, requestData);
+    public String generateSettlementToken(OrderRequest orderRequest, Settlement settlement, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException{
+        return generateToken(TokenContext.CONTEXT_INVOICE_TOKEN_TYPE,expireDate, notBefore, true, recipientSubject, orderRequest, settlement, requestData);
     }
 
-
-    // TODO
-    // Write tests for base token.
 
     /**
      * General method to generate JWT token that is JWS signed and optionally JWE encrypted.
@@ -182,7 +183,7 @@ public abstract class BaseTokenGenerator implements TokenGenerator{
      */
     public JwtClaims parseToken(String tokenContextType, String jwtToken) throws TokenException, IOException, InternalErrorException{
         if(jwtToken == null){
-            throw new TokenException("Couldn't verify null JWT token.");
+            throw new TokenException("Couldn't verify null JWT token.", NOT_FOUND);
         }
         try {
             if(isEncryptedToken(jwtToken)){
@@ -192,16 +193,16 @@ public abstract class BaseTokenGenerator implements TokenGenerator{
             jws.setCompactSerialization(jwtToken);
             populateJWSVerifyAlgAndKey(new TokenContext(tokenContextType, Context.KeyUsage.SIGN),jws);
             if(!jws.verifySignature()){
-                throw new TokenException("Invalid signature for token.");
+                throw new TokenException("Invalid signature for token.", INVALID);
             }
             JwtClaims jwtClaims = JwtClaims.parse(jws.getPayload());
             checkExpireDate(jwtClaims);
             checkNotBefore(jwtClaims);
             return jwtClaims;
         }catch(JoseException e){
-            throw new TokenException("Invalid token received when parsing JWS Signature: " + e.getMessage(),e);
+            throw new TokenException("Invalid token received when parsing JWS Signature: " + e.getMessage(),e, INVALID);
         }catch(InvalidJwtException e){
-            throw new TokenException("Invalid token received when parsing JWS Claims: " + e.getMessage(),e);
+            throw new TokenException("Invalid token received when parsing JWS Claims: " + e.getMessage(),e, INVALID);
         }
     }
 
@@ -214,13 +215,13 @@ public abstract class BaseTokenGenerator implements TokenGenerator{
         try {
             NumericDate numericDate = jwtClaims.getExpirationTime();
             if(numericDate == null){
-                throw new TokenException("Couldn't verify token, couldn't retrieve expire date from JWT claims.");
+                throw new TokenException("Couldn't verify token, couldn't retrieve expire date from JWT claims.", INVALID);
             }
             if(clock.millis() > (numericDate.getValueInMillis() + ALLOWED_CLOCK_SKEW)){
-                throw new TokenException("JWT Token have expired.");
+                throw new TokenException("JWT Token have expired.", EXPIRED);
             }
         } catch (MalformedClaimException e) {
-            throw new TokenException("Couldn't verify token, couldn't retrieve expire date from JWT claims.");
+            throw new TokenException("Couldn't verify token, couldn't retrieve expire date from JWT claims.", INVALID);
         }
     }
 
@@ -234,11 +235,11 @@ public abstract class BaseTokenGenerator implements TokenGenerator{
             NumericDate numericDate = jwtClaims.getNotBefore();
             if(numericDate != null) {
                 if (clock.millis() < (numericDate.getValueInMillis() - ALLOWED_CLOCK_SKEW)) {
-                    throw new TokenException("JWT Token not yet valid.");
+                    throw new TokenException("JWT Token not yet valid.", NOT_YET_VALID);
                 }
             }
         } catch (MalformedClaimException e) {
-            throw new TokenException("Couldn't verify token, couldn't retrieve not before date from JWT claims.");
+            throw new TokenException("Couldn't verify token, couldn't retrieve not before date from JWT claims.", INVALID);
         }
     }
 
@@ -328,7 +329,7 @@ public abstract class BaseTokenGenerator implements TokenGenerator{
             if(e instanceof InternalErrorException){
                 throw (InternalErrorException) e;
             }
-            throw new TokenException("Unable to decrypt token: " + e.getMessage(),e);
+            throw new TokenException("Unable to decrypt token: " + e.getMessage(),e, INVALID);
         }
     }
 }

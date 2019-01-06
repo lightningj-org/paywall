@@ -89,6 +89,11 @@ class OrderRequestSpec extends Specification {
         thrown JsonException
     }
 
+    def "Verify getClaimName() returns correct clain name"(){
+        expect:
+        new OrderRequest().getClaimName() == "orderRequest"
+    }
+
     private static List genPaymentOption(Map options){
         List retval = []
         options.keySet().each {

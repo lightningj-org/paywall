@@ -72,6 +72,7 @@ class KeyIdByFileRecipientRepositorySpec extends Specification {
         then:
         def e = thrown(TokenException)
         e.message == "Error couldn't find any recipient key to encrypt token to having key id (subject): someunknown"
+        e.reason == TokenException.Reason.INVALID
     }
 
     def "Verify that findRecipientKey returns EllipticCurveJsonWebKey for an EC public key"(){
@@ -110,5 +111,6 @@ class KeyIdByFileRecipientRepositorySpec extends Specification {
         then:
         def e = thrown(TokenException)
         e.message == "Error finding recipient key for subject null."
+        e.reason == TokenException.Reason.INVALID
     }
 }

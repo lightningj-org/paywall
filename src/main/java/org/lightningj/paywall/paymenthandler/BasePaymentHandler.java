@@ -14,6 +14,7 @@
  *************************************************************************/
 package org.lightningj.paywall.paymenthandler;
 
+import org.lightningj.paywall.AlreadyExecutedException;
 import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.lightninghandler.*;
 import org.lightningj.paywall.lightninghandler.lnd.LNDLightningHandlerContext;
@@ -124,18 +125,19 @@ public abstract class BasePaymentHandler implements PaymentHandler, LightningEve
      * @param includeInvoice if a invoice should be included in the settlement response. This might
      *                       consume more resources.
      * @return a settlement value object of related preImageHash if invoice is settled, otherwise null.
+     * @throws AlreadyExecutedException if related payment is pay per request and is already executed.
      * @throws IllegalArgumentException if related payment is per request and is already executed.
      * @throws IOException if communication exception occurred in underlying components.
      * @throws InternalErrorException if internal exception occurred looking up the settlement.
      */
     @Override
-    public Settlement checkSettlement(byte[] preImageHash, boolean includeInvoice) throws IllegalArgumentException, IOException, InternalErrorException {
+    public Settlement checkSettlement(byte[] preImageHash, boolean includeInvoice) throws AlreadyExecutedException, IllegalArgumentException, IOException, InternalErrorException {
         Settlement retval = null;
         PaymentData paymentData = findPaymentData(preImageHash);
         if(paymentData != null){
             if(paymentData instanceof PerRequestPaymentData && ((PerRequestPaymentData) paymentData).isPayPerRequest()){
                 if(((PerRequestPaymentData) paymentData).isExecuted()){
-                    throw new IllegalArgumentException("Invalid request with preImageHash: " + Base64Utils.encodeBase64String(preImageHash) + ", request have already been processed.");
+                    throw new AlreadyExecutedException(preImageHash,"Invalid request with preImageHash: " + Base64Utils.encodeBase64String(preImageHash) + ", request have already been processed.");
                 }
             }
             if(paymentDataConverter.isSettled(paymentData)){

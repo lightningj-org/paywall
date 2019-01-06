@@ -14,6 +14,7 @@
  *************************************************************************/
 package org.lightningj.paywall.paymenthandler;
 
+import org.lightningj.paywall.AlreadyExecutedException;
 import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.lightninghandler.LightningHandlerContext;
 import org.lightningj.paywall.lightninghandler.lnd.LNDLightningHandlerContext;
@@ -81,11 +82,12 @@ public interface PaymentHandler {
      * @param includeInvoice if a invoice should be included in the settlement response. This might
      *                       consume more resources.
      * @return a settlement value object of related preImageHash if invoice is settled, otherwise null.
+     * @throws AlreadyExecutedException if related payment is pay per request and is already executed.
      * @throws IllegalArgumentException if related payment is per request and is already executed.
      * @throws IOException if communication exception occurred in underlying components.
      * @throws InternalErrorException if internal exception occurred looking up the settlement.
      */
-    Settlement checkSettlement(byte[] preImageHash, boolean includeInvoice) throws IllegalArgumentException, IOException,InternalErrorException;
+    Settlement checkSettlement(byte[] preImageHash, boolean includeInvoice) throws AlreadyExecutedException, IllegalArgumentException, IOException,InternalErrorException;
 
     /**
      * Method to manually register an invoice as settled (isSettled must be set to true) used

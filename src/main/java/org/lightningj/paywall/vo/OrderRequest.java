@@ -14,8 +14,8 @@
  *************************************************************************/
 package org.lightningj.paywall.vo;
 
-import org.lightningj.paywall.JSONParsable;
-import org.lightningj.paywall.annotations.PaymentRequired;
+import org.jose4j.jwt.JwtClaims;
+import org.lightningj.paywall.tokengenerator.JWTClaim;
 
 import javax.json.JsonArray;
 import javax.json.JsonException;
@@ -30,7 +30,9 @@ import java.util.List;
  *
  * Created by Philip Vendil on 2018-12-07.
  */
-public class OrderRequest extends JSONParsable {
+public class OrderRequest extends JWTClaim {
+
+    public static final String CLAIM_NAME = "orderRequest";
 
     String articleId;
     int units;
@@ -68,6 +70,23 @@ public class OrderRequest extends JSONParsable {
      */
     public OrderRequest(JsonObject jsonObject) throws JsonException {
         super(jsonObject);
+    }
+
+    /**
+     * Parse from JWTClaims constructor
+     *
+     * @param jwtClaims the JWT Tokens Claim set to extract data from.
+     */
+    public OrderRequest(JwtClaims jwtClaims) {
+        super(jwtClaims);
+    }
+
+    /**
+     * @return the claim name to set for implementing data in generated JWT token
+     */
+    @Override
+    public String getClaimName() {
+        return CLAIM_NAME;
     }
 
     /**

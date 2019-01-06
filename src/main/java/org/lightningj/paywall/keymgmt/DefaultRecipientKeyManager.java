@@ -52,7 +52,7 @@ abstract class DefaultRecipientKeyManager implements RecipientKeyManager {
      * Retrieves a list of public keys that should be used included in encrypted envelopes of generated
      * tokens.
      * @param context related context.
-     * @return a map pf keyId to public keys that should be recipients of encrypted messages.
+     * @return a map of keyId to public keys that should be recipients of encrypted messages.
      * @throws UnsupportedOperationException if operation in combination with given context isn't
      * supported.
      * @throws InternalErrorException if internal error occurred retrieving the public keys.

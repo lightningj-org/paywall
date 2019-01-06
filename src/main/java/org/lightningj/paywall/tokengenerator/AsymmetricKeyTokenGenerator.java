@@ -42,7 +42,7 @@ import static org.lightningj.paywall.tokengenerator.TokenContext.*;
  *
  * Created by Philip Vendil on 2018-10-29.
  */
-public class AsymmetricKeyTokenGenerator extends BaseTokenGenerator{
+public class    AsymmetricKeyTokenGenerator extends BaseTokenGenerator{
 
     AsymmetricKeyManager keyManager;
     RecipientRepository recipientRepository;
@@ -100,7 +100,7 @@ public class AsymmetricKeyTokenGenerator extends BaseTokenGenerator{
         VerificationJwkSelector jwkSelector = new VerificationJwkSelector();
         JsonWebKey jwk = jwkSelector.select(jws, getTrustedKeysAsJWTKeys(context).getJsonWebKeys());
         if(jwk == null){
-            throw new TokenException("Error verifying token signature, signature key is not trusted.");
+            throw new TokenException("Error verifying token signature, signature key is not trusted.", TokenException.Reason.INVALID);
         }
         jws.setKey(jwk.getKey());
     }

@@ -14,6 +14,7 @@
  *************************************************************************/
 package org.lightningj.paywall.paymenthandler
 
+import org.lightningj.paywall.AlreadyExecutedException
 import org.lightningj.paywall.InternalErrorException
 import org.lightningj.paywall.lightninghandler.LightningEvent
 import org.lightningj.paywall.lightninghandler.LightningEventType
@@ -224,7 +225,8 @@ was returned without the includeInvoice flag."""(){
         when:
         Settlement result = paymentHandler.checkSettlement(preImageHash, false)
         then:
-        def e = thrown IllegalArgumentException
+        def e = thrown AlreadyExecutedException
+        e.preImageHash == "PerReqSettledExecuted".bytes
         e.message == "Invalid request with preImageHash: UGVyUmVxU2V0dGxlZEV4ZWN1dGVk, request have already been processed."
         paymentHandler.findPaymentDataCalls.size() == 1
         paymentHandler.findPaymentDataCalls[0].preImageHash == preImageHash

@@ -45,6 +45,7 @@ public class Invoice extends JWTClaim implements Payment {
     protected boolean settled;
     protected CryptoAmount settledAmount;
     protected Instant settlementDate;
+    protected String sourceNode;
 
     /**
      * Empty Constructor
@@ -281,6 +282,24 @@ public class Invoice extends JWTClaim implements Payment {
     }
 
     /**
+     *
+     * @return the source node of the node creating the order, used in a distributed environment
+     * where the paywalled service and lightning handler is in different systems.
+     */
+    public String getSourceNode() {
+        return sourceNode;
+    }
+
+    /**
+     *
+     * @param sourceNode the source node of the node creating the order, used in a distributed environment
+     * where the paywalled service and lightning handler is in different systems.
+     */
+    public void setSourceNode(String sourceNode) {
+        this.sourceNode = sourceNode;
+    }
+
+    /**
      * Method that should set the objects property to Json representation.
      *
      * @param jsonObjectBuilder the json object build to use to set key/values in json
@@ -298,6 +317,7 @@ public class Invoice extends JWTClaim implements Payment {
         add(jsonObjectBuilder,"settled",settled);
         addNotRequired(jsonObjectBuilder,"settledAmount",settledAmount);
         addNotRequired(jsonObjectBuilder,"settlementDate",settlementDate);
+        addNotRequired(jsonObjectBuilder,"sourceNode",sourceNode);
     }
 
     /**
@@ -328,6 +348,7 @@ public class Invoice extends JWTClaim implements Payment {
         if(jsonObject.containsKey("settlementDate") && !jsonObject.isNull("settlementDate")) {
             settlementDate = Instant.ofEpochMilli(getLong(jsonObject,"settlementDate", true));
         }
+        sourceNode = getStringIfSet(jsonObject,"sourceNode");
     }
 
     @Override

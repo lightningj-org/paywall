@@ -50,11 +50,11 @@ public class KeyIdByFileRecipientRepository implements RecipientRepository {
     @Override
     public JsonWebKey findRecipientKey(TokenContext context, String subject) throws TokenException, IOException, InternalErrorException {
         if(subject == null){
-            throw new TokenException("Error finding recipient key for subject null.");
+            throw new TokenException("Error finding recipient key for subject null.", TokenException.Reason.INVALID);
         }
         PublicKey key = recipientKeyManager.getReceipients(context).get(subject);
         if(key == null){
-            throw new TokenException("Error couldn't find any recipient key to encrypt token to having key id (subject): " + subject);
+            throw new TokenException("Error couldn't find any recipient key to encrypt token to having key id (subject): " + subject, TokenException.Reason.INVALID);
         }
         if(key instanceof RSAPublicKey){
             JsonWebKey jwk = new RsaJsonWebKey((RSAPublicKey) key);
@@ -66,6 +66,6 @@ public class KeyIdByFileRecipientRepository implements RecipientRepository {
             jwk.setKeyId(subject);
             return jwk;
         }
-        throw new TokenException("Error finding public key to encrypt token with key id " + subject + ", unsupport key type: " + key.getClass().getSimpleName());
+        throw new TokenException("Error finding public key to encrypt token with key id " + subject + ", unsupport key type: " + key.getClass().getSimpleName(), TokenException.Reason.INVALID);
     }
 }

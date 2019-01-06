@@ -1,0 +1,75 @@
+    /*
+
+    // In filter
+
+    // Pre Process
+
+     PaymentFlow paymentFlow = getPaymentFlow(paymentRequired, request, expectedToken)
+     if(paymentFlow.isPaymentRequired()){
+       responseData = paymentFlow.requestPayment()
+       // if central, payment token, other invoice, also contains redirect url
+         // Populate response, cookie. (QR Code problems, separate controller?, maybe remove)
+       // redirect, or json, set parameters
+     }else{
+        if(paymentFlow.isPayPerRequest()){
+          // Save payment flow in filter?
+        }
+
+
+        proceed
+     }
+
+
+    // PostProcess
+
+     if(sc == 200){
+       if(paymentFlow.isPayPerRequest()){
+         paymentFlow.markExecuted()
+       }
+     }
+
+    // In controller, local
+
+    // check
+    PaymentFlow paymentFlow = getPaymentFlow(paymentRequired, request, expectedToken = invoice)
+    Settlement settlement = paymentFlow.checkSettlement().
+    if(paymentFlow.isSettled()){
+       SettlementResult settlementResult = paymentFlow.getSettlement()
+       genResponseData(settlementResult,redirectURL)
+       // redirect, set cookie
+    }else{
+       // return payment requried?
+    }
+
+        // In controller, central
+
+    // One controller to gen payment
+    PaymentFlow paymentFlow = getPaymentFlow(paymentRequired, request, expectedToken = payment)
+    if(paymentFlow.isPaymentRequired()){
+       paymentFlow.requestPayment()
+       // Populate response, cookie
+       // redirect, or json
+     }else{
+        // Save payment flow in filter?
+        proceed
+     }
+
+
+
+
+    // check, basically the same as local
+    PaymentFlow paymentFlow = getPaymentFlow(paymentRequired, request, expectedToken = invoiceToken)
+    Settlement settlement = paymentFlow.checkSettlement()
+    if(paymentFlow.isSettled()){
+       String settlementToken = paymentFlow.getSettlement()
+       genResponseData(settlementToken,redirectURL)
+       // redirect
+    }else{
+       // return payment requried?
+    }
+
+    // For WebEvents should settlementToken data (json) be sent.
+
+
+
+     */

@@ -13,53 +13,36 @@
  *                                                                       *
  *************************************************************************/
 
-package org.lightningj.paywall.tokengenerator;
+package org.lightningj.paywall;
 
 /**
- * Exception thrown by TokenGenerator if verification of a token failed.
+ * Exception thrown if related payment flow is payPerRequest and related
+ * settlement has already been settled.
  *
- * Created by Philip Vendil on 2018-11-11.
+ * Created by Philip Vendil on 2019-01-05.
  */
-public class TokenException extends Exception {
+public class AlreadyExecutedException extends Exception {
 
-    private Reason reason;
+    private byte[] preImageHash;
 
     /**
-     * Exception thrown by TokenGenerator if verification of a token failed.
+     * General exception indicating that something went wrong internally
+     * not due to client request. Could be miss-configuration or underlying
+     * components malfunctioning.
      *
+     * @param preImageHash of related already executed invoice.
      * @param message descriptive message.
      */
-    public TokenException(String message, Reason reason){
+    public AlreadyExecutedException(byte[] preImageHash, String message){
         super(message);
-        this.reason = reason;
-    }
-
-    /**
-     * Exception thrown by TokenGenerator if verification of a token failed.
-     *
-     * @param message descriptive message.
-     * @param cause causing exception.
-     */
-    public TokenException(String message, Throwable cause, Reason reason){
-        super(message,cause);
-        this.reason = reason;
+        this.preImageHash = preImageHash;
     }
 
     /**
      *
-     * @return the reason on why that was wrong with to token
+     * @return preImageHash of related already executed invoice.
      */
-    public Reason getReason() {
-        return reason;
-    }
-
-    /**
-     * A List of reasons on why that was wrong with to token.
-     */
-    public enum Reason{
-        EXPIRED,
-        NOT_YET_VALID,
-        NOT_FOUND,
-        INVALID
+    public byte[] getPreImageHash() {
+        return preImageHash;
     }
 }

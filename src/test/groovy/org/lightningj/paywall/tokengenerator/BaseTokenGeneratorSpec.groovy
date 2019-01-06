@@ -41,6 +41,8 @@ class BaseTokenGeneratorSpec extends Specification {
     @Shared SymmetricKeyManager keyManager
     def ctx_type= TokenContext.CONTEXT_PAYMENT_TOKEN_TYPE
 
+    OrderRequest orderRequest = new OrderRequest("1234",2, null, false)
+
     BaseTokenGenerator baseTokenGenerator
     def setupSpec(){
         BCUtils.installBCProvider()
@@ -95,6 +97,7 @@ class BaseTokenGeneratorSpec extends Specification {
         then:
         def e = thrown TokenException
         e.message == "Couldn't verify token, couldn't retrieve expire date from JWT claims."
+        e.reason == TokenException.Reason.INVALID
     }
 
     def "Verify that checkExpireDate with expired jwtClaims throws TokenVerifyException"(){
@@ -106,6 +109,7 @@ class BaseTokenGeneratorSpec extends Specification {
         then:
         def e = thrown TokenException
         e.message == "JWT Token have expired."
+        e.reason == TokenException.Reason.EXPIRED
     }
 
     def "Verify that checkNotBefore with not yet claim set doesn't throw TokenVerifyException"(){
@@ -126,6 +130,7 @@ class BaseTokenGeneratorSpec extends Specification {
         then:
         def e = thrown TokenException
         e.message == "JWT Token not yet valid."
+        e.reason == TokenException.Reason.NOT_YET_VALID
     }
 
 
@@ -194,6 +199,7 @@ class BaseTokenGeneratorSpec extends Specification {
         then:
         def e = thrown TokenException
         e.message == "Couldn't verify null JWT token."
+        e.reason == TokenException.Reason.NOT_FOUND
     }
 
     def "Verify that generatePaymentToken generates a valid payment token"(){
@@ -203,7 +209,7 @@ class BaseTokenGeneratorSpec extends Specification {
         def paymentData = new Order("abasrekwsdf".getBytes(), "Some Description", new BTC(10000), expireDate)
         def requestData = new RequestData("avksjedf".getBytes(),requestDate)
         when:
-        String token = baseTokenGenerator.generatePaymentToken(paymentData,requestData,expireDate,null,null)
+        String token = baseTokenGenerator.generatePaymentToken(orderRequest,paymentData,requestData,expireDate,null,null)
         JwtClaims claims = baseTokenGenerator.parseToken(TokenContext.CONTEXT_PAYMENT_TOKEN_TYPE,token)
         then:
         def pd2 = new Order(claims)
@@ -212,11 +218,14 @@ class BaseTokenGeneratorSpec extends Specification {
         rd2.requestDate == requestDate
 
         when:
-        token = baseTokenGenerator.generatePaymentToken(paymentData,null,expireDate,null,null)
+        token = baseTokenGenerator.generatePaymentToken(orderRequest,paymentData,null,expireDate,null,null)
         claims = baseTokenGenerator.parseToken(TokenContext.CONTEXT_PAYMENT_TOKEN_TYPE,token)
         then:
         def pd3 = new Order(claims)
         pd3.expireDate == expireDate
+        def or1 = new OrderRequest(claims)
+        or1.articleId == "1234"
+
     }
 
     def "Verify that generateInvoiceToken generates a valid invoice token"(){
@@ -226,16 +235,18 @@ class BaseTokenGeneratorSpec extends Specification {
         def invoiceData = new Invoice("abasrekwsdf".getBytes(), "abasdreser",null,new BTC(10000),new NodeInfo("1231232@10.10.10.1"),expireDate,Instant.now())
         def requestData = new RequestData("avksjedf".getBytes(),requestDate)
         when:
-        String token = baseTokenGenerator.generateInvoiceToken(invoiceData,requestData,expireDate,null,null)
+        String token = baseTokenGenerator.generateInvoiceToken(orderRequest,invoiceData,requestData,expireDate,null,null)
         JwtClaims claims = baseTokenGenerator.parseToken(TokenContext.CONTEXT_INVOICE_TOKEN_TYPE,token)
         then:
         def id2 = new Invoice(claims)
         def rd2 = new RequestData(claims)
+        def or2 = new OrderRequest(claims)
+        or2.articleId == "1234"
         id2.expireDate == expireDate
         rd2.requestDate == requestDate
 
         when:
-        token = baseTokenGenerator.generateInvoiceToken(invoiceData,null,expireDate,null,null)
+        token = baseTokenGenerator.generateInvoiceToken(null,invoiceData,null,expireDate,null,null)
         claims = baseTokenGenerator.parseToken(TokenContext.CONTEXT_INVOICE_TOKEN_TYPE,token)
         then:
         def id3 = new Invoice(claims)
@@ -249,16 +260,18 @@ class BaseTokenGeneratorSpec extends Specification {
         def settlementData = new Settlement("abasrekwsdf".getBytes(),null,expireDate,null, true)
         def requestData = new RequestData("avksjedf".getBytes(),requestDate)
         when:
-        String token = baseTokenGenerator.generateSettlementToken(settlementData,requestData,expireDate,null,null)
+        String token = baseTokenGenerator.generateSettlementToken(orderRequest,settlementData,requestData,expireDate,null,null)
         JwtClaims claims = baseTokenGenerator.parseToken(TokenContext.CONTEXT_INVOICE_TOKEN_TYPE,token)
         then:
         def sd2 = new Settlement(claims)
         def rd2 = new RequestData(claims)
+        def or2 = new OrderRequest(claims)
+        or2.articleId == "1234"
         sd2.validUntil == expireDate
         rd2.requestDate == requestDate
 
         when:
-        token = baseTokenGenerator.generateSettlementToken(settlementData,null,expireDate,null,null)
+        token = baseTokenGenerator.generateSettlementToken(null,settlementData,null,expireDate,null,null)
         claims = baseTokenGenerator.parseToken(TokenContext.CONTEXT_INVOICE_TOKEN_TYPE,token)
         then:
         def sd3 = new Settlement(claims)

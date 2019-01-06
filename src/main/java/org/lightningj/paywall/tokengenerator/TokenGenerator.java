@@ -43,6 +43,7 @@ public interface TokenGenerator {
     /**
      * Help method to generate a JWT token containing a payment data claim.
      *
+     * @param orderRequest the order request derived from the payment required annotation.
      * @param order the payment data to include in the token.
      * @param requestData optional request data that could be set if workflow requires it.
      * @param expireDate the expire date of the token in the future.
@@ -54,11 +55,12 @@ public interface TokenGenerator {
      * @throws IOException if communication problems occurred with underlying systems.
      * @throws InternalErrorException if internal problems occurred processing the token.
      */
-    String generatePaymentToken(Order order, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException;
+    String generatePaymentToken(OrderRequest orderRequest, Order order, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException;
 
     /**
      * Help method to generate a JWT token containing a invoice data claim.
      *
+     * @param orderRequest the order request derived from the payment required annotation.
      * @param invoice the invoice data to include in the token.
      * @param requestData optional request data that could be set if workflow requires it.
      * @param expireDate the expire date of the token in the future.
@@ -70,11 +72,12 @@ public interface TokenGenerator {
      * @throws IOException if communication problems occurred with underlying systems.
      * @throws InternalErrorException if internal problems occurred processing the token.
      */
-    String generateInvoiceToken(Invoice invoice, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException;
+    String generateInvoiceToken(OrderRequest orderRequest, Invoice invoice, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException;
 
     /**
      * Help method to generate a JWT token containing a settlement data claim.
      *
+     * @param orderRequest the order request derived from the payment required annotation.
      * @param settlement the settlement data to include in the token.
      * @param requestData optional request data that could be set if workflow requires it.
      * @param expireDate the expire date of the token in the future.
@@ -86,7 +89,7 @@ public interface TokenGenerator {
      * @throws IOException if communication problems occurred with underlying systems.
      * @throws InternalErrorException if internal problems occurred processing the token.
      */
-    String generateSettlementToken(Settlement settlement, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException;
+    String generateSettlementToken(OrderRequest orderRequest, Settlement settlement, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException;
 
     /**
      * General method to generate JWT token that is JWS signed and optionally JWE encrypted.

@@ -44,6 +44,7 @@ class InvoiceSpec extends Specification {
         !id1.isSettled()
         id1.getSettledAmount() == null
         id1.getSettlementDate() == null
+        id1.getSourceNode() == null
         when:
         id1.setPreImageHash("123".getBytes())
         id1.setBolt11Invoice("fksjeoskajduakdfhaskdismensuduajseusdke")
@@ -55,6 +56,7 @@ class InvoiceSpec extends Specification {
         id1.setSettled(true)
         id1.setSettledAmount(new BTC(1234))
         id1.setSettlementDate(Instant.ofEpochMilli(12344L))
+        id1.setSourceNode("SomeSourceNode")
         then:
         id1.getPreImageHash() == "123".getBytes()
         id1.getBolt11Invoice() == "fksjeoskajduakdfhaskdismensuduajseusdke"
@@ -66,6 +68,7 @@ class InvoiceSpec extends Specification {
         id1.isSettled()
         id1.getSettledAmount()  instanceof BTC
         id1.getSettlementDate().toEpochMilli() == 12344L
+        id1.getSourceNode() == "SomeSourceNode"
         when:
         def id2 = genFullInvoiceData(false)
         then:
@@ -79,6 +82,7 @@ class InvoiceSpec extends Specification {
         !id2.isSettled()
         id2.getSettledAmount() == null
         id2.getSettlementDate() == null
+        id2.getSourceNode() == null
         when:
         def id3 = genFullInvoiceData(true)
         then:
@@ -97,10 +101,14 @@ class InvoiceSpec extends Specification {
     // JWTClaims constructor tested in BaseTokenGeneratorSpec
 
     def "Verify that toJsonAsString works as expected"(){
+        setup:
+        def fullInvoice = genFullInvoiceData(true)
+        fullInvoice.sourceNode = "SomeSourceNode"
         expect:
         new Invoice("123".getBytes(),"fksjeoskajduakdfhaskdismensuduajseusdke","test desc",new BTC(123),new NodeInfo("12312312@10.10.01.1"),Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(2345L)).toJsonAsString(false) == """{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","description":"test desc","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":false}"""
         new Invoice("123".getBytes(),"fksjeoskajduakdfhaskdismensuduajseusdke",null,null,null,Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(2345L)).toJsonAsString(false) == """{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345,"invoiceDate":2345,"settled":false}"""
-        genFullInvoiceData(true).toJsonAsString(false) == """{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","description":"test desc","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"settlementDate":12344}"""
+        fullInvoice.toJsonAsString(false) == """{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","description":"test desc","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"settlementDate":12344,"sourceNode":"SomeSourceNode"}"""
+
         when:
         new Invoice(null,"fksjeoskajduakdfhaskdismensuduajseusdke",null,null,null,Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(2345L)).toJsonAsString(false)
         then:
@@ -125,7 +133,7 @@ class InvoiceSpec extends Specification {
 
     def "Verify that parsing of JSON data works as expected"(){
         when:
-        Invoice d = new Invoice(toJsonObject("""{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","description": "test desc","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"settlementDate":12344}"""))
+        Invoice d = new Invoice(toJsonObject("""{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","description": "test desc","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"settlementDate":12344,"sourceNode":"SomeSourceNode"}"""))
         then:
         d.preImageHash == "123".getBytes()
         d.bolt11Invoice == "fksjeoskajduakdfhaskdismensuduajseusdke"
@@ -137,6 +145,7 @@ class InvoiceSpec extends Specification {
         d.isSettled()
         d.getSettledAmount() instanceof CryptoAmount
         d.getSettlementDate().toEpochMilli() == 12344L
+        d.getSourceNode() == "SomeSourceNode"
 
         when:
         d = new Invoice(toJsonObject("""{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345,"invoiceDate":2345, "settled": false}"""))
