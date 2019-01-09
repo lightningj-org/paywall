@@ -15,6 +15,7 @@
 package org.lightningj.paywall.paymentflow;
 
 import org.jose4j.jwt.JwtClaims;
+import org.lightningj.paywall.AlreadyExecutedException;
 import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.annotations.PaymentRequired;
 import org.lightningj.paywall.currencyconverter.CurrencyConverter;
@@ -89,7 +90,7 @@ public class LocalPaymentFlow extends BasePaymentFlow {
      * @throws TokenException if problems occurred generating or validating related JWT Token.
      */
     @Override
-    public RequestPaymentResult requestPayment() throws IllegalArgumentException, IOException, InternalErrorException, InvalidCurrencyException, TokenException{
+    public InvoiceResult requestPayment() throws IllegalArgumentException, IOException, InternalErrorException, InvalidCurrencyException, TokenException{
             RequestPolicy requestPolicy = getRequestPolicyFactory().getRequestPolicy(paymentRequired);
             requestData = requestPolicy.significantRequestDataDigest(request);
 
@@ -102,7 +103,56 @@ public class LocalPaymentFlow extends BasePaymentFlow {
             Invoice invoice = getLightningHandler().generateInvoice(preImageData,convertedOrder);
             String invoiceToken = getTokenGenerator().generateInvoiceToken(orderRequest,invoice,requestData,invoice.getExpireDate(), getNotBeforeDate(),null);
 
-            return new RequestPaymentResult(invoice, invoiceToken);
+            return new InvoiceResult(invoice, invoiceToken);
+    }
+
+    /**
+     * Method to check if related payment is settled by the end user.
+     *
+     * @return true if settled.
+     *
+     * @throws IllegalArgumentException if user specified parameters (used by the constructor) was invalid.
+     * @throws IOException if communication problems occurred with underlying components.
+     * @throws InternalErrorException if internal errors occurred processing the method.
+     */
+    @Override
+    public boolean isSettled() throws AlreadyExecutedException, IllegalArgumentException, IOException, InternalErrorException {
+        if(settlement == null) {
+            settlement = getPaymentHandler().checkSettlement(preImageHash, false);
+        }
+
+        return settlement != null;
+    }
+
+    /**
+     * Method to retrieve a settlement and generate a settlement token.
+     *
+     * @return a value object containing the settlement and the related settlement token.
+     * @throws IllegalArgumentException if user specified parameters (used by the constructor) was invalid.
+     * @throws IOException if communication problems occurred with underlying components.
+     * @throws InternalErrorException if internal errors occurred processing the method.
+     * @throws TokenException if problem occurred generating the settlement token.
+     */
+    @Override
+    public SettlementResult getSettlement() throws AlreadyExecutedException, IllegalArgumentException, IOException, InternalErrorException, TokenException {
+        assert orderRequest != null;
+        assert requestData != null;
+        if (settlement == null) {
+            settlement = getPaymentHandler().checkSettlement(preImageHash, false);
+        }
+
+        String token = getTokenGenerator().generateSettlementToken(orderRequest,settlement,requestData,settlement.getValidUntil(),settlement.getValidFrom(), getSourceNode());
+        return new SettlementResult(settlement,token);
+    }
+
+    /**
+     * Unsupported operation in local payment flow. Throws InternalErrorException.
+     *
+     * @return InvoiceResult with invoice token if related token is settled, otherwise null.
+     * @throws InternalErrorException if internal errors occurred processing the method.
+     */
+    public InvoiceResult checkSettledInvoice() throws InternalErrorException{
+        throw new InternalErrorException("Unsupported method checkSettledInvoice in local payment flow.");
     }
 
     /**

@@ -55,9 +55,23 @@
      }
 
 
+    // check
+    PaymentFlow paymentFlow = getPaymentFlow(paymentRequired, request, expectedToken = invoice)
+    Settlement settlement = paymentFlow.checkSettlement().
+    if(paymentFlow.isSettled()){
+       SettlementResult settlementResult = paymentFlow.getSettlement()
+       genResponseData(settlementResult,redirectURL)
+       // redirect, set cookie
+    }else{
+       // return payment requried?
+    }
+
 
 
     // check, basically the same as local
+
+
+    // back on local, genSettlement
     PaymentFlow paymentFlow = getPaymentFlow(paymentRequired, request, expectedToken = invoiceToken)
     Settlement settlement = paymentFlow.checkSettlement()
     if(paymentFlow.isSettled()){
@@ -67,6 +81,8 @@
     }else{
        // return payment requried?
     }
+
+    // regular on local filter.
 
     // For WebEvents should settlementToken data (json) be sent.
 

@@ -38,10 +38,11 @@ class TestPaymentFlowManager extends BasePaymentFlowManager{
     CurrencyConverter currencyConverter
     OrderRequestGeneratorFactory orderRequestGeneratorFactory
     String centralSystemRecipientId
+    boolean registerNew
 
     List getPaymentFlowModeCalls = []
 
-    TestPaymentFlowManager(PaymentFlowMode paymentFlowMode, TokenGenerator tokenGenerator, Duration tokenNotBeforeDuration, RequestPolicyFactory requestPolicyFactory, LightningHandler lightningHandler, PaymentHandler paymentHandler, CurrencyConverter currencyConverter, OrderRequestGeneratorFactory orderRequestGeneratorFactory, String centralSystemRecipientId) {
+    TestPaymentFlowManager(PaymentFlowMode paymentFlowMode, TokenGenerator tokenGenerator, Duration tokenNotBeforeDuration, RequestPolicyFactory requestPolicyFactory, LightningHandler lightningHandler, PaymentHandler paymentHandler, CurrencyConverter currencyConverter, OrderRequestGeneratorFactory orderRequestGeneratorFactory, String centralSystemRecipientId, boolean registerNew =false) {
         this.paymentFlowMode = paymentFlowMode
         this.tokenGenerator = tokenGenerator
         this.tokenNotBeforeDuration = tokenNotBeforeDuration
@@ -51,6 +52,7 @@ class TestPaymentFlowManager extends BasePaymentFlowManager{
         this.currencyConverter = currencyConverter
         this.orderRequestGeneratorFactory = orderRequestGeneratorFactory
         this.centralSystemRecipientId = centralSystemRecipientId
+        this.registerNew = registerNew
     }
 
     @Override
@@ -68,6 +70,11 @@ class TestPaymentFlowManager extends BasePaymentFlowManager{
     @Override
     protected Duration getTokenNotBeforeDuration() {
         return tokenNotBeforeDuration
+    }
+
+    @Override
+    protected boolean getRegisterNewInvoices() {
+        return registerNew
     }
 
     @Override

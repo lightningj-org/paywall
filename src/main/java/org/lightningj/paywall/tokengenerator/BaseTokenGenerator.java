@@ -140,7 +140,7 @@ public abstract class BaseTokenGenerator implements TokenGenerator{
         try {
             TokenContext signContext = new TokenContext(tokenContextType, Context.KeyUsage.SIGN);
             JwtClaims jwtClaims = new JwtClaims();
-            jwtClaims.setIssuer(getIssuerName(signContext));
+            jwtClaims.setIssuer(getIssuerName(tokenContextType));
             if(recipientSubject != null){
                 jwtClaims.setSubject(recipientSubject);
             }
@@ -289,14 +289,6 @@ public abstract class BaseTokenGenerator implements TokenGenerator{
      */
     protected abstract void populateJWEDecryptionAlgAndKey(TokenContext context, JsonWebEncryption jwe) throws IOException, InternalErrorException;
 
-    /**
-     * Method to retrieve the issuer claim in generated JWT tokens.
-     *
-     * @param context the related token context.
-     * @return should return the issuer name set in the JWT token. Usually the signers key id.
-     * @throws InternalErrorException if internal problems occurred retrieving the issuer name for the given context.
-     */
-    protected abstract String getIssuerName(TokenContext context) throws InternalErrorException;
 
     protected SecureRandom getSecureRandom() throws InternalErrorException{
         if(secureRandom == null) {

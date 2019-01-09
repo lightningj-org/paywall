@@ -26,6 +26,7 @@ import org.lightningj.paywall.requestpolicy.RequestPolicy;
 import org.lightningj.paywall.requestpolicy.RequestPolicyFactory;
 import org.lightningj.paywall.tokengenerator.TokenException;
 import org.lightningj.paywall.tokengenerator.TokenGenerator;
+import org.lightningj.paywall.util.Base64Utils;
 import org.lightningj.paywall.vo.*;
 import org.lightningj.paywall.web.CachableHttpServletRequest;
 
@@ -257,42 +258,7 @@ public abstract class BasePaymentFlow implements PaymentFlow{
         getPaymentHandler().markAsExecuted(settlement.getPreImageHash());
     }
 
-    /**
-     * Method to check if related payment is settled by the end user.
-     *
-     * @return true if settled.
-     *
-     * @throws IllegalArgumentException if user specified parameters (used by the constructor) was invalid.
-     * @throws IOException if communication problems occurred with underlying components.
-     * @throws InternalErrorException if internal errors occurred processing the method.
-     */
-    @Override
-    public boolean isSettled() throws AlreadyExecutedException, IllegalArgumentException, IOException, InternalErrorException {
-        if(settlement == null) {
-            settlement = getPaymentHandler().checkSettlement(preImageHash, false);
-        }
-        return settlement != null;
-    }
 
-    /**
-     * Method to retrieve a settlement and generate a settlement token.
-     *
-     * @return a value object containing the settlement and the related settlement token.
-     * @throws IllegalArgumentException if user specified parameters (used by the constructor) was invalid.
-     * @throws IOException if communication problems occurred with underlying components.
-     * @throws InternalErrorException if internal errors occurred processing the method.
-     * @throws TokenException if problem occurred generating the settlement token.
-     */
-    @Override
-    public SettlementResult getSettlement() throws AlreadyExecutedException, IllegalArgumentException, IOException, InternalErrorException, TokenException {
-        assert orderRequest != null;
-        assert requestData != null;
-        if(settlement == null){
-            settlement = getPaymentHandler().checkSettlement(preImageHash, false);
-        }
-        String token = getTokenGenerator().generateSettlementToken(orderRequest,settlement,requestData,settlement.getValidUntil(),settlement.getValidFrom(), getSourceNode());
-        return new SettlementResult(settlement,token);
-    }
 
     /**
      * Help method to retrieve the issuer claim from a JWT token.

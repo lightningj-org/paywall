@@ -119,4 +119,13 @@ public interface TokenGenerator {
      * @throws InternalErrorException if internal problems occurred processing the token.
      */
     JwtClaims parseToken(String tokenContextType, String jwtToken) throws TokenException, IOException, InternalErrorException;
+
+    /**
+     * Method to retrieve the issuer claim in generated JWT tokens.
+     *
+     * @param tokenContextType the related token context.
+     * @return should return the issuer name set in the JWT token. Usually the signers key id.
+     * @throws InternalErrorException if internal problems occurred retrieving the issuer name for the given context.
+     */
+    String getIssuerName(String tokenContextType) throws InternalErrorException;
 }

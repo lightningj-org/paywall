@@ -16,6 +16,7 @@ package org.lightningj.paywall.paymentflow
 
 import org.jose4j.jwt.JwtClaims
 import org.lightningj.paywall.AlreadyExecutedException
+import org.lightningj.paywall.InternalErrorException
 import org.lightningj.paywall.annotations.PaymentRequired
 import org.lightningj.paywall.currencyconverter.CurrencyConverter
 import org.lightningj.paywall.currencyconverter.SameCryptoCurrencyConverter
@@ -104,7 +105,7 @@ class LocalPaymentFlowSpec extends Specification {
         paymentFlow.isPaymentRequired()
 
         when: "Verify that correct payment required data is returned"
-        RequestPaymentResult requestPaymentResult = paymentFlow.requestPayment()
+        InvoiceResult requestPaymentResult = paymentFlow.requestPayment()
         then:
         1 * request.getMethod() >> "POST"
         1 * request.getRequestURL() >> new StringBuffer("http://test1/test")
@@ -266,7 +267,7 @@ class LocalPaymentFlowSpec extends Specification {
         paymentFlow.isPaymentRequired()
 
         when: "Verify that correct payment required data is returned"
-        RequestPaymentResult requestPaymentResult = paymentFlow.requestPayment()
+        InvoiceResult requestPaymentResult = paymentFlow.requestPayment()
         then:
         1 * request.getMethod() >> "POST"
         1 * request.getRequestURL() >> new StringBuffer("http://test1/test")
@@ -393,7 +394,7 @@ class LocalPaymentFlowSpec extends Specification {
         paymentFlow.getTokenIssuer() == null
 
         when: "Generate invoice for following test"
-        RequestPaymentResult result = paymentFlow.requestPayment()
+        InvoiceResult result = paymentFlow.requestPayment()
         then:
         result != null
 
@@ -455,6 +456,19 @@ class LocalPaymentFlowSpec extends Specification {
         paymentFlow.getNotBeforeDate().isAfter(clock.instant())
     }
 
+    def "Verify that checkSettledInvoice throws InternalErrorException since operation isn't supported"(){
+        setup:
+        localFlowManager = new TestPaymentFlowManager(PaymentFlowMode.LOCAL,tokenGenerator,
+                Duration.ofMinutes(15), requestPolicyFactory,lightningHandler, paymentHandler,
+                currencyConverter,orderRequestGeneratorFactory,null)
+        PaymentRequired paymentRequired = findAnnotation("paywalledMethod")
+        PaymentFlow paymentFlow = localFlowManager.getPaymentFlowByAnnotation(paymentRequired,request)
+        when:
+        paymentFlow.checkSettledInvoice()
+        then:
+        thrown InternalErrorException
+    }
+
     private void verifyLocalPaymentFlow(LocalPaymentFlow paymentFlow, String state){
 
         assert paymentFlow.request == request
@@ -489,7 +503,7 @@ class LocalPaymentFlowSpec extends Specification {
         }
     }
 
-    private findAnnotation(String method){
+    static findAnnotation(String method){
         return AnnotationTest.class.getMethod(method).annotations[0]
     }
 

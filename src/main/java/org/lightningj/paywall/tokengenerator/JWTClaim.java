@@ -38,6 +38,7 @@ public abstract class JWTClaim extends JSONParsable{
      *
      * @param jwtClaims the jwtClaims inside a JWT Token.
      */
+    @SuppressWarnings("unchecked")
     public JWTClaim(JwtClaims jwtClaims){
         try {
             // Convert into JSON String and parse it as json constructor.

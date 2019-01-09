@@ -22,6 +22,7 @@ import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.keys.HmacKey;
 import org.lightningj.paywall.InternalErrorException;
+import org.lightningj.paywall.keymgmt.Context;
 import org.lightningj.paywall.keymgmt.KeySerializationHelper;
 import org.lightningj.paywall.keymgmt.SymmetricKeyManager;
 
@@ -113,7 +114,7 @@ public class SymmetricKeyTokenGenerator extends BaseTokenGenerator{
      * @throws InternalErrorException if internal problems occurred retrieving the issuer name for the given context.
      */
     @Override
-    protected String getIssuerName(TokenContext context) throws InternalErrorException {
-        return KeySerializationHelper.genKeyId(keyManager.getSymmetricKey(context).getEncoded());
+    public String getIssuerName(String context) throws InternalErrorException {
+        return KeySerializationHelper.genKeyId(keyManager.getSymmetricKey(new TokenContext(context, Context.KeyUsage.SIGN)).getEncoded());
     }
 }

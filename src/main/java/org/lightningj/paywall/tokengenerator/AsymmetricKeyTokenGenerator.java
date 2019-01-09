@@ -24,6 +24,7 @@ import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.lang.JoseException;
 import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.keymgmt.AsymmetricKeyManager;
+import org.lightningj.paywall.keymgmt.Context;
 import org.lightningj.paywall.keymgmt.KeySerializationHelper;
 
 import java.io.IOException;
@@ -47,7 +48,6 @@ public class    AsymmetricKeyTokenGenerator extends BaseTokenGenerator{
     AsymmetricKeyManager keyManager;
     RecipientRepository recipientRepository;
 
-    protected Clock clock = Clock.systemDefaultZone();
     private static final long CACHE_TIME = 5 * 60 * 1000; // 5 Min
 
     long cacheExpireDate = 0;
@@ -113,8 +113,8 @@ public class    AsymmetricKeyTokenGenerator extends BaseTokenGenerator{
      * @throws InternalErrorException if internal problems occurred retrieving the issuer name for the given context.
      */
     @Override
-    protected String getIssuerName(TokenContext context) throws InternalErrorException {
-        return KeySerializationHelper.genKeyId(keyManager.getPublicKey(context).getEncoded());
+    public String getIssuerName(String context) throws InternalErrorException {
+        return KeySerializationHelper.genKeyId(keyManager.getPublicKey(new TokenContext(context, Context.KeyUsage.SIGN)).getEncoded());
     }
 
     /**

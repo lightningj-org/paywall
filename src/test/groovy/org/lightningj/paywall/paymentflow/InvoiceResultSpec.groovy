@@ -21,15 +21,15 @@ import spock.lang.Specification
 import static org.lightningj.paywall.JSONParsableSpec.toJsonObject
 
 /**
- * Unit tests for RequestPaymentResult.
+ * Unit tests for InvoiceResult.
  *
  * Created by Philip Vendil on 2018-12-29.
  */
-class RequestPaymentResultSpec extends Specification {
+class InvoiceResultSpec extends Specification {
 
     def "Verify constructors and getter and setters"(){
         when:
-        def rpr1 = new RequestPaymentResult()
+        def rpr1 = new InvoiceResult()
         then:
         rpr1.getInvoice() == null
         rpr1.getToken() == null
@@ -43,7 +43,7 @@ class RequestPaymentResultSpec extends Specification {
         rpr1.getToken() == "sometokendata"
 
         when:
-        def rpr2 = new RequestPaymentResult(InvoiceSpec.genFullInvoiceData(true), "sometokendata")
+        def rpr2 = new InvoiceResult(InvoiceSpec.genFullInvoiceData(true), "sometokendata")
         then:
         rpr2.getInvoice() instanceof Invoice
         rpr2.getToken() == "sometokendata"
@@ -52,19 +52,19 @@ class RequestPaymentResultSpec extends Specification {
 
     def "Verify that toJsonAsString works as expected"(){
         expect:
-        new RequestPaymentResult(InvoiceSpec.genFullInvoiceData(true), "sometokendata").toJsonAsString(false) == """{"invoice":{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","description":"test desc","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"settlementDate":12344},"token":"sometokendata"}"""
-        new RequestPaymentResult(null,null).toJsonAsString(false) == "{}"
+        new InvoiceResult(InvoiceSpec.genFullInvoiceData(true), "sometokendata").toJsonAsString(false) == """{"invoice":{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","description":"test desc","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"settlementDate":12344},"token":"sometokendata"}"""
+        new InvoiceResult(null,null).toJsonAsString(false) == "{}"
     }
 
     def "Verify that parsing of JSON data works as expected"(){
         when:
-        RequestPaymentResult d = new RequestPaymentResult(toJsonObject("""{"invoice":{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","description":"test desc","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"settlementDate":12344},"token":"sometokendata"}"""))
+        InvoiceResult d = new InvoiceResult(toJsonObject("""{"invoice":{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","description":"test desc","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"settlementDate":12344},"token":"sometokendata"}"""))
         then:
         d.getInvoice() instanceof Invoice
         d.getToken() == "sometokendata"
 
         when:
-        RequestPaymentResult d2 = new RequestPaymentResult(toJsonObject("{}"))
+        InvoiceResult d2 = new InvoiceResult(toJsonObject("{}"))
         then:
         d2.getInvoice() == null
         d2.getToken() == null

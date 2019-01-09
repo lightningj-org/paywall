@@ -15,16 +15,20 @@
 package org.lightningj.paywall.paymentflow;
 
 import org.jose4j.jwt.JwtClaims;
+import org.lightningj.paywall.AlreadyExecutedException;
 import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.annotations.PaymentRequired;
 import org.lightningj.paywall.currencyconverter.CurrencyConverter;
 import org.lightningj.paywall.currencyconverter.InvalidCurrencyException;
+import org.lightningj.paywall.keymgmt.Context;
 import org.lightningj.paywall.lightninghandler.LightningHandler;
 import org.lightningj.paywall.paymenthandler.PaymentHandler;
 import org.lightningj.paywall.requestpolicy.RequestPolicy;
 import org.lightningj.paywall.requestpolicy.RequestPolicyFactory;
+import org.lightningj.paywall.tokengenerator.TokenContext;
 import org.lightningj.paywall.tokengenerator.TokenException;
 import org.lightningj.paywall.tokengenerator.TokenGenerator;
+import org.lightningj.paywall.util.Base64Utils;
 import org.lightningj.paywall.vo.*;
 import org.lightningj.paywall.vo.amount.CryptoAmount;
 import org.lightningj.paywall.web.CachableHttpServletRequest;
@@ -46,6 +50,7 @@ import java.time.Duration;
 public class CentralLightningHandlerPaymentFlow extends BasePaymentFlow {
 
     protected String centralSystemRecipientId;
+    protected boolean registerNew;
 
     /**
      * Default constructor for CentralLightningHandlerPaymentFlow, might be initialized
@@ -68,16 +73,19 @@ public class CentralLightningHandlerPaymentFlow extends BasePaymentFlow {
      *                          to support skewed clocked between systems. Use null if no not before date should
      *                          be set in generated JWT tokens.
      * @param centralSystemRecipientId the recipient id of the central lightning handler node used to encrypt JWT tokens to.
+     * @param registerNew in settled invoices that doesn't have prior order created should automatically be registerd.
      */
     public CentralLightningHandlerPaymentFlow(PaymentRequired paymentRequired, CachableHttpServletRequest request, OrderRequest orderRequest, RequestPolicyFactory requestPolicyFactory,
                                               LightningHandler lightningHandler, PaymentHandler paymentHandler, TokenGenerator tokenGenerator, CurrencyConverter currencyConverter,
-                                              JwtClaims tokenClaims, ExpectedTokenType expectedTokenType, Duration notBeforeDuration, String centralSystemRecipientId) {
+                                              JwtClaims tokenClaims, ExpectedTokenType expectedTokenType, Duration notBeforeDuration, String centralSystemRecipientId,
+                                              boolean registerNew) {
         super(paymentRequired, request, orderRequest,
                 requestPolicyFactory, lightningHandler,
                 paymentHandler, tokenGenerator, currencyConverter,
                 tokenClaims, expectedTokenType, notBeforeDuration);
 
         this.centralSystemRecipientId = centralSystemRecipientId;
+        this.registerNew = registerNew;
         assert centralSystemRecipientId != null : "Internal error, recipient id of central system used to encrypt JWT tokens to must be set.";
     }
 
@@ -97,7 +105,7 @@ public class CentralLightningHandlerPaymentFlow extends BasePaymentFlow {
      * @throws TokenException if problems occurred generating or validating related JWT Token.
      */
     @Override
-    public RequestPaymentResult requestPayment() throws IllegalArgumentException, IOException, InternalErrorException, InvalidCurrencyException, TokenException{
+    public InvoiceResult requestPayment() throws IllegalArgumentException, IOException, InternalErrorException, InvalidCurrencyException, TokenException{
         if(paymentRequired == null){
             return generateInvoice();
         }else{
@@ -118,7 +126,7 @@ public class CentralLightningHandlerPaymentFlow extends BasePaymentFlow {
      * used in the invoice.
      * @throws TokenException if problems occurred generating or validating related JWT Token.
      */
-    protected RequestPaymentResult generateOrder() throws IllegalArgumentException, IOException, InternalErrorException, InvalidCurrencyException, TokenException{
+    protected InvoiceResult generateOrder() throws IllegalArgumentException, IOException, InternalErrorException, InvalidCurrencyException, TokenException{
         assert getPaymentHandler() != null  : "Internal error, configured PaymentHandler cannot be null in central lightning handler payment flow";
         assert getRequestPolicyFactory() != null  : "Internal error, configured RequestPolicyFactory cannot be null in central lightning handler payment flow";
         assert getTokenGenerator() != null  : "Internal error, configured TokenGenerator cannot be null in central lightning handler payment flow";
@@ -130,9 +138,9 @@ public class CentralLightningHandlerPaymentFlow extends BasePaymentFlow {
         Order order = getPaymentHandler().createOrder(preImageData.getPreImageHash(), orderRequest);
         PreImageOrder preImageOrder = new PreImageOrder(preImageData.getPreImage(),order);
 
-        String orderToken = getTokenGenerator().generatePaymentToken(orderRequest,preImageOrder,requestData,invoice.getExpireDate(), getNotBeforeDate(),centralSystemRecipientId );
+        String orderToken = getTokenGenerator().generatePaymentToken(orderRequest,preImageOrder,requestData,order.getExpireDate(), getNotBeforeDate(),centralSystemRecipientId );
 
-        return new RequestPaymentResult(null,orderToken);
+        return new InvoiceResult(null,orderToken);
     }
 
     /**
@@ -146,7 +154,7 @@ public class CentralLightningHandlerPaymentFlow extends BasePaymentFlow {
      * used in the invoice.
      * @throws TokenException if problems occurred generating or validating related JWT Token.
      */
-    protected RequestPaymentResult generateInvoice() throws IllegalArgumentException, IOException, InternalErrorException, InvalidCurrencyException, TokenException{
+    protected InvoiceResult generateInvoice() throws IllegalArgumentException, IOException, InternalErrorException, InvalidCurrencyException, TokenException{
         assert expectedTokenType == ExpectedTokenType.PAYMENT_TOKEN : "Invalid expected payment token type specified: " + expectedTokenType;
         assert getLightningHandler() != null : "Internal error, configured LightningHandler cannot be null in central lightning handler payment flow";
         assert getTokenGenerator() != null  : "Internal error, configured TokenGenerator cannot be null in central lightning handler payment flow";
@@ -159,10 +167,70 @@ public class CentralLightningHandlerPaymentFlow extends BasePaymentFlow {
         invoice.setSourceNode(getTokenIssuer());
         String invoiceToken = getTokenGenerator().generateInvoiceToken(orderRequest,invoice,requestData,invoice.getExpireDate(), getNotBeforeDate(),centralSystemRecipientId);
 
-        return new RequestPaymentResult(invoice, invoiceToken);
+        return new InvoiceResult(invoice, invoiceToken);
     }
 
+    /**
+     * Method to check if a invoice is settled and returns an InvoiceResult if it is settled, otherwise null.
+     * @return InvoiceResult with invoice token if related token is settled, otherwise null.
+     * @throws IllegalArgumentException if user specified parameters (used by the constructor) was invalid.
+     * @throws IOException if communication problems occurred with underlying components.
+     * @throws InternalErrorException if internal errors occurred processing the method.
+     * @throws TokenException if problem occurred generating the settlement token.
+     */
+    public InvoiceResult checkSettledInvoice() throws IllegalArgumentException, IOException, InternalErrorException, TokenException{
+        assert getLightningHandler() != null;
+        assert invoice != null;
 
+        String sourceNode = invoice.getSourceNode();
+        invoice = getLightningHandler().lookupInvoice(invoice.getPreImageHash());
+        if(invoice.isSettled()){
+            String invoiceToken = getTokenGenerator().generateInvoiceToken(orderRequest,invoice,requestData,invoice.getExpireDate(), getNotBeforeDate(),sourceNode);
+            return new InvoiceResult(invoice, invoiceToken);
+        }
+
+        return null;
+    }
+
+    /**
+     * Method to check if related invoice is settled by the end user.
+     *
+     * @return true if settled.
+     *
+     * @throws IllegalArgumentException if user specified parameters (used by the constructor) was invalid.
+     */
+    @Override
+    public boolean isSettled() throws IllegalArgumentException {
+        if(invoice == null){
+            throw new IllegalArgumentException("No Invoice cookie found in request.");
+        }
+        return invoice.isSettled();
+    }
+
+    /**
+     * Method to retrieve a settlement and generate a settlement token.
+     *
+     * @return a value object containing the settlement and the related settlement token.
+     * @throws IllegalArgumentException if user specified parameters (used by the constructor) was invalid.
+     * @throws IOException if communication problems occurred with underlying components.
+     * @throws InternalErrorException if internal errors occurred processing the method.
+     * @throws TokenException if problem occurred generating the settlement token.
+     */
+    @Override
+    public SettlementResult getSettlement() throws IllegalArgumentException, IOException, InternalErrorException, TokenException {
+        if(invoice == null){
+            throw new IllegalArgumentException("No Invoice cookie found in request.");
+        }
+        if(invoice.isSettled()){
+            settlement = getPaymentHandler().registerSettledInvoice(invoice,registerNew,orderRequest,null);
+
+            String destinationId = getTokenGenerator().getIssuerName(TokenContext.CONTEXT_SETTLEMENT_TOKEN_TYPE);
+            String token = getTokenGenerator().generateSettlementToken(orderRequest,settlement,requestData,settlement.getValidUntil(),settlement.getValidFrom(), destinationId);
+            return new SettlementResult(settlement,token);
+        }else{
+            throw new IllegalArgumentException("Related Invoice " + Base64Utils.encodeBase64String(invoice.getPreImageHash()) + " haven't been settled.");
+        }
+    }
 
     /**
      *

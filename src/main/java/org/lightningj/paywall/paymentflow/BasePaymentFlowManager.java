@@ -177,6 +177,12 @@ public abstract class BasePaymentFlowManager implements PaymentFlowManager{
     protected abstract Duration getTokenNotBeforeDuration();
 
     /**
+     * @return true if settled invoices are presented before any order is created should
+     * be registered as new payments automatically when register them as settled.
+     */
+    protected abstract boolean getRegisterNewInvoices();
+
+    /**
      * Help method creating a new instance of configured payment flow (depending on PaymentFlowMode).
      *
      *
@@ -204,7 +210,7 @@ public abstract class BasePaymentFlowManager implements PaymentFlowManager{
                         orderRequest,getRequestPolicyFactory(),getLightningHandler(),
                         getPaymentHandler(),getTokenGenerator(),getCurrencyConverter(),
                         tokenClaims,expectedTokenType,getTokenNotBeforeDuration(),
-                        getCentralSystemRecipientId());
+                        getCentralSystemRecipientId(), getRegisterNewInvoices());
             case CENTRAL_PAYMENT_HANDLER:
                 default:
                     throw new InternalErrorException("Unsupported payment flow mode: " + mode);

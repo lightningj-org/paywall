@@ -21,18 +21,18 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
 /**
- * Value object returned by requestPayment call in a payment flow.
+ * Value object returned by invoice related calls in a payment flow such as requestPayment and isInvoiceSettled.
  *
  * Created by Philip Vendil on 2018-12-29.
  */
-public class RequestPaymentResult extends Result{
+public class InvoiceResult extends Result{
 
     private Invoice invoice;
 
     /**
      * Empty Constructor
      */
-    public RequestPaymentResult(){
+    public InvoiceResult(){
     }
 
     /**
@@ -42,7 +42,7 @@ public class RequestPaymentResult extends Result{
      *                during the payment flow.
      * @param token the JWT token related to the result.
      */
-    public RequestPaymentResult(Invoice invoice, String token) {
+    public InvoiceResult(Invoice invoice, String token) {
         super(token);
         this.invoice = invoice;
     }
@@ -52,7 +52,7 @@ public class RequestPaymentResult extends Result{
      *
      * @param jsonObject the json object to parse
      */
-    public RequestPaymentResult(JsonObject jsonObject) throws JsonException {
+    public InvoiceResult(JsonObject jsonObject) throws JsonException {
         super(jsonObject);
     }
 

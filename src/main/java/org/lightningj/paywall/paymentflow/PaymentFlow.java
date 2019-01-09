@@ -55,7 +55,7 @@ public interface PaymentFlow {
      * used in the invoice.
      * @throws TokenException if problems occurred generating or validating related JWT Token.
      */
-    RequestPaymentResult requestPayment() throws IllegalArgumentException, IOException, InternalErrorException, InvalidCurrencyException, TokenException;
+    InvoiceResult requestPayment() throws IllegalArgumentException, IOException, InternalErrorException, InvalidCurrencyException, TokenException;
 
     /**
      * Method to check if related payment is settled by the end user.
@@ -79,6 +79,16 @@ public interface PaymentFlow {
      * @throws TokenException if problem occurred generating the settlement token.
      */
     SettlementResult getSettlement() throws AlreadyExecutedException, IllegalArgumentException, IOException, InternalErrorException, TokenException;
+
+    /**
+     * Method to check if a invoice is settled and returns an InvoiceResult if it is settled, otherwise null.
+     * @return InvoiceResult with invoice token if related token is settled, otherwise null.
+     * @throws IllegalArgumentException if user specified parameters (used by the constructor) was invalid.
+     * @throws IOException if communication problems occurred with underlying components.
+     * @throws InternalErrorException if internal errors occurred processing the method.
+     * @throws TokenException if problem occurred generating the settlement token.
+     */
+    InvoiceResult checkSettledInvoice() throws IllegalArgumentException, IOException, InternalErrorException, TokenException;
 
     /**
      * Method that should indicate if related payment flow is for one request only or valid

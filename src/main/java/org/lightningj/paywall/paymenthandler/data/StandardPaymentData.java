@@ -132,6 +132,5 @@ public interface StandardPaymentData extends MinimalPaymentData {
      */
     void setSettlementExpireDate(Instant settlementDate);
 
-    // TODO Mark as executed. Onetime token.
 
 }
