@@ -39,7 +39,7 @@ import java.util.logging.Level;
  *
  * Created by Philip Vendil on 2018-09-17.
  */
-abstract class DefaultFileKeyManager extends FileKeyManager implements AsymmetricKeyManager, SymmetricKeyManager {
+public abstract class DefaultFileKeyManager extends FileKeyManager implements AsymmetricKeyManager, SymmetricKeyManager {
 
     static final String ASYM_PRIVATE_KEYNAME = "/asymkey_prv.pem";
     static final String ASYM_PUBLIC_KEYNAME = "/asymkey_pub.pem";
@@ -65,8 +65,6 @@ abstract class DefaultFileKeyManager extends FileKeyManager implements Asymmetri
 
     long trustStoreCacheExpireDate = 0;
     Map<String,PublicKey> trustedSigningKeysCache = new ConcurrentHashMap<>();
-    long reciepientsStoreCacheExpireDate = 0;
-    Map<String,PublicKey> trustedRecipientsKeysCache = new ConcurrentHashMap<>();
 
     protected Clock clock = Clock.systemDefaultZone();
 

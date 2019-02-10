@@ -1,0 +1,24 @@
+group 'org.lightningj'
+
+description = "LightningJ Paywall Spring - Spring components for LightningJ Paywall"
+
+
+dependencies {
+
+    compile project(':paywall-core')
+
+    compileOnly 'org.springframework:spring-context:5.1.4.RELEASE'
+    compileOnly 'org.springframework:spring-core:5.1.4.RELEASE'
+    compileOnly 'org.springframework:spring-web:5.1.4.RELEASE'
+    compileOnly 'org.springframework:spring-webmvc:5.1.4.RELEASE'
+
+    compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
+    testCompile 'javax.servlet:javax.servlet-api:4.0.1'
+    
+    testCompile 'org.spockframework:spock-spring:1.1-groovy-2.4'
+    testCompile 'org.springframework:spring-test:5.1.4.RELEASE'
+    testCompile 'org.springframework:spring-context:5.1.4.RELEASE'
+    testCompile 'org.springframework:spring-web:5.1.4.RELEASE'
+    testCompile 'org.springframework:spring-webmvc:5.1.4.RELEASE'
+
+}

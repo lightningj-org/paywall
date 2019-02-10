@@ -1,4 +1,6 @@
 rootProject.name = 'paywall'
 include 'paywall-core'
+include 'paywall-spring'
+include 'paywall-springboot2'
 
 
