@@ -12,22 +12,19 @@
  *  See terms of license at gnu.org.                                     *
  *                                                                       *
  *************************************************************************/
-package org.lightningj.paywall.springboot2;
+package org.lightningj.paywall.spring.util
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import spock.lang.Specification
 
+/**
+ * Unit tests for PaywallRuntimeException
+ */
+class PaywallRuntimeExceptionSpec extends Specification {
 
-@SpringBootApplication
-public class DemoApplication {
-
-
-	public static void main(String[] args) {
-		SpringApplication.run(DemoApplication.class, args);
-	}
-
+    def "Verify constructor"(){
+        when:
+        RuntimeException e = new RuntimeException(new IOException())
+        then:
+        e.cause instanceof IOException
+    }
 }
-

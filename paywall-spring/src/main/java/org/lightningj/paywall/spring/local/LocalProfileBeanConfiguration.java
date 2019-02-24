@@ -14,16 +14,13 @@
  *************************************************************************/
 package org.lightningj.paywall.spring.local;
 
-import org.lightningj.paywall.currencyconverter.CurrencyConverter;
-import org.lightningj.paywall.currencyconverter.SameCryptoCurrencyConverter;
 import org.lightningj.paywall.keymgmt.KeyManager;
 import org.lightningj.paywall.keymgmt.SymmetricKeyManager;
 import org.lightningj.paywall.lightninghandler.LightningHandler;
 import org.lightningj.paywall.orderrequestgenerator.OrderRequestGeneratorFactory;
 import org.lightningj.paywall.paymentflow.PaymentFlowManager;
-import org.lightningj.paywall.qrcode.DefaultQRCodeGenerator;
-import org.lightningj.paywall.qrcode.QRCodeGenerator;
 import org.lightningj.paywall.requestpolicy.RequestPolicyFactory;
+import org.lightningj.paywall.spring.CommonBeanConfiguration;
 import org.lightningj.paywall.spring.PaywallProperties;
 import org.lightningj.paywall.spring.SpringDefaultFileKeyManager;
 import org.lightningj.paywall.spring.SpringLNDLightningHandler;
@@ -43,15 +40,11 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 @Profile({"paywall_local"})
 @Conditional(DefaultLocalBeanCondition.class)
-public class LocalProfileBeanConfiguration {
+public class LocalProfileBeanConfiguration extends CommonBeanConfiguration {
 
     @Autowired
     PaywallProperties paywallProperties;
 
-    @Bean({"currencyConverter"})
-    public CurrencyConverter getCurrencyConverter(){
-        return new SameCryptoCurrencyConverter();
-    }
 
     @Bean({"tokenGenerator"})
     public TokenGenerator getTokenGenerator(){
@@ -73,10 +66,6 @@ public class LocalProfileBeanConfiguration {
         return new SpringLNDLightningHandler();
     }
 
-    @Bean("qrCodeGenerator")
-    public QRCodeGenerator getQRCodeGenerator(){
-        return new DefaultQRCodeGenerator();
-    }
 
     @Bean("requestPolicyFactory")
     public RequestPolicyFactory getRequestPolicyFactory(){
@@ -87,4 +76,6 @@ public class LocalProfileBeanConfiguration {
     public PaymentFlowManager getPaymentFlowManager(){
         return new SpringLocalPaymentFlowManager();
     }
+
+
 }

@@ -22,3 +22,10 @@ dependencies {
     testCompile 'org.springframework:spring-webmvc:5.1.4.RELEASE'
 
 }
+
+task generateXSD(type: XSDGenerator, dependsOn: compileJava){
+    classpath=compileTestJava.classpath.asPath
+    generatedResourcesDir="${rootProject.projectDir}/paywall-spring/build/resources/main"
+}
+
+jar.dependsOn(generateXSD)

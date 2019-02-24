@@ -12,22 +12,33 @@
  *  See terms of license at gnu.org.                                     *
  *                                                                       *
  *************************************************************************/
-package org.lightningj.paywall.springboot2;
+package org.lightningj.paywall.spring;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.lightningj.paywall.currencyconverter.CurrencyConverter;
+import org.lightningj.paywall.currencyconverter.SameCryptoCurrencyConverter;
+import org.lightningj.paywall.qrcode.DefaultQRCodeGenerator;
+import org.lightningj.paywall.qrcode.QRCodeGenerator;
+import org.springframework.context.annotation.Bean;
+
+/**
+ * Class containing configuration for beans in common for all configuration
+ * profiles.
+ */
+public class CommonBeanConfiguration {
+
+    @Bean({"currencyConverter"})
+    public CurrencyConverter getCurrencyConverter(){
+        return new SameCryptoCurrencyConverter();
+    }
 
 
-@SpringBootApplication
-public class DemoApplication {
+    @Bean("paywallExceptionHandler")
+    public PaywallExceptionHandler getPaywallExceptionHandler(){
+        return new SpringPaywallExceptionHandler();
+    }
 
-
-	public static void main(String[] args) {
-		SpringApplication.run(DemoApplication.class, args);
-	}
-
+    @Bean("qrCodeGenerator")
+    public QRCodeGenerator getQRCodeGenerator(){
+        return new DefaultQRCodeGenerator();
+    }
 }
-

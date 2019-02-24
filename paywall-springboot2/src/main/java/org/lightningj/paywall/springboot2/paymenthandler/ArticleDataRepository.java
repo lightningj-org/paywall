@@ -12,22 +12,14 @@
  *  See terms of license at gnu.org.                                     *
  *                                                                       *
  *************************************************************************/
-package org.lightningj.paywall.springboot2;
+package org.lightningj.paywall.springboot2.paymenthandler;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.data.repository.CrudRepository;
 
+/**
+ * Spring Data repository for ArticleData.
+ */
+public interface ArticleDataRepository extends CrudRepository<ArticleData,Integer> {
 
-@SpringBootApplication
-public class DemoApplication {
-
-
-	public static void main(String[] args) {
-		SpringApplication.run(DemoApplication.class, args);
-	}
-
+    ArticleData findByArticleId(String articleId);
 }
-

@@ -4,6 +4,7 @@ import org.lightningj.paywall.lightninghandler.LightningHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 // Here all bean definitions
 
