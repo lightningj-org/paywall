@@ -26,7 +26,6 @@ import static org.lightningj.paywall.util.SettingUtils.checkRequiredString;
 /**
  * Spring implementation of LND Lightning Handler.
  */
-@Profile({"paywall_local"})
 public class SpringLNDLightningHandler extends SimpleBaseLNDLightningHandler {
 
     @Autowired

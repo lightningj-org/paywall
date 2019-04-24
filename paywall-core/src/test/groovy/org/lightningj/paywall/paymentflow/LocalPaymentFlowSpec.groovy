@@ -125,6 +125,7 @@ class LocalPaymentFlowSpec extends Specification {
         JwtClaims claims = tokenGenerator.parseToken(TokenContext.CONTEXT_INVOICE_TOKEN_TYPE, requestPaymentResult.token)
         Invoice invoice = new Invoice(claims)
         invoice.preImageHash == requestPaymentResult.invoice.preImageHash
+        paymentFlow.getPreImageHash() == requestPaymentResult.invoice.preImageHash
 
         // On controller
         when: "Simulate controller to check settlement, not settled yet"
@@ -136,6 +137,7 @@ class LocalPaymentFlowSpec extends Specification {
         1 * request.getCookies() >> [new Cookie(HTTPConstants.COOKIE_INVOICE_REQUEST,requestPaymentResult.token)]
         1 * paymentHandler.checkSettlement(invoice.preImageHash,false) >> null
         paymentFlow.@settlement == null
+        paymentFlow.getPreImageHash().length > 0
 
         when: "Verify that token exception is thrown if invoice token have expired"
         // move clock 180 minutes forward
@@ -209,6 +211,7 @@ class LocalPaymentFlowSpec extends Specification {
         1 * request.getMethod() >> "POST"
         1 * request.getRequestURL() >> new StringBuffer("http://test1/test")
         2 * request.getHeader(HTTPConstants.HEADER_PAYMENT) >> settlementResult.token
+        paymentFlow.getPreImageHash() == invoice.preImageHash
 
         when: "Check that is is possible to run multiple times until it is expired"
         paymentFlow = localFlowManager.getPaymentFlowByAnnotation(paymentRequired,request)

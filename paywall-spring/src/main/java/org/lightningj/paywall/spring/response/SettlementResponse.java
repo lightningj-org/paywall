@@ -32,21 +32,26 @@ import java.util.Date;
 @XmlType(name = "SettlementResponseType", propOrder = {
         "preImageHash",
         "token",
-        "validUntil",
-        "validFrom",
+        "settlementValidUntil",
+        "settlementValidFrom",
         "payPerRequest",
         "settled"
 })
 public class SettlementResponse {
+
+        public static final String TYPE = "settlement";
+
+        @XmlTransient
+        private String type=TYPE;
 
     @XmlElement()
     private String preImageHash;
     @XmlElement()
     private String token;
     @XmlElement()
-    private Date validUntil;
+    private Date settlementValidUntil;
     @XmlElement()
-    private Date validFrom;
+    private Date settlementValidFrom;
     @XmlElement()
     private Boolean payPerRequest;
     @XmlElement(required = true)
@@ -69,10 +74,10 @@ public class SettlementResponse {
             preImageHash = Base64Utils.encodeBase64String(settlement.getPreImageHash());
             token = settlementResult.getToken();
             if(settlement.getValidUntil() != null) {
-                validUntil = new Date(settlement.getValidUntil().toEpochMilli());
+                settlementValidUntil = new Date(settlement.getValidUntil().toEpochMilli());
             }
             if(settlement.getValidFrom() != null) {
-                validFrom = new Date(settlement.getValidFrom().toEpochMilli());
+                settlementValidFrom = new Date(settlement.getValidFrom().toEpochMilli());
             }
             payPerRequest = settlement.isPayPerRequest();
             settled = true;
@@ -115,32 +120,32 @@ public class SettlementResponse {
      *
      * @return how long the JWT Token is valid
      */
-    public Date getValidUntil() {
-        return validUntil;
+    public Date getSettlementValidUntil() {
+        return settlementValidUntil;
     }
 
     /**
      *
-     * @param validUntil how long the JWT Token is valid
+     * @param settlementValidUntil how long the JWT Token is valid
      */
-    public void setValidUntil(Date validUntil) {
-        this.validUntil = validUntil;
+    public void setSettlementValidUntil(Date settlementValidUntil) {
+        this.settlementValidUntil = settlementValidUntil;
     }
 
     /**
      *
      * @return the valid from date of the JWT Token, null if no valid from date exists.
      */
-    public Date getValidFrom() {
-        return validFrom;
+    public Date getSettlementValidFrom() {
+        return settlementValidFrom;
     }
 
     /**
      *
-     * @param validFrom the valid from date of the JWT Token, null if no valid from date exists.
+     * @param settlementValidFrom the valid from date of the JWT Token, null if no valid from date exists.
      */
-    public void setValidFrom(Date validFrom) {
-        this.validFrom = validFrom;
+    public void setSettlementValidFrom(Date settlementValidFrom) {
+        this.settlementValidFrom= settlementValidFrom;
     }
 
     /**
@@ -175,13 +180,29 @@ public class SettlementResponse {
         this.settled = settled;
     }
 
+    /**
+     *
+     * @return the type of response returned in JSON responses only.
+     */
+    public String getType(){
+        return type;
+    }
+
+    /**
+     *
+     * @@param type  the type of response returned in JSON responses only.
+     */
+    public void setType(String type){
+        this.type= type;
+    }
+
     @Override
     public String toString() {
         return "SettlementResponse{" +
                 "preImageHash='" + preImageHash + '\'' +
                 ", token='" + token + '\'' +
-                ", validUntil=" + validUntil +
-                ", validFrom=" + validFrom +
+                ", settlementValidUntil=" + settlementValidUntil +
+                ", settlementValidFrom=" + settlementValidFrom +
                 ", payPerRequest=" + payPerRequest +
                 ", settled=" + settled +
                 '}';

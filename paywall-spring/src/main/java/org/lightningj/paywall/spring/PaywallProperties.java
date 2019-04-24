@@ -42,10 +42,23 @@ public class PaywallProperties {
     public static final String INVOICE_REGISTER_NEW = "paywall.invoice.registernew";
     public static final long DEFAULT_INVOICE_DEFAULT_VALIDITY = 60 * 60; // 1 Hour
     public static final String INVOICE_DEFAULT_VALIDITY = "paywall.invoice.defaultvalidity";
+    public static final boolean DEFAULT_INVOICE_INCLUDE_NODEINFO = true;
+    public static final String INVOICE_INCLUDE_NODEINFO = "paywall.invoice.includenodeinfo";
 
     // Settlement Settings
     public static final long DEFAULT_SETTLEMENT_DEFAULT_VALIDITY = 24 * 60 * 60; // 24 Hours
     public static final String SETTLEMENT_DEFAULT_VALIDITY = "paywall.settlement.defaultvalidity";
+
+    public static final String DEFAULT_CHECK_SETTLEMENT_URL = "/paywall/api/checkSettlement";
+    public static final String CHECK_SETTLEMENT_URL = "paywall.settlement.url";
+
+    // QR Code Default settings
+    public static final int DEFAULT_QR_CODE_DEFAULT_WIDTH = 300;
+    public static final String QR_CODE_DEFAULT_WIDTH = "paywall.qrcode.width.default";
+    public static final int DEFAULT_QR_CODE_DEFAULT_HEIGHT = 300;
+    public static final String QR_CODE_DEFAULT_HEIGHT = "paywall.qrcode.height.default";
+    public static final String DEFAULT_QR_CODE_URL = "/paywall/genqrcode";
+    public static final String QR_CODE_DEFAULT_URL = "paywall.qrcode.url";
 
     @Value("${" + LND_HOSTNAME +  ":}")
     private String lndHostname;
@@ -77,8 +90,23 @@ public class PaywallProperties {
     @Value("${" + INVOICE_DEFAULT_VALIDITY +  ":" + DEFAULT_INVOICE_DEFAULT_VALIDITY + "}")
     private String invoiceDefaultValidity;
 
+    @Value("${" + INVOICE_INCLUDE_NODEINFO +  ":" + DEFAULT_INVOICE_INCLUDE_NODEINFO + "}")
+    private String invoiceIncludeNodeInfo;
+
     @Value("${" + SETTLEMENT_DEFAULT_VALIDITY +  ":" + DEFAULT_SETTLEMENT_DEFAULT_VALIDITY + "}")
     private String settlmentDefaultValidity;
+
+    @Value("${" + CHECK_SETTLEMENT_URL +  ":" + DEFAULT_CHECK_SETTLEMENT_URL + "}")
+    private String checkSettlementUrl;
+
+    @Value("${" + QR_CODE_DEFAULT_WIDTH +  ":" + DEFAULT_QR_CODE_DEFAULT_WIDTH + "}")
+    private String qrCodeDefaultWidth;
+
+    @Value("${" + QR_CODE_DEFAULT_HEIGHT +  ":" + DEFAULT_QR_CODE_DEFAULT_HEIGHT + "}")
+    private String qrCodeDefaultHeight;
+
+    @Value("${" + QR_CODE_DEFAULT_URL +  ":" + DEFAULT_QR_CODE_URL + "}")
+    private String qrCodeUrl;
 
     /**
      * Method that should return the hostname of IP address of the LND node to connect to.
@@ -94,7 +122,6 @@ public class PaywallProperties {
      * Method that should return the port number of the LND node to connect to.
      *
      * @return the port number of the LND node to connect to.
-     * @throws InternalErrorException if problems occurred getting the configuration information.
      */
     public String getLndPort() {
         return lndPort;
@@ -105,7 +132,6 @@ public class PaywallProperties {
      * Should point to an file readable by the current user..
      *
      * @return the path to the tls cert path.
-     * @throws InternalErrorException if problems occurred getting the configuration information.
      */
     public String getLndTLSCertPath() {
         return lndTLSCertPath;
@@ -116,7 +142,6 @@ public class PaywallProperties {
      * should have invoice creation rights.
      *
      * @return the path to the macaroon to use.
-     * @throws InternalErrorException if problems occurred getting the configuration information.
      */
     public String getLndMacaroonPath() {
         return lndMacaroonPath;
@@ -127,7 +152,6 @@ public class PaywallProperties {
      *
      * @return the path to the directory where trusted public key store files are stored. Or null
      * if not configured.
-     * @throws InternalErrorException if internal error occurred retrieving the trust store path.
      */
     public String getKeymgrAsymTruststorePath(){
         return keymgrAsymTruststorePath;
@@ -138,7 +162,6 @@ public class PaywallProperties {
      *
      * @return the path to the directory where key store files are stored. Or null
      * if not configured.
-     * @throws InternalErrorException if internal error occurred retrieving the key store path.
      */
     public String getKeymgrKeystorePath(){
         return keymgrKeystorePath;
@@ -148,7 +171,6 @@ public class PaywallProperties {
      * Method to retrieve the configured pass phrase used to protect generated keys.
      *
      * @return the configured protect pass phrase or null if no passphrase is configured.
-     * @throws InternalErrorException if internal error occurred retrieving configuration.
      */
     public String getKeymgrPassword(){
         return keymgrPassword;
@@ -187,10 +209,50 @@ public class PaywallProperties {
 
     /**
      *
+     * @return true if node connection information should be included in generated invoices.
+     */
+    public String getInvoiceIncludeNodeInfo() {
+        return invoiceIncludeNodeInfo;
+    }
+
+    /**
+     *
      * @return the default validity for generated settlements if no valid until date have
      * been set explicit in PaymentData.
      */
-    public String getSettlmentDefaultValidity() {
+    public String getSettlementDefaultValidity() {
         return settlmentDefaultValidity;
+    }
+
+    /**
+     *
+     * @return the url to the check settlement controller.
+     */
+    public String getCheckSettlementURL() {
+        return checkSettlementUrl;
+    }
+
+    /**
+     *
+     * @return default QR Code width if no width parameter is specified in QR Code generation request.
+     */
+    public String getQrCodeDefaultWidth() {
+        return qrCodeDefaultWidth;
+    }
+
+    /**
+     *
+     * @return default QR Code width if no height parameter is specified in QR Code generation request.
+     */
+    public String getQrCodeDefaultHeight() {
+        return qrCodeDefaultHeight;
+    }
+
+    /**
+     *
+     * @return The URL to controller that generates QR code images.
+     */
+    public String getQrCodeUrl() {
+        return qrCodeUrl;
     }
 }

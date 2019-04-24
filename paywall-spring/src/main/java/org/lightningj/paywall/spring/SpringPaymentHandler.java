@@ -19,6 +19,7 @@ import org.lightningj.paywall.lightninghandler.LightningHandler;
 import org.lightningj.paywall.paymenthandler.BasePaymentHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.util.logging.Logger;
 
@@ -39,6 +40,12 @@ public abstract class SpringPaymentHandler extends BasePaymentHandler {
 
     @Autowired
     PaywallProperties paywallProperties;
+
+    @PostConstruct
+    @Override
+    public void init() throws InternalErrorException {
+        super.init();
+    }
 
     /**
      * Method that should returned the used LightningHandler.
@@ -72,10 +79,10 @@ public abstract class SpringPaymentHandler extends BasePaymentHandler {
     @Override
     protected Duration getDefaultSettlementValidity() {
         try {
-            long durationInSec = checkLongWithDefault(paywallProperties.getSettlmentDefaultValidity(), PaywallProperties.SETTLEMENT_DEFAULT_VALIDITY, PaywallProperties.DEFAULT_SETTLEMENT_DEFAULT_VALIDITY);
+            long durationInSec = checkLongWithDefault(paywallProperties.getSettlementDefaultValidity(), PaywallProperties.SETTLEMENT_DEFAULT_VALIDITY, PaywallProperties.DEFAULT_SETTLEMENT_DEFAULT_VALIDITY);
             return Duration.ofSeconds(durationInSec);
         }catch (InternalErrorException e){
-            log.severe("Error parsing application properties, setting " + PaywallProperties.SETTLEMENT_DEFAULT_VALIDITY + " should be an integer, not " + paywallProperties.getSettlmentDefaultValidity() + ", using default value: " + PaywallProperties.DEFAULT_SETTLEMENT_DEFAULT_VALIDITY);
+            log.severe("Error parsing application properties, setting " + PaywallProperties.SETTLEMENT_DEFAULT_VALIDITY + " should be an integer, not " + paywallProperties.getSettlementDefaultValidity() + ", using default value: " + PaywallProperties.DEFAULT_SETTLEMENT_DEFAULT_VALIDITY);
         }
         return Duration.ofSeconds(PaywallProperties.DEFAULT_SETTLEMENT_DEFAULT_VALIDITY);
     }

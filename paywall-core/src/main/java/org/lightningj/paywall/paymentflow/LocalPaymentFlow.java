@@ -95,6 +95,7 @@ public class LocalPaymentFlow extends BasePaymentFlow {
             requestData = requestPolicy.significantRequestDataDigest(request);
 
             PreImageData preImageData = getTokenGenerator().genPreImageData();
+            preImageHash = preImageData.getPreImageHash();
             Order order = getPaymentHandler().createOrder(preImageData.getPreImageHash(), orderRequest);
 
             CryptoAmount convertedAmount = getCurrencyConverter().convert(order.getOrderAmount());

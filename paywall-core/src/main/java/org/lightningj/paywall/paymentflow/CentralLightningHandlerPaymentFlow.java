@@ -137,7 +137,7 @@ public class CentralLightningHandlerPaymentFlow extends BasePaymentFlow {
         PreImageData preImageData = getTokenGenerator().genPreImageData();
         Order order = getPaymentHandler().createOrder(preImageData.getPreImageHash(), orderRequest);
         PreImageOrder preImageOrder = new PreImageOrder(preImageData.getPreImage(),order);
-
+        preImageHash = preImageOrder.getPreImageHash();
         String orderToken = getTokenGenerator().generatePaymentToken(orderRequest,preImageOrder,requestData,order.getExpireDate(), getNotBeforeDate(),centralSystemRecipientId );
 
         return new InvoiceResult(null,orderToken);

@@ -74,7 +74,7 @@ class DemoPaymentHandlerSpec extends Specification {
 
     }
 
-    def "Verify that payment data handler method handles valid payement data request properly."(){
+    def "Verify that payment data handler method handles valid payment data request properly."(){
         when: // Verify that newPaymentData generates a new saved payment data.
         DemoPaymentData r1 = demoPaymentHandler.newPaymentData(preImageHash, validOrderRequest)
         then:

@@ -1,4 +1,5 @@
-/************************************************************************
+/*
+ * ***********************************************************************
  *                                                                       *
  *  LightningJ                                                           *
  *                                                                       *
@@ -11,10 +12,23 @@
  *  See terms of license at gnu.org.                                     *
  *                                                                       *
  *************************************************************************/
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://lightningj.org/xsd/paywallspringapi_1_0",
-        xmlns = {
-         // @javax.xml.bind.annotation.XmlNs(namespaceURI = "http://lightningj.org/xsd/paywallspringapi_1_0", prefix = "")
-        },
-        elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
-@javax.xml.bind.annotation.XmlAccessorType(javax.xml.bind.annotation.XmlAccessType.PROPERTY)
-package org.lightningj.paywall.spring.response;
+package org.lightningj.paywall.springboot2;
+
+public class DemoResult {
+
+    private final long id;
+    private final String content;
+
+    public DemoResult(long id, String content) {
+        this.id = id;
+        this.content = content;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public String getContent() {
+        return content;
+    }
+}

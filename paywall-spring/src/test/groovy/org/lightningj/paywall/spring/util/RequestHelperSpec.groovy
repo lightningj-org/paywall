@@ -14,6 +14,7 @@
  *************************************************************************/
 package org.lightningj.paywall.spring.util
 
+import org.springframework.http.MediaType
 import org.springframework.mock.web.MockHttpServletRequest
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -66,6 +67,16 @@ class RequestHelperSpec extends Specification {
         contentType           | expected
         " "+XML.contentType   | XML
         " "+JSON.contentType  | JSON
+    }
+
+    @Unroll
+    def "Verify that request with RequestType has MediaType #expected"(){
+        expect:
+        requestType.mediaType == expected
+        where:
+        requestType                | expected
+        JSON                       | MediaType.APPLICATION_JSON
+        XML                        | MediaType.APPLICATION_XML
     }
 
     def "Verify that default value is returned if nothing matches"(){

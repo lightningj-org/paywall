@@ -111,4 +111,9 @@ public interface PaymentFlow {
      */
     void markAsExecuted() throws IllegalArgumentException, IOException, InternalErrorException;
 
+    /**
+     *
+     * @return the related preImageHash if generated/parsed yet in the payment flow, otherwise null.
+     */
+    byte[] getPreImageHash();
 }

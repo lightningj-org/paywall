@@ -259,6 +259,15 @@ public abstract class BasePaymentFlow implements PaymentFlow{
     }
 
 
+    /**
+     *
+     * @return the related preImageHash if generated/parsed yet in the payment flow, otherwise null.
+     */
+    @Override
+    public byte[] getPreImageHash(){
+        return preImageHash;
+    }
+
 
     /**
      * Help method to retrieve the issuer claim from a JWT token.
@@ -277,5 +286,8 @@ public abstract class BasePaymentFlow implements PaymentFlow{
             throw new TokenException("Invalid JWT token, no issuer found in token: " + e.getMessage(),e, TokenException.Reason.INVALID);
         }
     }
+
+
+
 
 }

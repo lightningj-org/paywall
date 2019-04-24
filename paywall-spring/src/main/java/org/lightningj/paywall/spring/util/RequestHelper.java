@@ -14,6 +14,8 @@
  *************************************************************************/
 package org.lightningj.paywall.spring.util;
 
+import org.springframework.http.MediaType;
+
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -30,16 +32,22 @@ public class RequestHelper {
      * Enumeration of different supported request handling types.
      */
     public enum RequestType{
-        JSON("application/json"),
-        XML("application/xml");
+        JSON("application/json", MediaType.APPLICATION_JSON),
+        XML("application/xml", MediaType.APPLICATION_XML);
 
         private String contentType;
-        RequestType(String contentType){
+        private MediaType mediaType;
+        RequestType(String contentType,MediaType mediaType){
             this.contentType=contentType;
+            this.mediaType=mediaType;
         }
 
         public String getContentType(){
             return this.contentType;
+        }
+
+        public MediaType getMediaType(){
+            return this.mediaType;
         }
     }
 

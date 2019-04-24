@@ -27,5 +27,6 @@ dependencies {
 	implementation 'org.mariadb.jdbc:mariadb-java-client:2.4.0'
 	implementation 'com.h2database:h2'
 	testCompile 'org.spockframework:spock-spring:1.2-groovy-2.4'
+	testCompile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

@@ -39,29 +39,30 @@ class SettlementResponseSpec extends Specification {
         r.settled
         r.preImageHash == "YWJj"
         r.payPerRequest
-        r.validFrom == new Date(5000);
-        r.validUntil == new Date(10000)
+        r.settlementValidFrom == new Date(5000);
+        r.settlementValidUntil == new Date(10000)
         r.token == "SomeToken"
 
+        r.type == SettlementResponse.TYPE
         when:
         r = new SettlementResponse()
         r.settled = true
         r.preImageHash = "abc"
         r.payPerRequest = true
-        r.validFrom = new Date(6000)
-        r.validUntil = new Date(11000)
+        r.settlementValidFrom = new Date(6000)
+        r.settlementValidUntil = new Date(11000)
         r.token = "token1"
         then:
         r.settled
         r.preImageHash == "abc"
         r.payPerRequest
-        r.validFrom == new Date(6000)
-        r.validUntil == new Date(11000)
+        r.settlementValidFrom == new Date(6000)
+        r.settlementValidUntil == new Date(11000)
         r.token == "token1"
     }
 
     def "Verify toString"(){
         expect:
-        new SettlementResponse(settlementResult).toString() == "SettlementResponse{preImageHash='YWJj', token='SomeToken', validUntil=Thu Jan 01 01:00:10 CET 1970, validFrom=Thu Jan 01 01:00:05 CET 1970, payPerRequest=true, settled=true}"
+        new SettlementResponse(settlementResult).toString() == "SettlementResponse{preImageHash='YWJj', token='SomeToken', settlementValidUntil=Thu Jan 01 01:00:10 CET 1970, settlementValidFrom=Thu Jan 01 01:00:05 CET 1970, payPerRequest=true, settled=true}"
     }
 }

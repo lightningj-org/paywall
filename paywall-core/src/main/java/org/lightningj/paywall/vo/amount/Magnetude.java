@@ -15,7 +15,7 @@
 package org.lightningj.paywall.vo.amount;
 
 /**
- * Represents the magnitute of a unit, usually a subunit of a crypto currency.
+ * Represents the magnitude of a unit, usually a subunit of a crypto currency.
  * For example if BTC is used, the value is specified in satoshi, but with a magnitude
  * of milli is the value specified in millisatoshi.
  *

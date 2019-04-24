@@ -144,8 +144,9 @@ class CentralLightningHandlerPaymentFlowSpec extends Specification {
         PreImageOrder preImageOrder = new PreImageOrder(claims)
         preImageOrder.preImageHash != null
         preImageOrder.preImage != null
+        paymentFlow.getPreImageHash() == preImageOrder.preImageHash
 
-        // On  newInvoice controller
+        // On newInvoice controller
         when:
         paymentFlow = centralFlowManager.getPaymentFlowFromToken(request, ExpectedTokenType.PAYMENT_TOKEN)
         setClock(paymentFlow)
@@ -154,7 +155,7 @@ class CentralLightningHandlerPaymentFlowSpec extends Specification {
         then:
         paymentFlow.isPaymentRequired()
         1 * request.getCookies() >> [new Cookie(HTTPConstants.COOKIE_PAYMENT_REQUEST,filterRequestPaymentResult.token)]
-
+        paymentFlow.getPreImageHash() == preImageOrder.preImageHash
         when:
         InvoiceResult centralRequestPaymentResult = paymentFlow.requestPayment()
 
@@ -169,6 +170,7 @@ class CentralLightningHandlerPaymentFlowSpec extends Specification {
                         invoiceExpireDate,clock.instant())
         }
         invoice.preImageHash == centralRequestPaymentResult.invoice.preImageHash
+        paymentFlow.getPreImageHash() == preImageOrder.preImageHash
 
         // On checkSettlement on central controller
         when: "Simulate controller to check settlement, not settled yet"
@@ -184,6 +186,7 @@ class CentralLightningHandlerPaymentFlowSpec extends Specification {
             assert !invoice.settled
             return invoice
         }
+        paymentFlow.getPreImageHash() == preImageOrder.preImageHash
 
         when: "Verify if token is settled then is a settlement token returned"
         paymentFlow = centralFlowManager.getPaymentFlowFromToken(request, ExpectedTokenType.INVOICE_TOKEN)
@@ -204,7 +207,7 @@ class CentralLightningHandlerPaymentFlowSpec extends Specification {
         centralInvoiceResult.invoice.settled
         tokenInvoice.settled
         paymentFlow.@settlement == null
-
+        paymentFlow.getPreImageHash() == preImageOrder.preImageHash
 
         when: "After redirected to local systems genSettlement controller"
         paymentFlow = filterFlowManager.getPaymentFlowFromToken(request, ExpectedTokenType.INVOICE_TOKEN)
@@ -225,6 +228,7 @@ class CentralLightningHandlerPaymentFlowSpec extends Specification {
             return new Settlement(invoice.preImageHash,null,inFuture(Duration.ofMinutes(180)), null,false)
         }
         paymentFlow.@settlement != null
+        paymentFlow.getPreImageHash() == preImageOrder.preImageHash
 
 
         // Back on pay-walled resource filter.
@@ -239,6 +243,7 @@ class CentralLightningHandlerPaymentFlowSpec extends Specification {
         1 * request.getMethod() >> "POST"
         1 * request.getRequestURL() >> new StringBuffer("http://test1/test")
         2 * request.getHeader(HTTPConstants.HEADER_PAYMENT) >> settlementResult.token
+        paymentFlow.getPreImageHash() == preImageOrder.preImageHash
 
         when: "Check that is is possible to run multiple times until it is expired"
         paymentFlow = filterFlowManager.getPaymentFlowByAnnotation(paymentRequired,request)

@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 /**
  * Condition to check if Default beans in LocalProfileBeanConfiguration should be used.
  *
- * @author philip 2019-02-8
+ * @author philip 2019-02-08
  */
 public class DefaultLocalBeanCondition implements Condition {
 
