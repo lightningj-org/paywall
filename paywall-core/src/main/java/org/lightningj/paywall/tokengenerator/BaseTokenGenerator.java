@@ -97,7 +97,7 @@ public abstract class BaseTokenGenerator implements TokenGenerator{
      * @throws IOException if communication problems occurred with underlying systems.
      * @throws InternalErrorException if internal problems occurred processing the token.
      */
-    public String generateInvoiceToken(OrderRequest orderRequest, Invoice invoice, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException{
+    public String generateInvoiceToken(OrderRequest orderRequest, MinimalInvoice invoice, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException{
         return generateToken(TokenContext.CONTEXT_INVOICE_TOKEN_TYPE,expireDate, notBefore, true, recipientSubject, orderRequest, invoice, requestData);
     }
 

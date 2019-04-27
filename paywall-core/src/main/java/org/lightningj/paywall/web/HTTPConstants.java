@@ -34,8 +34,32 @@ public class HTTPConstants {
     public static final String COOKIE_INVOICE_REQUEST = "InvoiceRequest";
 
     /**
+     * Header name used when redirecting an invoice request controller
+     * to check payment.
+     */
+    public static final String HEADER_INVOICE_REQUEST = COOKIE_INVOICE_REQUEST;
+
+    /**
+     * Parameter name used when redirecting an invoice request controller
+     * to check payment. It a shorted version with name avoiding conflict.
+     */
+    public static final String PARAMETER_INVOICE_REQUEST = "pwir";
+
+    /**
      * Cookie name used when redirecting an order request to a central payment controller
      * and checking for payment.
      */
     public static final String COOKIE_PAYMENT_REQUEST = "PaymentRequest";
+
+    /**
+     * Header name used when redirecting an order request to a central payment controller
+     * and checking for payment.
+     */
+    public static final String HEADER_PAYMENT_REQUEST = COOKIE_PAYMENT_REQUEST;
+
+    /**
+     * Parameter name used when redirecting an order request to a central payment controller
+     * and checking for payment.
+     */
+    public static final String PARAMETER_PAYMENT_REQUEST = "pwpr";
 }

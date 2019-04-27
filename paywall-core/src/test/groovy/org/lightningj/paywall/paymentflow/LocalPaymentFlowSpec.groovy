@@ -34,6 +34,7 @@ import org.lightningj.paywall.tokengenerator.TokenGenerator
 import org.lightningj.paywall.util.BCUtils
 import org.lightningj.paywall.vo.ConvertedOrder
 import org.lightningj.paywall.vo.Invoice
+import org.lightningj.paywall.vo.MinimalInvoice
 import org.lightningj.paywall.vo.NodeInfo
 import org.lightningj.paywall.vo.Order
 import org.lightningj.paywall.vo.OrderRequest
@@ -97,7 +98,7 @@ class LocalPaymentFlowSpec extends Specification {
         Instant invoiceExpireDate = inFuture(Duration.ofMinutes(120))
         then: "Verify that correct local payment flow was returned"
         paymentFlow instanceof LocalPaymentFlow
-        verifyLocalPaymentFlow(paymentFlow, "notoken")
+        verifyLocalPaymentFlow(paymentFlow, "notoken", true)
         paymentFlow.orderRequest.articleId == paymentRequired.articleId()
         paymentFlow.orderRequest.units == paymentRequired.units()
 
@@ -123,14 +124,14 @@ class LocalPaymentFlowSpec extends Specification {
         requestPaymentResult.invoice.preImageHash.length > 0
         requestPaymentResult.invoice.bolt11Invoice == "somebolt11invoice"
         JwtClaims claims = tokenGenerator.parseToken(TokenContext.CONTEXT_INVOICE_TOKEN_TYPE, requestPaymentResult.token)
-        Invoice invoice = new Invoice(claims)
+        MinimalInvoice invoice = new MinimalInvoice(claims)
         invoice.preImageHash == requestPaymentResult.invoice.preImageHash
         paymentFlow.getPreImageHash() == requestPaymentResult.invoice.preImageHash
 
         // On controller
         when: "Simulate controller to check settlement, not settled yet"
         paymentFlow = localFlowManager.getPaymentFlowFromToken(request, ExpectedTokenType.INVOICE_TOKEN)
-        verifyLocalPaymentFlow(paymentFlow, "invoicetokenset")
+        verifyLocalPaymentFlow(paymentFlow, "invoicetokenset", false)
         boolean isSettled = paymentFlow.isSettled()
         then:
         !isSettled
@@ -164,7 +165,7 @@ class LocalPaymentFlowSpec extends Specification {
         when:
         requestPaymentResult = paymentFlow.requestPayment()
         claims = tokenGenerator.parseToken(TokenContext.CONTEXT_INVOICE_TOKEN_TYPE, requestPaymentResult.token)
-        invoice = new Invoice(claims)
+        invoice = new MinimalInvoice(claims)
         then:
         1 * request.getMethod() >> "POST"
         1 * request.getRequestURL() >> new StringBuffer("http://test1/test")
@@ -182,7 +183,7 @@ class LocalPaymentFlowSpec extends Specification {
 
         when: "Verify if token is settled then is a settlement token returned"
         paymentFlow = localFlowManager.getPaymentFlowFromToken(request, ExpectedTokenType.INVOICE_TOKEN)
-        verifyLocalPaymentFlow(paymentFlow, "invoicetokenset")
+        verifyLocalPaymentFlow(paymentFlow, "invoicetokenset", false)
         isSettled = paymentFlow.isSettled()
 
         then:
@@ -203,7 +204,7 @@ class LocalPaymentFlowSpec extends Specification {
         when: "Check that valid settlement token in the filter header returns payment required as false."
         paymentFlow = localFlowManager.getPaymentFlowByAnnotation(paymentRequired,request)
         setClock(paymentFlow)
-        verifyLocalPaymentFlow(paymentFlow, "settlementtokenset")
+        verifyLocalPaymentFlow(paymentFlow, "settlementtokenset", true)
         and:
         boolean isPaymentRequired = paymentFlow.isPaymentRequired()
         then:
@@ -261,7 +262,7 @@ class LocalPaymentFlowSpec extends Specification {
         Instant invoiceExpireDate = inFuture(Duration.ofMinutes(120))
         then: "Verify that correct local payment flow was returned"
         paymentFlow instanceof LocalPaymentFlow
-        verifyLocalPaymentFlow(paymentFlow, "notoken")
+        verifyLocalPaymentFlow(paymentFlow, "notoken", true)
         paymentFlow.orderRequest.articleId == paymentRequired.articleId()
         paymentFlow.orderRequest.units == paymentRequired.units()
         paymentFlow.orderRequest.payPerRequest
@@ -288,10 +289,8 @@ class LocalPaymentFlowSpec extends Specification {
         requestPaymentResult.invoice.preImageHash.length > 0
         requestPaymentResult.invoice.bolt11Invoice == "somebolt11invoice"
         JwtClaims claims = tokenGenerator.parseToken(TokenContext.CONTEXT_INVOICE_TOKEN_TYPE, requestPaymentResult.token)
-        Invoice invoice = new Invoice(claims)
+        MinimalInvoice invoice = new MinimalInvoice(claims)
         invoice.preImageHash == requestPaymentResult.invoice.preImageHash
-        OrderRequest or = new OrderRequest(claims)
-        or.payPerRequest
 
         // On controller
         when: "Generate new invoice"
@@ -306,7 +305,7 @@ class LocalPaymentFlowSpec extends Specification {
         when:
         requestPaymentResult = paymentFlow.requestPayment()
         claims = tokenGenerator.parseToken(TokenContext.CONTEXT_INVOICE_TOKEN_TYPE, requestPaymentResult.token)
-        invoice = new Invoice(claims)
+        invoice = new MinimalInvoice(claims)
         then:
         1 * request.getMethod() >> "POST"
         1 * request.getRequestURL() >> new StringBuffer("http://test1/test")
@@ -324,7 +323,7 @@ class LocalPaymentFlowSpec extends Specification {
 
         when: "Verify if token is settled then is a settlement token returned"
         paymentFlow = localFlowManager.getPaymentFlowFromToken(request, ExpectedTokenType.INVOICE_TOKEN)
-        verifyLocalPaymentFlow(paymentFlow, "invoicetokenset")
+        verifyLocalPaymentFlow(paymentFlow, "invoicetokenset",false)
         boolean isSettled = paymentFlow.isSettled()
 
         then:
@@ -345,7 +344,7 @@ class LocalPaymentFlowSpec extends Specification {
         when: "Check that valid settlement token in the filter header returns payment required as false."
         paymentFlow = localFlowManager.getPaymentFlowByAnnotation(paymentRequired,request)
         setClock(paymentFlow)
-        verifyLocalPaymentFlow(paymentFlow, "settlementtokenset")
+        verifyLocalPaymentFlow(paymentFlow, "settlementtokenset", true)
         and:
         boolean isPaymentRequired = paymentFlow.isPaymentRequired()
         boolean isPayPerRequest = paymentFlow.isPayPerRequest()
@@ -472,10 +471,14 @@ class LocalPaymentFlowSpec extends Specification {
         thrown InternalErrorException
     }
 
-    private void verifyLocalPaymentFlow(LocalPaymentFlow paymentFlow, String state){
+    private void verifyLocalPaymentFlow(LocalPaymentFlow paymentFlow, String state, boolean expectOrderRequest){
 
         assert paymentFlow.request == request
-        assert paymentFlow.orderRequest != null
+        if(expectOrderRequest) {
+            assert paymentFlow.orderRequest != null
+        }else{
+            assert paymentFlow.orderRequest == null
+        }
         assert paymentFlow.requestPolicyFactory != null
         assert paymentFlow.lightningHandler != null
         assert paymentFlow.paymentHandler != null

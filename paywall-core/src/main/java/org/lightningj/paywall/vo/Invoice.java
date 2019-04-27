@@ -31,11 +31,10 @@ import java.time.Instant;
  *
  * Created by Philip Vendil on 2018-11-11.
  */
-public class Invoice extends JWTClaim implements Payment {
+public class Invoice extends MinimalInvoice implements Payment {
 
     public static final String CLAIM_NAME = "invoice";
 
-    protected byte[] preImageHash;
     protected String bolt11Invoice;
     protected String description;
     protected CryptoAmount invoiceAmount;
@@ -118,22 +117,6 @@ public class Invoice extends JWTClaim implements Payment {
      */
     public Invoice(JwtClaims jwtClaims) {
         super(jwtClaims);
-    }
-
-    /**
-     *
-     * @return the generated preImageHash from PreImageData which acts as an unique id for the payment.
-     */
-    public byte[] getPreImageHash() {
-        return preImageHash;
-    }
-
-    /**
-     *
-     * @param preImageHash the generated preImageHash from PreImageData which acts as an unique id for the payment.
-     */
-    public void setPreImageHash(byte[] preImageHash) {
-        this.preImageHash = preImageHash;
     }
 
     /**
@@ -307,7 +290,7 @@ public class Invoice extends JWTClaim implements Payment {
      */
     @Override
     public void convertToJson(JsonObjectBuilder jsonObjectBuilder) throws JsonException {
-        add(jsonObjectBuilder,"preImageHash", Base64Utils.encodeBase64String(preImageHash));
+        super.convertToJson(jsonObjectBuilder);
         add(jsonObjectBuilder,"bolt11Invoice", bolt11Invoice);
         addNotRequired(jsonObjectBuilder,"description", description);
         addNotRequired(jsonObjectBuilder,"invoiceAmount", invoiceAmount);
@@ -328,7 +311,7 @@ public class Invoice extends JWTClaim implements Payment {
      */
     @Override
     public void parseJson(JsonObject jsonObject) throws JsonException {
-        preImageHash = getByteArrayFromB64(jsonObject,"preImageHash",true);
+        super.parseJson(jsonObject);
         bolt11Invoice = getString(jsonObject,"bolt11Invoice", true);
         description = getStringIfSet(jsonObject,"description");
         if(jsonObject.containsKey("invoiceAmount") && !jsonObject.isNull("invoiceAmount")) {

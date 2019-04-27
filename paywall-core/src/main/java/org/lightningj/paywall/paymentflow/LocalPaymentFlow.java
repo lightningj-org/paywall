@@ -102,7 +102,8 @@ public class LocalPaymentFlow extends BasePaymentFlow {
             ConvertedOrder convertedOrder = new ConvertedOrder(order,convertedAmount);
 
             Invoice invoice = getLightningHandler().generateInvoice(preImageData,convertedOrder);
-            String invoiceToken = getTokenGenerator().generateInvoiceToken(orderRequest,invoice,requestData,invoice.getExpireDate(), getNotBeforeDate(),null);
+            MinimalInvoice minimalInvoice = new MinimalInvoice(invoice);
+            String invoiceToken = getTokenGenerator().generateInvoiceToken(null,minimalInvoice,requestData,invoice.getExpireDate(), getNotBeforeDate(),null);
 
             return new InvoiceResult(invoice, invoiceToken);
     }
@@ -136,13 +137,12 @@ public class LocalPaymentFlow extends BasePaymentFlow {
      */
     @Override
     public SettlementResult getSettlement() throws AlreadyExecutedException, IllegalArgumentException, IOException, InternalErrorException, TokenException {
-        assert orderRequest != null;
         assert requestData != null;
         if (settlement == null) {
             settlement = getPaymentHandler().checkSettlement(preImageHash, false);
         }
 
-        String token = getTokenGenerator().generateSettlementToken(orderRequest,settlement,requestData,settlement.getValidUntil(),settlement.getValidFrom(), getSourceNode());
+        String token = getTokenGenerator().generateSettlementToken(null,settlement,requestData,settlement.getValidUntil(),settlement.getValidFrom(), getSourceNode());
         return new SettlementResult(settlement,token);
     }
 

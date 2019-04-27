@@ -72,7 +72,7 @@ public interface TokenGenerator {
      * @throws IOException if communication problems occurred with underlying systems.
      * @throws InternalErrorException if internal problems occurred processing the token.
      */
-    String generateInvoiceToken(OrderRequest orderRequest, Invoice invoice, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException;
+    String generateInvoiceToken(OrderRequest orderRequest, MinimalInvoice invoice, RequestData requestData, Instant expireDate, Instant notBefore, String recipientSubject) throws TokenException, IOException, InternalErrorException;
 
     /**
      * Help method to generate a JWT token containing a settlement data claim.

@@ -90,7 +90,10 @@ public abstract class BasePaymentFlowManager implements PaymentFlowManager{
     public PaymentFlow getPaymentFlowFromToken(CachableHttpServletRequest request, ExpectedTokenType expectedTokenType) throws IllegalArgumentException, InternalErrorException, IOException, TokenException {
 
         JwtClaims claims = getAndVerifyTokenClaims(request,expectedTokenType);
-        OrderRequest orderRequest = new OrderRequest(claims);
+        OrderRequest orderRequest = null;
+        if(claims.hasClaim(OrderRequest.CLAIM_NAME)){
+            orderRequest = new OrderRequest(claims);
+        }
 
         return lookupPaymentFlow(null,request,orderRequest,claims,expectedTokenType);
     }
@@ -247,15 +250,39 @@ public abstract class BasePaymentFlowManager implements PaymentFlowManager{
                 tokenData = request.getHeader(HTTPConstants.HEADER_PAYMENT);
                 break;
             case INVOICE_TOKEN:
-                tokenData = findCookie(request, HTTPConstants.COOKIE_INVOICE_REQUEST);
+                tokenData = findToken(request, HTTPConstants.PARAMETER_INVOICE_REQUEST, HTTPConstants.HEADER_INVOICE_REQUEST, HTTPConstants.COOKIE_INVOICE_REQUEST);
                 break;
             case PAYMENT_TOKEN:
-                tokenData = findCookie(request, HTTPConstants.COOKIE_PAYMENT_REQUEST);
+                tokenData = findToken(request, HTTPConstants.PARAMETER_PAYMENT_REQUEST, HTTPConstants.HEADER_PAYMENT_REQUEST, HTTPConstants.COOKIE_PAYMENT_REQUEST);
         }
         if(tokenData == null){
             throw new TokenException("No related JWT token found for payment flow.", TokenException.Reason.NOT_FOUND);
         }
         return getTokenGenerator().parseToken(expectedTokenType.getTokenContext(),tokenData);
+    }
+
+
+    /**
+     * Help method retrieving a JWT token by searching the parameters, header or cookie.
+     * If parameter name is null is the given type skipped.
+     * @param request hte related http request.
+     * @param parameterName the parameter name to lookup, null to skip.
+     * @param headerName the header name to lookup, null to skip.
+     * @param cookieName the cookie name to lookup, null to skip.
+     * @return the token found in order parameter -> header -> cookie or null if no token found.
+     */
+    protected String findToken(CachableHttpServletRequest request, String parameterName, String headerName,  String cookieName){
+        String retval = null;
+        if(parameterName != null){
+          retval = request.getParameter(parameterName);
+        }
+        if(retval == null && headerName != null){
+            retval = request.getHeader(headerName);
+        }
+        if(retval == null && cookieName != null){
+            retval = findCookie(request,cookieName);
+        }
+        return retval;
     }
 
     /**

@@ -180,13 +180,16 @@ public class CentralLightningHandlerPaymentFlow extends BasePaymentFlow {
      */
     public InvoiceResult checkSettledInvoice() throws IllegalArgumentException, IOException, InternalErrorException, TokenException{
         assert getLightningHandler() != null;
-        assert invoice != null;
+        assert invoice instanceof Invoice;
 
-        String sourceNode = invoice.getSourceNode();
+        String sourceNode = null;
+        if(invoice instanceof Invoice){
+            sourceNode = ((Invoice) invoice).getSourceNode();
+        }
         invoice = getLightningHandler().lookupInvoice(invoice.getPreImageHash());
-        if(invoice.isSettled()){
-            String invoiceToken = getTokenGenerator().generateInvoiceToken(orderRequest,invoice,requestData,invoice.getExpireDate(), getNotBeforeDate(),sourceNode);
-            return new InvoiceResult(invoice, invoiceToken);
+        if(((Invoice) invoice).isSettled()){
+            String invoiceToken = getTokenGenerator().generateInvoiceToken(orderRequest,invoice,requestData,((Invoice) invoice).getExpireDate(), getNotBeforeDate(),sourceNode);
+            return new InvoiceResult((Invoice) invoice, invoiceToken);
         }
 
         return null;
@@ -201,10 +204,11 @@ public class CentralLightningHandlerPaymentFlow extends BasePaymentFlow {
      */
     @Override
     public boolean isSettled() throws IllegalArgumentException {
-        if(invoice == null){
-            throw new IllegalArgumentException("No Invoice cookie found in request.");
+        if(!(invoice instanceof Invoice)){
+            throw new IllegalArgumentException("No Invoice data found in request.");
         }
-        return invoice.isSettled();
+        Invoice inv = (Invoice) invoice;
+        return inv.isSettled();
     }
 
     /**
@@ -218,11 +222,12 @@ public class CentralLightningHandlerPaymentFlow extends BasePaymentFlow {
      */
     @Override
     public SettlementResult getSettlement() throws IllegalArgumentException, IOException, InternalErrorException, TokenException {
-        if(invoice == null){
-            throw new IllegalArgumentException("No Invoice cookie found in request.");
+        if(!(invoice instanceof Invoice)){
+            throw new IllegalArgumentException("No Invoice data found in request.");
         }
-        if(invoice.isSettled()){
-            settlement = getPaymentHandler().registerSettledInvoice(invoice,registerNew,orderRequest,null);
+        Invoice inv = (Invoice) invoice;
+        if(inv.isSettled()){
+            settlement = getPaymentHandler().registerSettledInvoice(inv,registerNew,orderRequest,null);
 
             String destinationId = getTokenGenerator().getIssuerName(TokenContext.CONTEXT_SETTLEMENT_TOKEN_TYPE);
             String token = getTokenGenerator().generateSettlementToken(orderRequest,settlement,requestData,settlement.getValidUntil(),settlement.getValidFrom(), destinationId);
@@ -241,6 +246,7 @@ public class CentralLightningHandlerPaymentFlow extends BasePaymentFlow {
     @Override
     protected String getSourceNode() {
         assert invoice != null : "Invoice should be set before generating a settlement in a distributed setup.";
-        return invoice.getSourceNode();
+        assert invoice instanceof Invoice;
+        return ((Invoice) invoice).getSourceNode();
     }
 }

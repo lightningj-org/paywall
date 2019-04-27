@@ -143,4 +143,69 @@ class BasePaymentFlowManagerSpec extends Specification {
         e.message == "No related JWT token found for payment flow."
         e.reason == TokenException.Reason.NOT_FOUND
     }
+
+    def "Verify that findToken check parameter first and returns it's value if not null"(){
+        setup:
+        CachableHttpServletRequest request = Mock(CachableHttpServletRequest)
+        1 * request.getParameter(HTTPConstants.PARAMETER_INVOICE_REQUEST) >> "SomeValue"
+        0 * request.getHeader(_)
+        0 * request.getCookies()
+        expect:
+        flowManager.findToken(request,HTTPConstants.PARAMETER_INVOICE_REQUEST, HTTPConstants.HEADER_INVOICE_REQUEST, HTTPConstants.COOKIE_INVOICE_REQUEST) == "SomeValue"
+    }
+
+    def "Verify that findToken check header if parameter was null and returns it's value if not null"(){
+        setup:
+        CachableHttpServletRequest request = Mock(CachableHttpServletRequest)
+        1 * request.getParameter(HTTPConstants.PARAMETER_INVOICE_REQUEST) >> null
+        1 * request.getHeader(HTTPConstants.HEADER_INVOICE_REQUEST)  >> "SomeValue"
+        0 * request.getCookies()
+        expect:
+        flowManager.findToken(request,HTTPConstants.PARAMETER_INVOICE_REQUEST, HTTPConstants.HEADER_INVOICE_REQUEST, HTTPConstants.COOKIE_INVOICE_REQUEST) == "SomeValue"
+    }
+
+    def "Verify that findToken check cookie if parameter and header was null and returns it's value if not null"(){
+        setup:
+        CachableHttpServletRequest request = Mock(CachableHttpServletRequest)
+        1 * request.getParameter(HTTPConstants.PARAMETER_INVOICE_REQUEST) >> null
+        1 * request.getHeader(HTTPConstants.HEADER_INVOICE_REQUEST)  >> null
+        1 * request.getCookies()  >> {[new Cookie("somename1", "somevalue1"),
+                                       new Cookie((String) HTTPConstants.COOKIE_INVOICE_REQUEST, "sometoken"),
+                                       new Cookie("somename2", "somevalue2")] as Cookie[]}
+        expect:
+        flowManager.findToken(request,HTTPConstants.PARAMETER_INVOICE_REQUEST, HTTPConstants.HEADER_INVOICE_REQUEST, HTTPConstants.COOKIE_INVOICE_REQUEST) == "sometoken"
+    }
+
+
+    def "Verify that findToken doesn't check parameters of parameterName is null"(){
+        setup:
+        CachableHttpServletRequest request = Mock(CachableHttpServletRequest)
+        0 * request.getParameter(HTTPConstants.PARAMETER_INVOICE_REQUEST)
+        1 * request.getHeader(HTTPConstants.HEADER_INVOICE_REQUEST)  >> "SomeValue"
+        0 * request.getCookies()
+        expect:
+        flowManager.findToken(request,null, HTTPConstants.HEADER_INVOICE_REQUEST, HTTPConstants.COOKIE_INVOICE_REQUEST) == "SomeValue"
+    }
+
+    def "Verify that findToken doesn't check header of headerName is null"(){
+        setup:
+        CachableHttpServletRequest request = Mock(CachableHttpServletRequest)
+        0 * request.getParameter(HTTPConstants.PARAMETER_INVOICE_REQUEST)
+        0 * request.getHeader(HTTPConstants.HEADER_INVOICE_REQUEST)
+        1 * request.getCookies()  >> {[new Cookie("somename1", "somevalue1"),
+                                       new Cookie((String) HTTPConstants.COOKIE_INVOICE_REQUEST, "sometoken"),
+                                       new Cookie("somename2", "somevalue2")] as Cookie[]}
+        expect:
+        flowManager.findToken(request,null, null, HTTPConstants.COOKIE_INVOICE_REQUEST) == "sometoken"
+    }
+
+    def "Verify that findToken doesn't check cookie of cookieName is null"(){
+        setup:
+        CachableHttpServletRequest request = Mock(CachableHttpServletRequest)
+        0 * request.getParameter(HTTPConstants.PARAMETER_INVOICE_REQUEST)
+        0 * request.getHeader(HTTPConstants.HEADER_INVOICE_REQUEST)
+        0 * request.getCookies()
+        expect:
+        flowManager.findToken(request,null, null, null) == null
+    }
 }

@@ -65,7 +65,7 @@ public abstract class BasePaymentFlow implements PaymentFlow{
 
    private boolean checkRequestData = false;
    protected PreImageOrder order = null;
-   protected Invoice invoice = null;
+   protected MinimalInvoice invoice = null;
    protected Settlement settlement = null;
    protected byte[] preImageHash = null;
    protected RequestData requestData = null;
@@ -129,7 +129,11 @@ public abstract class BasePaymentFlow implements PaymentFlow{
                requestData = new RequestData(tokenClaims);
                break;
            case INVOICE_TOKEN:
-               invoice = new Invoice(tokenClaims);
+               if(tokenClaims.hasClaim(Invoice.CLAIM_NAME)) {
+                   invoice = new Invoice(tokenClaims);
+               }else{
+                   invoice = new MinimalInvoice(tokenClaims);
+               }
                preImageHash = invoice.getPreImageHash();
                requestData = new RequestData(tokenClaims);
                break;
