@@ -25,33 +25,33 @@ import spock.lang.Specification
 /**
  * Unit tests for SpringDefaultFileKeyManager
  */
-@ContextConfiguration(classes=[TestPaymentHandler,PaywallProperties,LocalProfileBeanConfiguration])
+@ContextConfiguration(classes = [TestPaymentHandler, PaywallProperties, LocalProfileBeanConfiguration])
 @TestPropertySource("/test_application.properties")
 class SpringDefaultFileKeyManagerSpec extends Specification {
 
     @Autowired
     SpringDefaultFileKeyManager keyManager
 
-    def setupSpec(){
+    def setupSpec() {
         BCUtils.installBCProvider()
     }
 
-    def "Verify that getAsymTrustStorePath() return the setting for keymgrAsymTruststorePath"(){
+    def "Verify that getAsymTrustStorePath() return the setting for keymgrAsymTruststorePath"() {
         expect:
         keyManager.getAsymTrustStorePath() == "/tmp/truststorepath"
     }
 
-    def "Verify that getKeyStorePath() return the setting for keymgrKeystorePath"(){
+    def "Verify that getKeyStorePath() return the setting for keymgrKeystorePath"() {
         expect:
         keyManager.getKeyStorePath() == "/tmp/keystorepath"
     }
 
-    def "Verify that getProtectPassphrase() return the setting for keymgrPassword"(){
+    def "Verify that getProtectPassphrase() return the setting for keymgrPassword"() {
         expect:
         keyManager.getProtectPassphrase() == "foo123"
     }
 
-    def "Verify that getAsymTrustStorePath() throws InternalErrorException if not set"(){
+    def "Verify that getAsymTrustStorePath() throws InternalErrorException if not set"() {
         setup:
         keyManager.paywallProperties = new PaywallProperties()
         when:
@@ -61,7 +61,7 @@ class SpringDefaultFileKeyManagerSpec extends Specification {
         e.message == "Invalid server configuration, check that setting paywall.keys.truststorepath is set in configuration."
     }
 
-    def "Verify that getKeyStorePath() throws InternalErrorException if not set"(){
+    def "Verify that getKeyStorePath() throws InternalErrorException if not set"() {
         setup:
         keyManager.paywallProperties = new PaywallProperties()
         when:
@@ -71,7 +71,7 @@ class SpringDefaultFileKeyManagerSpec extends Specification {
         e.message == "Invalid server configuration, check that setting paywall.keys.keystorepath is set in configuration."
     }
 
-    def "Verify that getProtectPassphrase() throws InternalErrorException if not set"(){
+    def "Verify that getProtectPassphrase() throws InternalErrorException if not set"() {
         setup:
         keyManager.paywallProperties = new PaywallProperties()
         when:

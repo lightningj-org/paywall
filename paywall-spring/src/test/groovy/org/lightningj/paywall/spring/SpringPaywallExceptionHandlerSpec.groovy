@@ -32,50 +32,51 @@ import spock.lang.Unroll
 class SpringPaywallExceptionHandlerSpec extends Specification {
 
     SpringPaywallExceptionHandler handler = new SpringPaywallExceptionHandler()
-    MockHttpServletRequest request = new MockHttpServletRequest("GET","/someuri.json")
+    MockHttpServletRequest request = new MockHttpServletRequest("GET", "/someuri.json")
     MockHttpServletResponse response = new MockHttpServletResponse()
 
-    def "Verify that handleException without any customized error message uses message from exception"(){
+    // TODO Here fix internal exception
+    def "Verify that handleException without any customized error message uses message from exception, if exception is not internal error."() {
         when:
-        ResponseEntity<Object> result = handler.handleException(request,response,new PaywallRuntimeException(new TestException()))
+        ResponseEntity<Object> result = handler.handleException(request, response, new PaywallRuntimeException(new IllegalArgumentException("Test Message")))
         then:
-        result.statusCode == HttpStatus.INTERNAL_SERVER_ERROR
+        result.statusCode == HttpStatus.BAD_REQUEST
         result.headers.get("Content-Type")[0] == "application/json"
-        result.body.status == HttpStatus.INTERNAL_SERVER_ERROR
-        result.body.message == "Internal Server Error: Some Localized Message"
+        result.body.status == HttpStatus.BAD_REQUEST
+        result.body.message == "Invalid Request: Test Message"
         result.body.errors.size() == 1
-        result.body.errors[0] == "Some Localized Message"
+        result.body.errors[0] == "Test Message"
     }
 
-    def "Verify that handleException with one customized error message includes customized message"(){
+    def "Verify that handleException with one customized error message includes customized message"() {
         when:
-        ResponseEntity<Object> result = handler.handleException(request,response,new PaywallRuntimeException(new TestException()), "Some custom message")
+        ResponseEntity<Object> result = handler.handleException(request, response, new PaywallRuntimeException(new IllegalArgumentException("Test Message")), "Some custom message")
         then:
-        result.statusCode == HttpStatus.INTERNAL_SERVER_ERROR
+        result.statusCode == HttpStatus.BAD_REQUEST
         result.headers.get("Content-Type")[0] == "application/json"
-        result.body.status == HttpStatus.INTERNAL_SERVER_ERROR
-        result.body.message == "Internal Server Error: Some Localized Message"
+        result.body.status == HttpStatus.BAD_REQUEST
+        result.body.message == "Invalid Request: Test Message"
         result.body.errors.size() == 1
         result.body.errors[0] == "Some custom message"
     }
 
-    def "Verify that handleException with a list of customized error messages includes all customized messages"(){
+    def "Verify that handleException with a list of customized error messages includes all customized messages"() {
         when:
-        ResponseEntity<Object> result = handler.handleException(request,response,new PaywallRuntimeException(new TestException()), ["Some custom message1","Some custom message2"])
+        ResponseEntity<Object> result = handler.handleException(request, response, new PaywallRuntimeException(new TestException()), ["Some custom message1", "Some custom message2"])
         then:
         result.statusCode == HttpStatus.INTERNAL_SERVER_ERROR
         result.headers.get("Content-Type")[0] == "application/json"
         result.body.status == HttpStatus.INTERNAL_SERVER_ERROR
-        result.body.message == "Internal Server Error: Some Localized Message"
+        result.body.message == "Internal Server Error"
         result.body.errors.size() == 2
         result.body.errors[0] == "Some custom message1"
         result.body.errors[1] == "Some custom message2"
     }
 
     @Unroll
-    def "Verify that http response code #status and prefix #prefix is returned for exception of type #exceptionName"(){
+    def "Verify that http response code #status and prefix #prefix is returned for exception of type #exceptionName"() {
         when:
-        ResponseEntity<Object> result = handler .handleException(request,response,new PaywallRuntimeException(exception))
+        ResponseEntity<Object> result = handler.handleException(request, response, new PaywallRuntimeException(exception))
         then:
         result.statusCode == status
         result.body.message.startsWith(prefix)
@@ -89,16 +90,16 @@ class SpringPaywallExceptionHandlerSpec extends Specification {
     }
 
 
-    def "Verify that reason code is set of TokenException is thrown"(){
+    def "Verify that reason code is set of TokenException is thrown"() {
         when:
-        ResponseEntity<Object> result = handler.handleException(request,response,new PaywallRuntimeException(new TokenException("SomeMessage", TokenException.Reason.EXPIRED)))
+        ResponseEntity<Object> result = handler.handleException(request, response, new PaywallRuntimeException(new TokenException("SomeMessage", TokenException.Reason.EXPIRED)))
         then:
         result.body.reason == TokenException.Reason.EXPIRED
     }
 
-    static class TestException extends Exception{
+    static class TestException extends Exception {
 
-        TestException(){
+        TestException() {
             super("Message")
         }
 

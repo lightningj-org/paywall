@@ -12,47 +12,14 @@
  *  See terms of license at gnu.org.                                     *
  *                                                                       *
  *************************************************************************/
-package org.lightningj.paywall.springboot2;
+package org.lightningj.paywall.springboot2.paymenthandler;
 
-import javax.xml.bind.annotation.*;
+import org.springframework.data.repository.CrudRepository;
 
 /**
- * Response object used by DemoRestController to display result in JSON or XML.
- * @author philip
+ * Spring Data repository for DemoPerRequestPaymentData.
  */
-@XmlRootElement(name = "DemoResult")
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SettlementResponseType", propOrder = {
-        "id",
-        "content"
-})
-public class DemoResult {
+public interface DemoPerRequestPaymentDataRepository extends CrudRepository<DemoPerRequestPaymentData,Integer> {
 
-    @XmlElement()
-    private long id;
-    @XmlElement()
-    private String content;
-
-    public DemoResult(){
-    }
-    public DemoResult(long id, String content) {
-        this.id = id;
-        this.content = content;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
+    DemoPerRequestPaymentData findByPreImageHash(String preImageHash);
 }

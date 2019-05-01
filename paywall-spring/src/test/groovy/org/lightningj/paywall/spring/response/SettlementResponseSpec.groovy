@@ -27,12 +27,12 @@ class SettlementResponseSpec extends Specification {
 
     SettlementResult settlementResult
 
-    def setup(){
-        Settlement settlement = new Settlement("abc".getBytes(),null, Instant.ofEpochMilli(10000), Instant.ofEpochMilli(5000), true)
+    def setup() {
+        Settlement settlement = new Settlement("abc".getBytes(), null, Instant.ofEpochMilli(10000), Instant.ofEpochMilli(5000), true)
         settlementResult = new SettlementResult(settlement, "SomeToken")
     }
 
-    def "Verify constructors and getter and setters"(){
+    def "Verify constructors and getter and setters"() {
         when:
         SettlementResponse r = new SettlementResponse(settlementResult)
         then:
@@ -61,7 +61,7 @@ class SettlementResponseSpec extends Specification {
         r.token == "token1"
     }
 
-    def "Verify toString"(){
+    def "Verify toString"() {
         expect:
         new SettlementResponse(settlementResult).toString() == "SettlementResponse{preImageHash='YWJj', token='SomeToken', settlementValidUntil=Thu Jan 01 01:00:10 CET 1970, settlementValidFrom=Thu Jan 01 01:00:05 CET 1970, payPerRequest=true, settled=true}"
     }

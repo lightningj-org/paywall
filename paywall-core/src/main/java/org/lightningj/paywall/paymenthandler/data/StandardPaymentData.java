@@ -16,6 +16,7 @@ package org.lightningj.paywall.paymenthandler.data;
 
 import org.lightningj.paywall.vo.amount.CryptoAmount;
 
+import java.time.Duration;
 import java.time.Instant;
 
 /**
@@ -119,18 +120,34 @@ public interface StandardPaymentData extends MinimalPaymentData {
     void setSettlementDate(Instant settlementDate);
 
     /**
-     *
-     * @return the date the settlement will expire used to indicate how long a settlement token should be valid.
-     * If null will default settlement validity be used.
+     * The settlement duration indicates how long time a generated settlement should be valid. If
+     * not set will a default settlement value be used. In FullPaymentData it is also possible
+     * to specifiy an expiration date of an settlement used if it's required to set a fixed time when
+     * the settlement should expire, for example if a settlement should be valid the entire day or month.
+     * <p>
+     * If settlement expire date is set it has precedence over settlementDuration.
+     * </p>
+     * <p>
+     *     <b>Important:</b> Data in this field is only set to instruct the settlement token generator of expiration date.
+     *     the actual settlement date is not updated in this field.
+     * </p>
+     * @see FullPaymentData#getSettlementExpireDate()
+     * @return the duration the settlement should be valid, null if default settlement duration
+     * should be used or if a fixed expiration date should be used.
      */
-    Instant getSettlementExpireDate();
+    Duration getSettlementDuration();
 
     /**
-     *
-     * @param settlementDate the date the settlement will expire used to indicate how long a settlement token should be valid.
-     * If null will default settlement validity be used.
+     * The settlement duration indicates how long time a generated settlement should be valid. If
+     * not set will a default settlement value be used. In FullPaymentData it is also possible
+     * to specifiy an expiration date of an settlement used if it's required to set a fixed time when
+     * the settlement should expire, for example if a settlement should be valid the entire day or month.
+     * <p>
+     * If settlement expire date is set it has precedence over settlementDuration.
+     * </p>
+     * @see FullPaymentData#getSettlementExpireDate()
+     * @param settlementDuration the specific duration of this message.
      */
-    void setSettlementExpireDate(Instant settlementDate);
-
+    void setSettlementDuration(Duration settlementDuration);
 
 }

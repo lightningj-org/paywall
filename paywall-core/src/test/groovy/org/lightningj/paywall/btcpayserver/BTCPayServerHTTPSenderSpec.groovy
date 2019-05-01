@@ -68,7 +68,6 @@ class BTCPayServerHTTPSenderSpec extends Specification {
 
     def "Verify that sending contains the correct headers"(){
         setup:
-
         TestWebServer webServer = new TestWebServer(PORT,handler)
         webServer.startup()
         when: // Test sending signed messages is correct

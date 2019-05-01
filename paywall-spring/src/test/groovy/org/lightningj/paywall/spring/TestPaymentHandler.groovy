@@ -8,7 +8,7 @@ import org.lightningj.paywall.vo.OrderRequest
 import org.springframework.stereotype.Component
 
 @Component("paymentHandler")
-class TestPaymentHandler extends SpringPaymentHandler{
+class TestPaymentHandler extends SpringPaymentHandler {
     /**
      * Method that should generate a new PaymentData for a given order request.
      * This is the first call in a payment flow and the implementation should

@@ -21,7 +21,7 @@ import spock.lang.Specification
  */
 class PaywallRuntimeExceptionSpec extends Specification {
 
-    def "Verify constructor"(){
+    def "Verify constructor"() {
         when:
         RuntimeException e = new RuntimeException(new IOException())
         then:

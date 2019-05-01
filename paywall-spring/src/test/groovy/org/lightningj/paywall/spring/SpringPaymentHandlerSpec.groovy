@@ -26,34 +26,34 @@ import java.util.logging.Logger
  * Unit tests for SpringPaymentHandler
  * @author philip 2019-02-10
  */
-@ContextConfiguration(classes=[TestPaymentHandler,PaywallProperties, LocalProfileBeanConfiguration])
+@ContextConfiguration(classes = [TestPaymentHandler, PaywallProperties, LocalProfileBeanConfiguration])
 @TestPropertySource("/test_application.properties")
 class SpringPaymentHandlerSpec extends Specification {
 
     @Autowired
     SpringPaymentHandler paymentHandler
 
-    def setup(){
+    def setup() {
         SpringPaymentHandler.log = Mock(Logger)
     }
 
-    def "Verify that all beans are injected"(){
+    def "Verify that all beans are injected"() {
         expect:
         paymentHandler.paywallProperties != null
         paymentHandler.getLightningHandler() != null
     }
 
-    def "Verify that getDefaultInvoiceValidity returns Duration from setting paywall.invoice.defaultvalidity "(){
+    def "Verify that getDefaultInvoiceValidity returns Duration from setting paywall.invoice.defaultvalidity "() {
         expect:
         paymentHandler.getDefaultInvoiceValidity().toMinutes() == 1
     }
 
-    def "Verify that getDefaultSettlementValidity returns Duration from setting paywall.settlement.defaultvalidity"(){
+    def "Verify that getDefaultSettlementValidity returns Duration from setting paywall.settlement.defaultvalidity"() {
         expect:
         paymentHandler.getDefaultSettlementValidity().toMinutes() == 2
     }
 
-    def "Verify that getDefaultInvoiceValidity returns default validity if setting is not set"(){
+    def "Verify that getDefaultInvoiceValidity returns default validity if setting is not set"() {
         setup:
         PaywallProperties p = new PaywallProperties()
         p.invoiceDefaultValidity = null
@@ -62,7 +62,7 @@ class SpringPaymentHandlerSpec extends Specification {
         paymentHandler.getDefaultInvoiceValidity().toHours() == 1
     }
 
-    def "Verify that getDefaultSettlementValidity returns default validity if setting is not set"(){
+    def "Verify that getDefaultSettlementValidity returns default validity if setting is not set"() {
         setup:
         PaywallProperties p = new PaywallProperties()
         p.settlmentDefaultValidity = null
@@ -71,7 +71,7 @@ class SpringPaymentHandlerSpec extends Specification {
         paymentHandler.getDefaultSettlementValidity().toHours() == 24
     }
 
-    def "Verify that error log is done for invalid setting of default invoice validity"(){
+    def "Verify that error log is done for invalid setting of default invoice validity"() {
         setup:
         PaywallProperties p = new PaywallProperties()
         p.invoiceDefaultValidity = "abc"
@@ -83,7 +83,7 @@ class SpringPaymentHandlerSpec extends Specification {
         1 * SpringPaymentHandler.log.severe("Error parsing application properties, setting paywall.invoice.defaultvalidity should be an integer, not abc, using default value: 3600")
     }
 
-    def "Verify that error log is done for invalid setting of default settlement validity"(){
+    def "Verify that error log is done for invalid setting of default settlement validity"() {
         setup:
         PaywallProperties p = new PaywallProperties()
         p.settlmentDefaultValidity = "abc"

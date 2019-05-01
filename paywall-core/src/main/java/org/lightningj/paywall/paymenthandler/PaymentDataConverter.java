@@ -49,7 +49,7 @@ public class PaymentDataConverter {
      *                                  if no settlement validity is used in the
      *                                  configured payment data.
      * @param defaultInvoiceValidity the default invoice validity used
-     *                               if no settlement validity is used in the
+     *                               if no invoice validity is used in the
      *                               configured payment data.
      */
     public PaymentDataConverter(LightningHandler lightningHandler,
@@ -150,15 +150,18 @@ public class PaymentDataConverter {
         }
         if(paymentData instanceof StandardPaymentData){
             StandardPaymentData spd = (StandardPaymentData) paymentData;
-            if(spd.getSettlementExpireDate() == null){
+            if(spd.getSettlementDuration() == null){
                 settlement.setValidUntil(clock.instant().plus(defaultSettlementValidity));
             }else {
-                settlement.setValidUntil(spd.getSettlementExpireDate());
+                settlement.setValidUntil(clock.instant().plus(spd.getSettlementDuration()));
             }
         }
         if(paymentData instanceof FullPaymentData){
             FullPaymentData fpd = (FullPaymentData) paymentData;
             settlement.setValidFrom(fpd.getSettlementValidFrom());
+            if(fpd.getSettlementExpireDate() != null){
+                settlement.setValidUntil(fpd.getSettlementExpireDate());
+            }
         }
         if(includeInvoice){
             settlement.setInvoice(convertToInvoice(paymentData));

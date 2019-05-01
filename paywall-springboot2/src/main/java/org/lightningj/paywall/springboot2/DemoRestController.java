@@ -44,8 +44,15 @@ import java.util.concurrent.atomic.AtomicLong;
                     String.format(template, paywallProperties.getLndHostname()));
         }
 
-    @RequestMapping("/demo2")
-    public DemoResult demo2(@RequestParam(value="name", defaultValue="World2") String name) {
+    @PaymentRequired(articleId = "abcPayPerRequest", payPerRequest = true)
+    @RequestMapping("/demoPayPerRequest")
+    public DemoResult demoPayPerRequest(@RequestParam(value="name", defaultValue="Pay Per Request") String name) {
+        return new DemoResult(counter.incrementAndGet(),
+                String.format(template, paywallProperties.getLndHostname()));
+    }
+
+    @RequestMapping("/demoNoPaymentRequired")
+    public DemoResult demoNoPaymentRequired(@RequestParam(value="name", defaultValue="No Payment Required") String name) {
         return new DemoResult(counter.incrementAndGet(),
                 String.format(template, paywallProperties.getLndHostname()));
     }

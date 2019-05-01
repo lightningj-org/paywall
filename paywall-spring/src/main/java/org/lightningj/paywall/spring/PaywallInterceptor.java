@@ -14,6 +14,7 @@
  *************************************************************************/
 package org.lightningj.paywall.spring;
 
+import org.lightningj.paywall.AlreadyExecutedException;
 import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.annotations.PaymentRequired;
 import org.lightningj.paywall.currencyconverter.CurrencyConverter;
@@ -125,7 +126,16 @@ public class PaywallInterceptor implements HandlerInterceptor {
                     SpringCachableHttpServletRequest cachableHttpServletRequest = new SpringCachableHttpServletRequest(request);
 
                     PaymentFlow paymentFlow = paymentFlowManager.getPaymentFlowByAnnotation(paymentRequired, cachableHttpServletRequest);
-                    if (paymentFlow.isPaymentRequired()) {
+
+                    boolean isPaymentRequired = false;
+                    try{
+                        isPaymentRequired = paymentFlow.isPaymentRequired();
+                    }catch (AlreadyExecutedException e){
+                        log.fine("Paywall Interceptor: Pay Per Request Payment (preImageHash=" + displayablePreImageHash(e.getPreImageHash()) + ") already executed. Message: " + e.getMessage());
+                        isPaymentRequired = true;
+                    }
+
+                    if (isPaymentRequired) {
                       InvoiceResult requestPaymentResult = paymentFlow.requestPayment();
                       InvoiceResponse invoiceResponse = genInvoiceResponse(requestPaymentResult,paymentRequired);
                       generatePaymentRequiredResponse(requestType,invoiceResponse,response);
@@ -234,6 +244,7 @@ public class PaywallInterceptor implements HandlerInterceptor {
                 paywallProperties.getCheckSettlementURL(),
                 paywallProperties.getQrCodeUrl());
     }
+
 
 
     /**

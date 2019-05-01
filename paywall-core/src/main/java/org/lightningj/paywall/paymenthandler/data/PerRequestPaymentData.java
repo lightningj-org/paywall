@@ -27,7 +27,7 @@ package org.lightningj.paywall.paymenthandler.data;
  *
  * Created by Philip Vendil on 2018-12-17.
  */
-public interface PerRequestPaymentData {
+public interface PerRequestPaymentData extends MinimalPaymentData{
 
     /**
      *

@@ -19,7 +19,7 @@ import org.springframework.data.repository.CrudRepository;
 /**
  * Spring Data repository for DemoPaymentData.
  */
-public interface DemoPaymentDataRepository extends CrudRepository<DemoPaymentData,Integer> {
+public interface DemoMinimalPaymentDataRepository extends CrudRepository<DemoMinimalPaymentData,Integer> {
 
-    DemoPaymentData findByPreImageHash(String preImageHash);
+    DemoMinimalPaymentData findByPreImageHash(String preImageHash);
 }

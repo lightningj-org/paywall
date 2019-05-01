@@ -14,12 +14,17 @@
  *************************************************************************/
 package org.lightningj.paywall.spring.response;
 
+import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.paymentflow.InvoiceResult;
 import org.lightningj.paywall.requestpolicy.RequestPolicyType;
+import org.lightningj.paywall.spring.controller.GenerateQRCodeController;
 import org.lightningj.paywall.util.Base64Utils;
 import org.lightningj.paywall.vo.Invoice;
+import org.lightningj.paywall.web.HTTPConstants;
 
 import javax.xml.bind.annotation.*;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Date;
 
 /**
@@ -107,7 +112,7 @@ public class InvoiceResponse {
                            RequestPolicyType requestPolicyType,
                            boolean includeNodeInfo,
                            String checkSettlementLink,
-                           String qrLink){
+                           String qrLink) throws InternalErrorException {
         Invoice invoice = invoiceResult.getInvoice();
         preImageHash = invoice.getPreImageHash();
         bolt11Invoice = invoice.getBolt11Invoice();
@@ -121,8 +126,12 @@ public class InvoiceResponse {
         invoiceExpireDate = new Date(invoice.getExpireDate().toEpochMilli());
         this.requestPolicyType = requestPolicyType.name();
         payPerRequest = isPayPerRequest;
-        this.checkSettlementLink = checkSettlementLink;
-        this.qrLink = qrLink;
+        try {
+            this.checkSettlementLink = checkSettlementLink + "?" + HTTPConstants.PARAMETER_INVOICE_REQUEST + "=" + URLEncoder.encode(token, "UTF-8");
+            this.qrLink = qrLink + "?" + GenerateQRCodeController.PARAMETER_DATA + "=" + URLEncoder.encode(invoice.getBolt11Invoice(), "UTF-8");
+        }catch (UnsupportedEncodingException e){
+            throw new InternalErrorException("Internal error encoding invoice response, unsupported encoding when URL encoding.: " + e.getMessage(),e);
+        }
     }
 
     /**

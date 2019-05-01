@@ -14,7 +14,7 @@
  *************************************************************************/
 package org.lightningj.paywall.springboot2.paymenthandler;
 
-import org.lightningj.paywall.paymenthandler.data.MinimalPaymentData;
+import org.lightningj.paywall.paymenthandler.data.PerRequestPaymentData;
 import org.lightningj.paywall.util.Base64Utils;
 import org.lightningj.paywall.vo.amount.Amount;
 import org.lightningj.paywall.vo.amount.BTC;
@@ -23,18 +23,19 @@ import org.lightningj.paywall.vo.amount.CryptoAmount;
 import javax.persistence.*;
 
 /**
- * Demo payment data implementing the MinimalPaymentData requirements
+ * Demo payment data implementing the PerRequestPaymentData requirements
  * for payment flow to work.
  * It is a simple JPA Entity with following columns:
  * <p><ul>
  * <li>id: primary id in database</li>
  * <li>preImageHash: unique preImageHash generated with the order.</li>
  * <li>orderAmount: the orderAmount in satoshis for this payment</li>
- * <li>settled: indicates if this order have been settled.</li>
+ * <li>payPerRequest: If payment flow is for one request only..</li>
+ * <li>executed: If related request already have been executed.</li>
  * </ul><p>
  */
 @Entity
-public class DemoPaymentData implements MinimalPaymentData {
+public class DemoPerRequestPaymentData implements PerRequestPaymentData {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -46,6 +47,10 @@ public class DemoPaymentData implements MinimalPaymentData {
     private long orderAmount;
 
     private boolean settled = false;
+
+    private boolean payPerRequest = false;
+
+    private boolean executed = false;
 
     /**
      *
@@ -122,6 +127,44 @@ public class DemoPaymentData implements MinimalPaymentData {
         this.settled = settled;
     }
 
+    /**
+     * @return flag indicating that this payment is for one request only. The implementation
+     * can take the payPerRequest flag from the order request as guidance, but it is the PaymentHandler
+     * that ultimately decides if payPerRequest should be set.
+     */
+    @Override
+    public boolean isPayPerRequest() {
+        return payPerRequest;
+    }
+
+    /**
+     * @param payPerRequest flag indicating that this payment is for one request only. The implementation
+     *                      can take the payPerRequest flag from the order request as guidance, but it is the PaymentHandler
+     *                      that ultimately decides if payPerRequest should be set.
+     */
+    @Override
+    public void setPayPerRequest(boolean payPerRequest) {
+        this.payPerRequest = payPerRequest;
+    }
+
+    /**
+     * @return true if related request have been executed, is set after successful processing
+     * if a payed call and used to indicate that it cannot be processed again.
+     */
+    @Override
+    public boolean isExecuted() {
+        return executed;
+    }
+
+    /**
+     * @param executed true if related request have been executed, is set after successful processing
+     *                 if a payed call and used to indicate that it cannot be processed again.
+     */
+    @Override
+    public void setExecuted(boolean executed) {
+        this.executed = executed;
+    }
+
     @Override
     public String toString() {
         return "DemoPaymentData{" +
@@ -129,6 +172,10 @@ public class DemoPaymentData implements MinimalPaymentData {
                 ", preImageHash='" + preImageHash + '\'' +
                 ", orderAmount=" + orderAmount +
                 ", settled=" + settled +
+                ", payPerRequest=" + payPerRequest +
+                ", executed=" + executed +
                 '}';
     }
+
+
 }

@@ -24,7 +24,7 @@ import spock.lang.Specification
 /**
  * Unit tests for SpringLNDLightningHandler
  */
-@ContextConfiguration(classes=[TestPaymentHandler,PaywallProperties, LocalProfileBeanConfiguration])
+@ContextConfiguration(classes = [TestPaymentHandler, PaywallProperties, LocalProfileBeanConfiguration])
 @TestPropertySource("/test_application.properties")
 class SpringLNDLightningHandlerSpec extends Specification {
 
@@ -32,27 +32,27 @@ class SpringLNDLightningHandlerSpec extends Specification {
     SpringLNDLightningHandler lightningHandler
 
 
-    def "Verify that getHost() return the setting for lndHostname"(){
+    def "Verify that getHost() return the setting for lndHostname"() {
         expect:
         lightningHandler.getHost() == "somehost"
     }
 
-    def "Verify that getPort() return the setting for lndPort"(){
+    def "Verify that getPort() return the setting for lndPort"() {
         expect:
         lightningHandler.getPort() == 10000
     }
 
-    def "Verify that getTLSCertPath() return the setting for lndTLSCertPath"(){
+    def "Verify that getTLSCertPath() return the setting for lndTLSCertPath"() {
         expect:
         lightningHandler.getTLSCertPath() == "/tmp/tlscertpath"
     }
 
-    def "Verify that getMacaroonPath() return the setting for lndMacaroonPath"(){
+    def "Verify that getMacaroonPath() return the setting for lndMacaroonPath"() {
         expect:
         lightningHandler.getMacaroonPath() == "/tmp/macaroonpath"
     }
 
-    def "Verify that getHost() throws InternalErrorException if not set"(){
+    def "Verify that getHost() throws InternalErrorException if not set"() {
         setup:
         lightningHandler.paywallProperties = new PaywallProperties()
         when:
@@ -62,7 +62,7 @@ class SpringLNDLightningHandlerSpec extends Specification {
         e.message == "Invalid server configuration, check that setting paywall.lnd.hostname is set in configuration."
     }
 
-    def "Verify that getPort() throws InternalErrorException if not set"(){
+    def "Verify that getPort() throws InternalErrorException if not set"() {
         setup:
         lightningHandler.paywallProperties = new PaywallProperties()
         when:
@@ -72,7 +72,7 @@ class SpringLNDLightningHandlerSpec extends Specification {
         e.message == "Invalid server configuration, check that setting paywall.lnd.port is set in configuration."
     }
 
-    def "Verify that getPort() throws InternalErrorException if setting is non integer"(){
+    def "Verify that getPort() throws InternalErrorException if setting is non integer"() {
         setup:
         lightningHandler.paywallProperties = new PaywallProperties()
         lightningHandler.paywallProperties.lndPort = "abc"
@@ -83,7 +83,7 @@ class SpringLNDLightningHandlerSpec extends Specification {
         e.message == "Invalid server configuration, check that setting paywall.lnd.port has a number value, not abc"
     }
 
-    def "Verify that getTLSCertPath() throws InternalErrorException if not set"(){
+    def "Verify that getTLSCertPath() throws InternalErrorException if not set"() {
         setup:
         lightningHandler.paywallProperties = new PaywallProperties()
         when:
@@ -93,7 +93,7 @@ class SpringLNDLightningHandlerSpec extends Specification {
         e.message == "Invalid server configuration, check that setting paywall.lnd.tlscertpath is set in configuration."
     }
 
-    def "Verify that getMacaroonPath() throws InternalErrorException if not set"(){
+    def "Verify that getMacaroonPath() throws InternalErrorException if not set"() {
         setup:
         lightningHandler.paywallProperties = new PaywallProperties()
         when:

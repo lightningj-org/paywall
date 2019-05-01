@@ -16,6 +16,7 @@ package org.lightningj.paywall.springboot2.paymenthandler
 
 import org.lightningj.paywall.InternalErrorException
 import org.lightningj.paywall.tokengenerator.TokenGenerator
+import org.lightningj.paywall.util.BCUtils
 import org.lightningj.paywall.vo.OrderRequest
 import org.lightningj.paywall.vo.amount.BTC
 import org.lightningj.paywall.vo.amount.CryptoAmount
@@ -40,7 +41,7 @@ class DemoPaymentHandlerSpec extends Specification {
     ArticleDataRepository articleDataRepository
 
     @Autowired
-    DemoPaymentDataRepository demoPaymentDataRepository
+    DemoFullPaymentDataRepository demoPaymentDataRepository
 
     @Autowired
     DemoPaymentHandler demoPaymentHandler
@@ -52,6 +53,10 @@ class DemoPaymentHandlerSpec extends Specification {
 
     OrderRequest validOrderRequest
     OrderRequest invalidOrderRequest
+
+    def setupSpec(){
+        BCUtils.installBCProvider()
+    }
 
     def setup() {
         if (articleDataRepository.findByArticleId("abc123") == null) {
@@ -76,7 +81,7 @@ class DemoPaymentHandlerSpec extends Specification {
 
     def "Verify that payment data handler method handles valid payment data request properly."(){
         when: // Verify that newPaymentData generates a new saved payment data.
-        DemoPaymentData r1 = demoPaymentHandler.newPaymentData(preImageHash, validOrderRequest)
+        DemoFullPaymentData r1 = demoPaymentHandler.newPaymentData(preImageHash, validOrderRequest)
         then:
         r1.preImageHash == preImageHash
         !r1.settled
@@ -85,7 +90,7 @@ class DemoPaymentHandlerSpec extends Specification {
         ((CryptoAmount) r1.orderAmount).value == 20
 
         when:
-        DemoPaymentData r2  = demoPaymentHandler.findPaymentData(preImageHash)
+        DemoFullPaymentData r2  = demoPaymentHandler.findPaymentData(preImageHash)
 
         then:
         r2.id == r1.id
@@ -93,7 +98,7 @@ class DemoPaymentHandlerSpec extends Specification {
         when:
         r2.settled = true
         demoPaymentHandler.updatePaymentData(null,r2,null)
-        DemoPaymentData r3 = demoPaymentDataRepository.findById(r2.id).get()
+        DemoFullPaymentData r3 = demoPaymentDataRepository.findById(r2.id).get()
         then:
         r3.id == r2.id
         r3.settled

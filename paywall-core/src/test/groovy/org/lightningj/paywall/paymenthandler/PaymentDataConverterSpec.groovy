@@ -214,7 +214,7 @@ class PaymentDataConverterSpec extends Specification {
 
     def "Verify that convertToSettlement converts StandardPaymentData with payment data validity if set."(){
         setup:
-        def pd = new TestStandardData(settled: true, preImageHash: "abc".bytes, orderAmount: new BTC(123), settlementExpireDate: Instant.ofEpochMilli(7000))
+        def pd = new TestStandardData(settled: true, preImageHash: "abc".bytes, orderAmount: new BTC(123), settlementDuration : Duration.ofSeconds(2))
         when:
         Settlement settlement = converter.convertToSettlement(pd,false)
         then:
@@ -235,6 +235,34 @@ class PaymentDataConverterSpec extends Specification {
         settlement.preImageHash == "abc".bytes
         settlement.invoice == null
         settlement.validUntil.toEpochMilli() == 7000
+        settlement.validFrom.toEpochMilli() == 1000
+        settlement.payPerRequest
+    }
+
+    def "Verify that convertToSettlement converts FullPaymentData using settlementDuration if settlementExpireDate is not set."(){
+        setup:
+        def pd = new TestFullData(settled: true, preImageHash: "abc".bytes, orderAmount: new BTC(123),
+                settlementDuration: Duration.ofSeconds(1), settlementValidFrom: Instant.ofEpochMilli(1000), payPerRequest: true)
+        when:
+        Settlement settlement = converter.convertToSettlement(pd,false)
+        then:
+        settlement.preImageHash == "abc".bytes
+        settlement.invoice == null
+        settlement.validUntil.toEpochMilli() == 6000
+        settlement.validFrom.toEpochMilli() == 1000
+        settlement.payPerRequest
+    }
+
+    def "Verify that convertToSettlement converts FullPaymentData using default settlement duration if neither settlementExpireDate nor settlementDuration are set."(){
+        setup:
+        def pd = new TestFullData(settled: true, preImageHash: "abc".bytes, orderAmount: new BTC(123),
+                settlementValidFrom: Instant.ofEpochMilli(1000), payPerRequest: true)
+        when:
+        Settlement settlement = converter.convertToSettlement(pd,false)
+        then:
+        settlement.preImageHash == "abc".bytes
+        settlement.invoice == null
+        settlement.validUntil.toEpochMilli() == 3605000
         settlement.validFrom.toEpochMilli() == 1000
         settlement.payPerRequest
     }
@@ -283,7 +311,7 @@ class PaymentDataConverterSpec extends Specification {
         pd.invoiceExpireDate == settledInvoice.expireDate
         pd.settlementDate == settledInvoice.settlementDate
         pd.settledAmount == settledInvoice.settledAmount
-        pd.settlementExpireDate == null
+        pd.settlementDuration == null
     }
 
     def "Verify populatePaymentDataFromInvoice sets all expected fields for a MinimalPaymentData"(){
@@ -352,11 +380,12 @@ class PaymentDataConverterSpec extends Specification {
         Instant invoiceExpireDate
         CryptoAmount settledAmount
         Instant settlementDate
-        Instant settlementExpireDate
+        Duration settlementDuration
     }
 
     static class TestFullData extends TestStandardData implements FullPaymentData{
         Instant settlementValidFrom
+        Instant settlementExpireDate
         String bolt11Invoice
         boolean payPerRequest
         boolean executed

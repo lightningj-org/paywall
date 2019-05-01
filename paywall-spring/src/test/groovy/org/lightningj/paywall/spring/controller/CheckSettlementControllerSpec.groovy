@@ -33,51 +33,55 @@ import java.time.Instant
 class CheckSettlementControllerSpec extends Specification {
 
     CheckSettlementController controller = new CheckSettlementController()
-    MockHttpServletRequest request = new MockHttpServletRequest("GET","/someuri.json")
+    MockHttpServletRequest request = new MockHttpServletRequest("GET", "/someuri.json")
     MockHttpServletResponse response = new MockHttpServletResponse()
 
-    def setup(){
+    def setup() {
         controller.paymentFlowManager = Mock(PaymentFlowManager)
         controller.paywallExceptionHandler = Mock(PaywallExceptionHandler)
     }
 
-    def "Verify that checkSettlement() returns unsettled response if payment isn't settled"(){
+    def "Verify that checkSettlement() returns unsettled response if payment isn't settled"() {
         setup:
         def paymentFlow = Mock(PaymentFlow)
         when:
-        SettlementResponse resp = controller.checkSettlement(request,response)
+        SettlementResponse resp = controller.checkSettlement(request, response)
 
         then:
         !resp.settled
         response.contentType == "application/json"
-        1 * controller.paymentFlowManager.getPaymentFlowFromToken(!null, ExpectedTokenType.INVOICE_TOKEN) >> { paymentFlow}
-        1 * paymentFlow.isSettled() >> { false}
+        1 * controller.paymentFlowManager.getPaymentFlowFromToken(!null, ExpectedTokenType.INVOICE_TOKEN) >> {
+            paymentFlow
+        }
+        1 * paymentFlow.isSettled() >> { false }
     }
 
-    def "Verify that checkSettlement() returns settled response if payment isn settled"(){
+    def "Verify that checkSettlement() returns settled response if payment isn settled"() {
         setup:
         def paymentFlow = Mock(PaymentFlow)
         when:
-        SettlementResponse resp = controller.checkSettlement(request,response)
+        SettlementResponse resp = controller.checkSettlement(request, response)
 
         then:
         resp.settled
         resp.token == "SomeToken"
         response.contentType == "application/json"
-        1 * controller.paymentFlowManager.getPaymentFlowFromToken(!null, ExpectedTokenType.INVOICE_TOKEN) >> { paymentFlow}
-        1 * paymentFlow.isSettled() >> { true}
+        1 * controller.paymentFlowManager.getPaymentFlowFromToken(!null, ExpectedTokenType.INVOICE_TOKEN) >> {
+            paymentFlow
+        }
+        1 * paymentFlow.isSettled() >> { true }
         1 * paymentFlow.getSettlement() >> {
-            Settlement settlement = new Settlement("abc".getBytes(),null, Instant.ofEpochMilli(10000), null, true)
+            Settlement settlement = new Settlement("abc".getBytes(), null, Instant.ofEpochMilli(10000), null, true)
             return new SettlementResult(settlement, "SomeToken")
         }
     }
 
-    def "Verify that handleException calls underlying paywallExceptionHandler bean."(){
+    def "Verify that handleException calls underlying paywallExceptionHandler bean."() {
         setup:
         Exception e = new IOException("asdf")
         when:
-        controller.handleException(request,response,e)
+        controller.handleException(request, response, e)
         then:
-        1 * controller.paywallExceptionHandler.handleException(request,response,e)
+        1 * controller.paywallExceptionHandler.handleException(request, response, e)
     }
 }

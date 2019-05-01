@@ -14,6 +14,7 @@
  *************************************************************************/
 package org.lightningj.paywall.spring;
 
+import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.spring.util.PaywallRuntimeException;
 import org.lightningj.paywall.spring.util.RequestHelper;
 import org.lightningj.paywall.tokengenerator.TokenException;
@@ -33,6 +34,8 @@ import java.util.*;
  * @see org.lightningj.paywall.spring.PaywallExceptionHandler
  */
 public class SpringPaywallExceptionHandler implements PaywallExceptionHandler{
+
+    static final String INTERNAL_SERVER_ERROR_MSG = "Internal Server Error";
 
     private static Map<Class, HttpStatus> statusCodeMap = new HashMap<>();
     private static Map<Class, String> errorMsgPrefix = new HashMap<>();
@@ -63,14 +66,15 @@ public class SpringPaywallExceptionHandler implements PaywallExceptionHandler{
                                                   Exception exception){
         List<String> errorMessages = new ArrayList<>();
         String errorMessage;
-        if(exception instanceof PaywallRuntimeException){
-            errorMessage = exception.getCause().getLocalizedMessage();
-        }else{
-            errorMessage = exception.getLocalizedMessage();
+        if (exception instanceof PaywallRuntimeException) {
+            errorMessage = getErrorMessageFromException(exception.getCause());
+        } else {
+            errorMessage = getErrorMessageFromException(exception);
         }
-        if(errorMessage != null){
+        if (errorMessage != null) {
             errorMessages.add(errorMessage);
         }
+
         return handleException(request,response,exception, errorMessages);
     }
 
@@ -115,12 +119,14 @@ public class SpringPaywallExceptionHandler implements PaywallExceptionHandler{
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         }
         String messagePrefix = errorMsgPrefix.get(exception.getClass());
+        String message;
         if(messagePrefix == null){
-            messagePrefix = "Internal Server Error";
-        }
-        String message = messagePrefix;
-        if(exception.getLocalizedMessage() != null){
-            message += ": " + exception.getLocalizedMessage();
+            message = INTERNAL_SERVER_ERROR_MSG;
+        }else {
+            message = messagePrefix;
+            if (exception.getLocalizedMessage() != null) {
+                message += ": " + exception.getLocalizedMessage();
+            }
         }
         APIError apiError = new APIError(httpStatus,message,errorMessages);
         if(exception instanceof TokenException){
@@ -130,5 +136,20 @@ public class SpringPaywallExceptionHandler implements PaywallExceptionHandler{
         httpHeaders.setContentType(MediaType.parseMediaType(requestType.getContentType()));
         return new ResponseEntity<>(
                 apiError, httpHeaders, apiError.getStatus());
+    }
+
+    /**
+     * Help method returning the localized message if not exception is not
+     * related to an internal server error. Then the details is masked out.
+     * @param exception the expection to get error message from.
+     * @return the localized message from exception or "Internal Server Error" if
+     * exception is related to internal error.
+     */
+    private String getErrorMessageFromException(Throwable exception){
+        if(errorMsgPrefix.get(exception.getClass()) != null){
+            return exception.getLocalizedMessage();
+        }else{
+            return INTERNAL_SERVER_ERROR_MSG;
+        }
     }
 }

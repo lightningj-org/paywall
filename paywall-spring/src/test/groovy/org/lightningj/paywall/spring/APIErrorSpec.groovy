@@ -23,13 +23,13 @@ import spock.lang.Specification
  */
 class APIErrorSpec extends Specification {
 
-    def "Verify that constructors and toString works properly"(){
+    def "Verify that constructors and toString works properly"() {
         expect:
         new APIError(HttpStatus.TEMPORARY_REDIRECT, "Some Temporary Redirect", "Some Constructed Message").toString() == """APIError{status=307 TEMPORARY_REDIRECT, message='Some Temporary Redirect', errors=[Some Constructed Message], reason=null}"""
-        new APIError(HttpStatus.TEMPORARY_REDIRECT, "Some Temporary Redirect", ["Some Constructed Message1","Some Constructed Message2"]).toString() == """APIError{status=307 TEMPORARY_REDIRECT, message='Some Temporary Redirect', errors=[Some Constructed Message1, Some Constructed Message2], reason=null}"""
+        new APIError(HttpStatus.TEMPORARY_REDIRECT, "Some Temporary Redirect", ["Some Constructed Message1", "Some Constructed Message2"]).toString() == """APIError{status=307 TEMPORARY_REDIRECT, message='Some Temporary Redirect', errors=[Some Constructed Message1, Some Constructed Message2], reason=null}"""
     }
 
-    def "Verify getters and setters"(){
+    def "Verify getters and setters"() {
         setup:
         def apiError = new APIError(HttpStatus.TEMPORARY_REDIRECT, "Some Temporary Redirect", "Some Constructed Message")
         expect:

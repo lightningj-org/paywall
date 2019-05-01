@@ -1,9 +1,8 @@
 package org.lightningj.paywall.spring;
 
 import org.lightningj.paywall.InternalErrorException;
-import org.lightningj.paywall.lightninghandler.LightningEventListener;
-import org.lightningj.paywall.lightninghandler.LightningHandler;
-import org.lightningj.paywall.lightninghandler.LightningHandlerContext;
+import org.lightningj.paywall.lightninghandler.*;
+import org.lightningj.paywall.util.Base64Utils;
 import org.lightningj.paywall.vo.ConvertedOrder;
 import org.lightningj.paywall.vo.Invoice;
 import org.lightningj.paywall.vo.NodeInfo;
@@ -14,19 +13,27 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MockedLightningHandler implements LightningHandler {
 
-    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
+    Clock clock = Clock.systemDefaultZone();
     Instant invoiceDate;
-    Instant expireDate;
-
+    Duration invoiceValidity = Duration.of(1, ChronoUnit.HOURS);
+    List<LightningEventListener> lightningEventListeners = new ArrayList<>();
+    Map<String,Invoice> invoiceMap = new HashMap<>();
+    String internalErrorMessage = null;
     @PostConstruct
-    void init() throws ParseException{
-        invoiceDate = dateFormat.parse("2019-01-03 13:12:12").toInstant();
-        expireDate = dateFormat.parse("2019-01-03 14:12:12").toInstant();
+    void init() {
+        invoiceDate = clock.instant();
     }
 
     /**
@@ -54,12 +61,23 @@ public class MockedLightningHandler implements LightningHandler {
     @Override
     public Invoice generateInvoice(PreImageData preImageData, ConvertedOrder paymentData) throws IOException, InternalErrorException {
 
-        return new Invoice(preImageData.getPreImageHash(),
+        if(internalErrorMessage != null){
+            String message = internalErrorMessage;
+            internalErrorMessage = null;
+            throw new InternalErrorException(message);
+
+        }
+        Invoice retval =  new Invoice(preImageData.getPreImageHash(),
                 "lntb10u1pwt6nk9pp59rulenhfxs7qcq867kfs3mx3pyehp5egjwa8zggaymp56kxr2hrsdqqcqzpgsn2swaz4q47u0dee8fsezqnarwlcjdhvdcdnv6avecqjldqx75yya7z8lw45qzh7jd9vgkwu38xeec620g4lsd6vstw8yrtkya96prsqru5vqa",
                 "Some description",
                 paymentData.getConvertedAmount(),
                 getNodeInfo(),
-                expireDate,invoiceDate);
+                invoiceDate.plus(invoiceValidity),invoiceDate);
+        invoiceMap.put(Base64Utils.encodeBase64String(preImageData.getPreImageHash()),retval);
+        for(LightningEventListener l : lightningEventListeners){
+            l.onLightningEvent(new LightningEvent(LightningEventType.ADDED,retval,null));
+        }
+        return retval;
     }
 
     /**
@@ -70,7 +88,7 @@ public class MockedLightningHandler implements LightningHandler {
      */
     @Override
     public void registerListener(LightningEventListener listener) throws InternalErrorException {
-
+        lightningEventListeners.add(listener);
     }
 
     /**
@@ -82,7 +100,7 @@ public class MockedLightningHandler implements LightningHandler {
      */
     @Override
     public void unregisterListener(LightningEventListener listener) throws InternalErrorException {
-
+        lightningEventListeners.remove(listener);
     }
 
     /**
@@ -95,7 +113,7 @@ public class MockedLightningHandler implements LightningHandler {
      */
     @Override
     public Invoice lookupInvoice(byte[] preImageHash) throws IOException, InternalErrorException {
-        return null;
+        return invoiceMap.get(Base64Utils.encodeBase64String(preImageHash));
     }
 
     /**
@@ -107,7 +125,7 @@ public class MockedLightningHandler implements LightningHandler {
      */
     @Override
     public boolean isConnected() throws IOException, InternalErrorException {
-        return false;
+        return true;
     }
 
     /**
@@ -132,4 +150,43 @@ public class MockedLightningHandler implements LightningHandler {
     public NodeInfo getNodeInfo() throws IOException, InternalErrorException {
         return new NodeInfo("03978f437e05f64b36fa974b415049e6c36c0163b0af097bab3eb3642501055efa@10.10.10.10:5735");
     }
+
+    /**
+     * Test method to simulate a signal that related payment have been settled in full.
+     *
+     */
+    public void simulateSettleInvoice(byte[] preImageHash) throws Exception{
+        Invoice i = lookupInvoice(preImageHash);
+        i.setSettled(true);
+        i.setSettledAmount(i.getInvoiceAmount());
+        i.setSettlementDate(clock.instant());
+        for(LightningEventListener l : lightningEventListeners){
+            l.onLightningEvent(new LightningEvent(LightningEventType.SETTLEMENT,i,null));
+        }
+    }
+
+    /**
+     * Method that simulates an internal exception next created invoice
+     */
+    public void simulateInternalError(String message){
+        internalErrorMessage = message;
+    }
+
+    /**
+     *
+     * @return mocked invoice validity set in invoices.
+     */
+    public Duration getInvoiceValidity(){
+        return invoiceValidity;
+    }
+
+    /**
+     *
+     * @param duration mocked invoice validity set in invoices.
+     */
+    public void setInvoiceValidity(Duration duration){
+        invoiceValidity = duration;
+    }
+
+
 }

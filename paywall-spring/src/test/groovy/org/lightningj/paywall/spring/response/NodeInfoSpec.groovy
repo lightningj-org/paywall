@@ -26,7 +26,7 @@ class NodeInfoSpec extends Specification {
 
     IntNodeInfo intNodeInfo = new IntNodeInfo("8371babdk9382719281722@10.10.10.1:123")
 
-    def "Verify constructor and getter and setters"(){
+    def "Verify constructor and getter and setters"() {
         when:
         NodeInfo nodeInfo1 = new NodeInfo()
         then:
@@ -58,7 +58,7 @@ class NodeInfoSpec extends Specification {
         nodeInfo2.getConnectString() == "8371babdk9382719281722@10.10.10.1:123"
     }
 
-    def "Verify toString()"(){
+    def "Verify toString()"() {
         expect:
         new NodeInfo(intNodeInfo).toString() == """NodeInfo{publicKeyInfo='8371babdk9382719281722', nodeAddress='10.10.10.1', nodePort=123, mainNet=true, connectString='8371babdk9382719281722@10.10.10.1:123'}"""
     }
