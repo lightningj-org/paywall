@@ -2,7 +2,7 @@ package org.lightningj.paywall.spring;
 
 import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.lightninghandler.*;
-import org.lightningj.paywall.util.Base64Utils;
+import org.lightningj.paywall.util.Base58;
 import org.lightningj.paywall.vo.ConvertedOrder;
 import org.lightningj.paywall.vo.Invoice;
 import org.lightningj.paywall.vo.NodeInfo;
@@ -10,14 +10,10 @@ import org.lightningj.paywall.vo.PreImageData;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,15 +22,11 @@ import java.util.Map;
 public class MockedLightningHandler implements LightningHandler {
 
     Clock clock = Clock.systemDefaultZone();
-    Instant invoiceDate;
     Duration invoiceValidity = Duration.of(1, ChronoUnit.HOURS);
     List<LightningEventListener> lightningEventListeners = new ArrayList<>();
     Map<String,Invoice> invoiceMap = new HashMap<>();
     String internalErrorMessage = null;
-    @PostConstruct
-    void init() {
-        invoiceDate = clock.instant();
-    }
+
 
     /**
      * Method to open up a connection to the configured LND node. Calls to register and un-register listeners
@@ -67,13 +59,14 @@ public class MockedLightningHandler implements LightningHandler {
             throw new InternalErrorException(message);
 
         }
+        Instant invoiceDate = clock.instant();
         Invoice retval =  new Invoice(preImageData.getPreImageHash(),
                 "lntb10u1pwt6nk9pp59rulenhfxs7qcq867kfs3mx3pyehp5egjwa8zggaymp56kxr2hrsdqqcqzpgsn2swaz4q47u0dee8fsezqnarwlcjdhvdcdnv6avecqjldqx75yya7z8lw45qzh7jd9vgkwu38xeec620g4lsd6vstw8yrtkya96prsqru5vqa",
                 "Some description",
                 paymentData.getConvertedAmount(),
                 getNodeInfo(),
                 invoiceDate.plus(invoiceValidity),invoiceDate);
-        invoiceMap.put(Base64Utils.encodeBase64String(preImageData.getPreImageHash()),retval);
+        invoiceMap.put(Base58.encodeToString(preImageData.getPreImageHash()),retval);
         for(LightningEventListener l : lightningEventListeners){
             l.onLightningEvent(new LightningEvent(LightningEventType.ADDED,retval,null));
         }
@@ -113,7 +106,7 @@ public class MockedLightningHandler implements LightningHandler {
      */
     @Override
     public Invoice lookupInvoice(byte[] preImageHash) throws IOException, InternalErrorException {
-        return invoiceMap.get(Base64Utils.encodeBase64String(preImageHash));
+        return invoiceMap.get(Base58.encodeToString(preImageHash));
     }
 
     /**

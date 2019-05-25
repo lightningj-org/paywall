@@ -52,6 +52,8 @@ public class FiatAmount extends Amount {
 
     /**
      * JSON Parseable constructor
+     * @param jsonObject the jsonObject to parse.
+     * @throws JsonException if problems occurred parsing the json data.
      */
     public FiatAmount(JsonObject jsonObject) throws JsonException{
         super(AmountType.FIAT);

@@ -181,6 +181,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @return the id field.
      */
     public String getId() {
         return id;
@@ -188,6 +189,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @param id the invoice id field.
      */
     public void setId(String id) {
         this.id = id;
@@ -195,6 +197,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @return the token field.
      */
     public String getToken() {
         return token;
@@ -202,6 +205,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @param token the invoice token field.
      */
     public void setToken(String token) {
         this.token = token;
@@ -209,6 +213,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @return the price field.
      */
     public Double getPrice() {
         return price;
@@ -216,6 +221,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @param price the invoice price field.
      */
     public void setPrice(Double price) {
         this.price = price;
@@ -223,6 +229,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @return the currency field.
      */
     public String getCurrency() {
         return currency;
@@ -230,6 +237,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @param currency the invoice currency field.
      */
     public void setCurrency(String currency) {
         this.currency = currency;
@@ -237,6 +245,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @return the orderId field.
      */
     public String getOrderId() {
         return orderId;
@@ -244,6 +253,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @param orderId the invoice orderId field.
      */
     public void setOrderId(String orderId) {
         this.orderId = orderId;
@@ -251,6 +261,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @return the itemDesc field.
      */
     public String getItemDesc() {
         return itemDesc;
@@ -258,6 +269,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @param itemDesc the invoice itemDesc field.
      */
     public void setItemDesc(String itemDesc) {
         this.itemDesc = itemDesc;
@@ -265,6 +277,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @return the itemCode field.
      */
     public String getItemCode() {
         return itemCode;
@@ -272,6 +285,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @param itemCode the invoice itemCode field.
      */
     public void setItemCode(String itemCode) {
         this.itemCode = itemCode;
@@ -279,6 +293,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @return the notificationEmail field.
      */
     public String getNotificationEmail() {
         return notificationEmail;
@@ -286,6 +301,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @param notificationEmail the invoice notificationEmail field.
      */
     public void setNotificationEmail(String notificationEmail) {
         this.notificationEmail = notificationEmail;
@@ -293,6 +309,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @return the notificationURL field.
      */
     public String getNotificationURL() {
         return notificationURL;
@@ -300,6 +317,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @param notificationURL the invoice notificationURL field.
      */
     public void setNotificationURL(String notificationURL) {
         this.notificationURL = notificationURL;
@@ -307,6 +325,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @return the redirectURL field.
      */
     public String getRedirectURL() {
         return redirectURL;
@@ -314,6 +333,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @param redirectURL the invoice redirectURL field.
      */
     public void setRedirectURL(String redirectURL) {
         this.redirectURL = redirectURL;
@@ -321,6 +341,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @return the posData field.
      */
     public String getPosData() {
         return posData;
@@ -328,6 +349,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @param posData the invoice posData field.
      */
     public void setPosData(String posData) {
         this.posData = posData;
@@ -335,6 +357,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @return the transactionSpeed field.
      */
     public String getTransactionSpeed() {
         return transactionSpeed;
@@ -342,6 +365,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @param transactionSpeed the invoice transactionSpeed field.
      */
     public void setTransactionSpeed(String transactionSpeed) {
         this.transactionSpeed = transactionSpeed;
@@ -349,6 +373,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @return the fullNotifications field.
      */
     public Boolean isFullNotifications() {
         return fullNotifications;
@@ -356,6 +381,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @param fullNotifications the invoice fullNotifications field.
      */
     public void setFullNotifications(Boolean fullNotifications) {
         this.fullNotifications = fullNotifications;
@@ -363,6 +389,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @return the extendedNotifications field.
      */
     public Boolean isExtendedNotifications() {
         return extendedNotifications;
@@ -370,6 +397,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @param extendedNotifications the invoice extendedNotifications field.
      */
     public void setExtendedNotifications(Boolean extendedNotifications) {
         this.extendedNotifications = extendedNotifications;
@@ -377,6 +405,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @return the url field.
      */
     public String getUrl() {
         return url;
@@ -384,6 +413,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @param url the invoice url field.
      */
     public void setUrl(String url) {
         this.url = url;
@@ -391,6 +421,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @return the status field.
      */
     public String getStatus() {
         return status;
@@ -398,6 +429,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @param status the invoice status field.
      */
     public void setStatus(String status) {
         this.status = status;
@@ -405,6 +437,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @return the amountPaid field.
      */
     public long getAmountPaid() {
         return amountPaid;
@@ -412,6 +445,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @param amountPaid the invoice amountPaid field.
      */
     public void setAmountPaid(long amountPaid) {
         this.amountPaid = amountPaid;
@@ -419,6 +453,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @return the expirationTime field.
      */
     public Long getExpirationTime() {
         return expirationTime;
@@ -426,6 +461,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @param expirationTime the invoice expirationTime field.
      */
     public void setExpirationTime(Long expirationTime) {
         this.expirationTime = expirationTime;
@@ -433,6 +469,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @return the currentTime field.
      */
     public Long getCurrentTime() {
         return currentTime;
@@ -440,6 +477,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @param currentTime the invoice currentTime field.
      */
     public void setCurrentTime(Long currentTime) {
         this.currentTime = currentTime;
@@ -447,6 +485,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @return the exceptionStatus field.
      */
     public Boolean getExceptionStatus() {
         return exceptionStatus;
@@ -454,6 +493,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @param exceptionStatus the invoice exceptionStatus field.
      */
     public void setExceptionStatus(Boolean exceptionStatus) {
         this.exceptionStatus = exceptionStatus;
@@ -461,6 +501,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @return the transactionCurrency field.
      */
     public String getTransactionCurrency() {
         return transactionCurrency;
@@ -468,6 +509,7 @@ public class Invoice extends JSONParsable{
 
     /**
      * See property comment
+     * @param transactionCurrency the invoice transactionCurrency field.
      */
     public void setTransactionCurrency(String transactionCurrency) {
         this.transactionCurrency = transactionCurrency;

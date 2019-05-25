@@ -62,7 +62,7 @@ class ConvertedOrderSpec extends Specification {
 
     def "Verify that toJsonAsString works as expected"(){
         expect:
-        new ConvertedOrder(new Order("123".getBytes(),"SomeDescription",new BTC(1234),Instant.ofEpochMilli(12345L)),new BTC(2345)).toJsonAsString(false) == """{"preImageHash":"MTIz","description":"SomeDescription","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345,"convertedAmount":{"type":"CRYTOCURRENCY","value":2345,"currencyCode":"BTC","magnetude":"NONE"}}"""
+        new ConvertedOrder(new Order("123".getBytes(),"SomeDescription",new BTC(1234),Instant.ofEpochMilli(12345L)),new BTC(2345)).toJsonAsString(false) == """{"preImageHash":"HXRC","description":"SomeDescription","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345,"convertedAmount":{"type":"CRYTOCURRENCY","value":2345,"currencyCode":"BTC","magnetude":"NONE"}}"""
         when:
         new ConvertedOrder(new Order("123".getBytes(),"SomeDescription",new BTC(1234),Instant.ofEpochMilli(12345L)),null).toJsonAsString(false)
         then:
@@ -72,7 +72,7 @@ class ConvertedOrderSpec extends Specification {
 
     def "Verify that parsing of JSON data works as expected"(){
         when:
-        ConvertedOrder d = new ConvertedOrder(toJsonObject("""{"preImageHash":"MTIz","description":"SomeDescription","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345,"convertedAmount":{"type":"CRYTOCURRENCY","value":2345,"currencyCode":"BTC","magnetude":"NONE"}}"""))
+        ConvertedOrder d = new ConvertedOrder(toJsonObject("""{"preImageHash":"HXRC","description":"SomeDescription","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345,"convertedAmount":{"type":"CRYTOCURRENCY","value":2345,"currencyCode":"BTC","magnetude":"NONE"}}"""))
         then:
         d.preImageHash == "123".getBytes()
         d.description == "SomeDescription"
@@ -82,7 +82,7 @@ class ConvertedOrderSpec extends Specification {
         d.getConvertedAmount().value == 2345L
 
         when:
-        new ConvertedOrder(toJsonObject("""{"preImageHash":"MTIz","description":"SomeDescription","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345}"""))
+        new ConvertedOrder(toJsonObject("""{"preImageHash":"HXRC","description":"SomeDescription","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345}"""))
         then:
         def e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key convertedAmount is required."

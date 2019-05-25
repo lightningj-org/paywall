@@ -92,7 +92,7 @@ public interface FullPaymentData extends StandardPaymentData, PerRequestPaymentD
      * </p>
      * @see StandardPaymentData#getSettlementDuration()
      *
-     * @@param settlementExpireDate the date the settlement will expire used to indicate how long a settlement token should be valid.
+     * @param settlementExpireDate the date the settlement will expire used to indicate how long a settlement token should be valid.
      * If null will default settlement validity be used. If settlementExpireDate is set it will override
      * the settlement duration value.
      */

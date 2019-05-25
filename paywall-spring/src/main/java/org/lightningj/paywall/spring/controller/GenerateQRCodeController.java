@@ -31,17 +31,18 @@ import java.util.logging.Logger;
 
 /**
  * Controller to generate a QR Code and return a PNG Image.
- * <p>
- *     Has the following parameters:
- *     <ul>
- *       <li>d: the string to generate qr code for (Required).</li>
- *       <li>w: custom width of generated image (Optional).</li>
- *       <li>h: custom height of generated image (Optional).</li>
- *     </ul>
- * </p>
+ * Has the following parameters:
+ * <ul>
+ *   <li>d: the string to generate qr code for (Required).</li>
+ *   <li>w: custom width of generated image (Optional).</li>
+ *   <li>h: custom height of generated image (Optional).</li>
+ * </ul>
  */
 @Controller
 public class GenerateQRCodeController {
+
+    // TODO enable settings were settlement controller is disabled, when supporting other
+    // than local payment flow.
 
     protected static Logger log = Logger.getLogger(GenerateQRCodeController.class.getName());
 
@@ -64,7 +65,7 @@ public class GenerateQRCodeController {
      * Main controller action generating a QR Code image for a given qr code
      * @param request the related http request.
      * @param response the related http response.
-     * @return a settlement response containing either settled=false of a settlement token with meta data.
+     * @throws Exception if problems occurred, handled by handleException method.
      */
     @GetMapping("/paywall/genqrcode")
     public void generateQRCode(HttpServletRequest request, HttpServletResponse response) throws Exception{

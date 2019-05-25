@@ -102,7 +102,7 @@ public class CryptoAmount {
 
     /**
      *
-     * @return the magnetude of the amount.
+     * @param magnetude the magnetude of the amount.
      */
     public void setMagnetude(Magnetude magnetude) {
         this.magnetude = magnetude;

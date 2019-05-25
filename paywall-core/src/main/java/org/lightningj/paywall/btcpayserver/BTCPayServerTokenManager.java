@@ -56,6 +56,7 @@ public class BTCPayServerTokenManager {
 
     /**
      * Adds the given token in related to the facade to the cache.
+     * @param token the token to set.
      */
     public void put(Token token){
         tokenCache.put(token.getFacade(), token);

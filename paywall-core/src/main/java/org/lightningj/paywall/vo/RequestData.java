@@ -16,16 +16,13 @@ package org.lightningj.paywall.vo;
 
 import org.jose4j.jwt.JwtClaims;
 import org.lightningj.paywall.tokengenerator.JWTClaim;
-import org.lightningj.paywall.util.Base64Utils;
-import org.lightningj.paywall.util.HexUtils;
-import org.lightningj.paywall.vo.amount.CryptoAmount;
+import org.lightningj.paywall.util.Base58;
 
 import javax.json.JsonException;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.Base64;
 
 /**
  * Value object class containing information about a request that might require payment.
@@ -115,7 +112,7 @@ public class RequestData extends JWTClaim {
      */
     @Override
     public void convertToJson(JsonObjectBuilder jsonObjectBuilder) throws JsonException {
-        add(jsonObjectBuilder,"significantData", Base64Utils.encodeBase64String(significantData));
+        addB58(jsonObjectBuilder,"significantData", Base58.encodeToString(significantData));
         add(jsonObjectBuilder,"requestDate",requestDate);
     }
 
@@ -127,7 +124,7 @@ public class RequestData extends JWTClaim {
      */
     @Override
     public void parseJson(JsonObject jsonObject) throws JsonException {
-        this.significantData = getByteArrayFromB64(jsonObject,"significantData",true);
+        this.significantData = getByteArrayFromB58(jsonObject,"significantData",true);
         this.requestDate = Instant.ofEpochMilli(getLong(jsonObject,"requestDate", true));
     }
 

@@ -55,7 +55,7 @@ class BTCPayServerHTTPSenderSpec extends Specification {
     BTCPayServerHTTPSender sender
     TestHandler handler = new TestHandler()
 
-    private static final int PORT = 39822
+    private static final int PORT = 39823
 
     def setupSpec(){
         BCUtils.installBCProvider()

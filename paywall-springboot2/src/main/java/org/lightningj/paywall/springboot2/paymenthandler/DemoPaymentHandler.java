@@ -18,9 +18,8 @@ import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.lightninghandler.LightningHandlerContext;
 import org.lightningj.paywall.paymenthandler.PaymentEventType;
 import org.lightningj.paywall.paymenthandler.data.PaymentData;
-import org.lightningj.paywall.spring.PaywallProperties;
 import org.lightningj.paywall.spring.SpringPaymentHandler;
-import org.lightningj.paywall.util.Base64Utils;
+import org.lightningj.paywall.util.Base58;
 import org.lightningj.paywall.vo.OrderRequest;
 import org.lightningj.paywall.vo.amount.BTC;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +28,6 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
-
-import static org.lightningj.paywall.util.SettingUtils.checkLongWithDefault;
 
 /**
  * Demo implementation of a Payment Handler extending SpringPaymentHandler.
@@ -111,13 +108,12 @@ public class DemoPaymentHandler extends SpringPaymentHandler {
      * @param preImageHash the unique preImageHash used to identify a payment flow
      *                     withing a lightning payment.
      * @return return related payment data or null if not found.
-     * @throws IOException            if communication exception occurred in underlying components.
      * @throws InternalErrorException if internal exception occurred fetching related payment data.
      */
     @Override
     protected PaymentData findPaymentData(byte[] preImageHash) throws InternalErrorException {
         try{
-          return demoPaymentDataRepository.findByPreImageHash(Base64Utils.encodeBase64String(preImageHash));
+          return demoPaymentDataRepository.findByPreImageHash(Base58.encodeToString(preImageHash));
         }catch(Exception e){
           throw new InternalErrorException("Error occurred fetching DemoPaymentData from database: " + e.getMessage(),e);
         }
@@ -135,7 +131,6 @@ public class DemoPaymentHandler extends SpringPaymentHandler {
      * @param type        the type of event such as INVOICE_CREATED or INVOICE_SETTLED.
      * @param paymentData the payment data to update and persist.
      * @param context     the latest known state of the lightning handler.  Null if no known state exists.
-     * @throws IOException            if communication exception occurred in underlying components.
      * @throws InternalErrorException if internal exception occurred updating related payment data.
      */
     @Override
@@ -154,7 +149,8 @@ public class DemoPaymentHandler extends SpringPaymentHandler {
     /**
      * Method only used to override default duration set for settlement, only used
      * to test settlement token expiration in functional test and does not need to be part
-     * of implementation regulare use cases.
+     * of implementation regular use cases.
+     * @param settlementDuration the duration of generated settlement for this payment.
      */
     public void setSettlementDuration(Duration settlementDuration){
         this.settlementDuration = settlementDuration;

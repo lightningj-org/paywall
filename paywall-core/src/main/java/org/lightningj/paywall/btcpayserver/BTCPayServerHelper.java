@@ -67,6 +67,7 @@ public class BTCPayServerHelper {
      *
      * @param publicKey the public key to convert to BTCPay hex representation.
      * @return hexadecimal encoded of the compressed Q point.
+     * @throws InternalErrorException if problems occurred converting the public key.
      */
     public String pubKeyInHex(ECPublicKey publicKey) throws InternalErrorException{
         org.bouncycastle.jce.interfaces.ECPublicKey bcPubKey;

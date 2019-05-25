@@ -38,9 +38,9 @@ public interface PaymentFlowManager {
      * @param paymentRequired the related annotation for the resource needing payment.
      * @param request the HTTP request to parse JWT token from.
      * @return a new instance of related payment flow.
-     * @throws IllegalArgumentException if user specified parameters (used by the constructor) was invalid.
      * @throws IOException if communication problems occurred with underlying components.
      * @throws InternalErrorException if internal errors occurred processing the method.
+     * @throws TokenException if problems occurred generating or validating related JWT Token.
      */
     PaymentFlow getPaymentFlowByAnnotation(PaymentRequired paymentRequired, CachableHttpServletRequest request) throws InternalErrorException, IOException, TokenException;
 

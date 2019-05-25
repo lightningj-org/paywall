@@ -20,7 +20,6 @@ import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.annotations.PaymentRequired;
 import org.lightningj.paywall.currencyconverter.CurrencyConverter;
 import org.lightningj.paywall.currencyconverter.InvalidCurrencyException;
-import org.lightningj.paywall.keymgmt.Context;
 import org.lightningj.paywall.lightninghandler.LightningHandler;
 import org.lightningj.paywall.paymenthandler.PaymentHandler;
 import org.lightningj.paywall.requestpolicy.RequestPolicy;
@@ -28,7 +27,7 @@ import org.lightningj.paywall.requestpolicy.RequestPolicyFactory;
 import org.lightningj.paywall.tokengenerator.TokenContext;
 import org.lightningj.paywall.tokengenerator.TokenException;
 import org.lightningj.paywall.tokengenerator.TokenGenerator;
-import org.lightningj.paywall.util.Base64Utils;
+import org.lightningj.paywall.util.Base58;
 import org.lightningj.paywall.vo.*;
 import org.lightningj.paywall.vo.amount.CryptoAmount;
 import org.lightningj.paywall.web.CachableHttpServletRequest;
@@ -233,7 +232,7 @@ public class CentralLightningHandlerPaymentFlow extends BasePaymentFlow {
             String token = getTokenGenerator().generateSettlementToken(orderRequest,settlement,requestData,settlement.getValidUntil(),settlement.getValidFrom(), destinationId);
             return new SettlementResult(settlement,token);
         }else{
-            throw new IllegalArgumentException("Related Invoice " + Base64Utils.encodeBase64String(invoice.getPreImageHash()) + " haven't been settled.");
+            throw new IllegalArgumentException("Related Invoice " + Base58.encodeToString(invoice.getPreImageHash()) + " haven't been settled.");
         }
     }
 

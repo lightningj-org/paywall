@@ -73,6 +73,7 @@ public class KeySerializationHelper {
      * be done with deserializeSecretKey.
      *
      * @param key the secret key to serialize, never null.
+     * @param protectPasshrase the password protecting the key.
      * @return serialized byte array with header and data.
      * @throws InternalErrorException if internal problems occurred serializing the key.
      */
@@ -90,6 +91,7 @@ public class KeySerializationHelper {
      * Method to deserialize key data of a secret key.
      *
      * @param data the serialized key data.
+     * @param protectPassphrase the password protecting the key.
      * @return the raw key data
      * @throws InternalErrorException if problems occurred deserializing the secret key.
      */
@@ -189,6 +191,7 @@ public class KeySerializationHelper {
      *
      * @param publicKeyData the serialized public key data, never null.
      * @param privateKeyData the serialized private key data, never null.
+     * @param protectPassphrase the password protecting the key.
      * @param keyFactory the keyFactory to reconstruct the keys with.
      * @return a reconstructed key pair.
      * @throws InternalErrorException if internal problems occurred deserializing the keys.
@@ -223,7 +226,9 @@ public class KeySerializationHelper {
      * The method only parses the private key and generates the public key from it automatically.
      *
      * @param privateKeyData the serialized private key data, never null.
+     * @param protectPassphrase the password protecting the key.
      * @param keyFactory the keyFactory to reconstruct the keys with.
+     * @param eCCurveName the name of used ec curve.
      * @return a reconstructed key pair.
      * @throws InternalErrorException if internal problems occurred deserializing the keys.
      */

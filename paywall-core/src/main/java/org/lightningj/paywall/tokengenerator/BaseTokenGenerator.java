@@ -261,6 +261,7 @@ public abstract class BaseTokenGenerator implements TokenGenerator{
      * @param context the related token context.
      * @param jws the signature to check signing algorithm and signing key for.
      * @throws TokenException if no trusted signing key could be found.
+     * @throws JoseException if JWT problems occurred.
      * @throws IOException if communication problems occurred with underlying systems.
      * @throws InternalErrorException if internal problem occurred setting the JWS properties.
      */

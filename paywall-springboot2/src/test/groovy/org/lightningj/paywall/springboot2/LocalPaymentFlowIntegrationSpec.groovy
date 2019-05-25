@@ -22,7 +22,7 @@ import org.lightningj.paywall.spring.PaywallProperties
 import org.lightningj.paywall.springboot2.paymenthandler.*
 import org.lightningj.paywall.tokengenerator.TokenGenerator
 import org.lightningj.paywall.util.BCUtils
-import org.lightningj.paywall.util.Base64Utils
+import org.lightningj.paywall.util.Base58
 import org.lightningj.paywall.web.HTTPConstants
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -112,7 +112,7 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
         // Check that invoice response has correct json
         verifyJsonInvoiceResponse(invoice)
         // Verify that payment data was created in database.
-        verifyPaymentData(invoice,demoPaymentHandler.findPaymentData(Base64Utils.decodeBase64String(resp.data.preImageHash)))
+        verifyPaymentData(invoice,demoPaymentHandler.findPaymentData(Base58.decode(resp.data.preImageHash)))
         when:
 
         // Check if payment have been settled.
@@ -142,11 +142,11 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
 
         when:
         // Simulate lightning invoice is payed in lightning handler.
-        lightningHandler.simulateSettleInvoice(Base64Utils.decodeBase64String(invoice.preImageHash))
+        lightningHandler.simulateSettleInvoice(Base58.decode(invoice.preImageHash))
 
         then: // Verify that payment data have been updated
         verifyPaymentData(invoice,
-                demoPaymentHandler.findPaymentData(Base64Utils.decodeBase64String(invoice.preImageHash)),
+                demoPaymentHandler.findPaymentData(Base58.decode(invoice.preImageHash)),
                 [expectSettled: true])
 
         when:
@@ -199,7 +199,7 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
 
         when:
         // Simulate lightning invoice is payed in lightning handler.
-        lightningHandler.simulateSettleInvoice(Base64Utils.decodeBase64String(invoice.preImageHash.toString()))
+        lightningHandler.simulateSettleInvoice(Base58.decode(invoice.preImageHash.toString()))
 
         and:
         // Check settlement
@@ -235,7 +235,7 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
         verifyJsonInvoiceResponse(invoice, [payPerRequest: true, expectedValue: 15])
         // Verify that payment data was created in database.
         verifyPaymentData(invoice,
-                demoPaymentHandler.findPaymentData(Base64Utils.decodeBase64String(resp.data.preImageHash)),
+                demoPaymentHandler.findPaymentData(Base58.decode(resp.data.preImageHash)),
                 [expectPayPerRequest: true, expectExecuted: false])
         when:
 
@@ -258,11 +258,11 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
 
         when:
         // Simulate lightning invoice is payed in lightning handler.
-        lightningHandler.simulateSettleInvoice(Base64Utils.decodeBase64String(invoice.preImageHash))
+        lightningHandler.simulateSettleInvoice(Base58.decode(invoice.preImageHash))
 
         then: // Verify that payment data have been updated
         verifyPaymentData(invoice,
-                demoPaymentHandler.findPaymentData(Base64Utils.decodeBase64String(invoice.preImageHash)),
+                demoPaymentHandler.findPaymentData(Base58.decode(invoice.preImageHash)),
         [expectSettled: true, expectPayPerRequest: true])
 
         when:
@@ -306,7 +306,7 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
         // Check that invoice response has correct json
         verifyJsonInvoiceResponse(invoice)
         // Verify that payment data was created in database.
-        verifyPaymentData(invoice,demoPaymentHandler.findPaymentData(Base64Utils.decodeBase64String(resp.data.preImageHash)))
+        verifyPaymentData(invoice,demoPaymentHandler.findPaymentData(Base58.decode(resp.data.preImageHash)))
         when:
 
         // Check if invoice have been expired.
@@ -341,11 +341,11 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
         verifyJsonInvoiceResponse(invoice)
         when:
         // Simulate lightning invoice is payed in lightning handler.
-        lightningHandler.simulateSettleInvoice(Base64Utils.decodeBase64String(invoice.preImageHash))
+        lightningHandler.simulateSettleInvoice(Base58.decode(invoice.preImageHash))
 
         then: // Verify that payment data have been updated
         verifyPaymentData(invoice,
-                demoPaymentHandler.findPaymentData(Base64Utils.decodeBase64String(invoice.preImageHash)),
+                demoPaymentHandler.findPaymentData(Base58.decode(invoice.preImageHash)),
                 [expectSettled: true])
 
         when:
@@ -388,7 +388,7 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
 
         when:
         // Simulate lightning invoice is payed in lightning handler.
-        lightningHandler.simulateSettleInvoice(Base64Utils.decodeBase64String(invoice.preImageHash))
+        lightningHandler.simulateSettleInvoice(Base58.decode(invoice.preImageHash))
 
         and:
         // Check settlement
@@ -462,6 +462,7 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
         assert jsonData.type == "settlement"
         boolean expectSettled =  expectedData.expectSettled != null ? expectedData.expectSettled : false
         assert jsonData.settled == expectSettled
+        assert jsonData.status == "OK"
         if(expectSettled){
             assert jsonData.preImageHash == invoice.preImageHash
             assert jsonData.token != null
@@ -499,6 +500,7 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
     private void verifyCheckSettlementXMLResponse(NodeChild xmlData, NodeChild invoice, Map expectedData = [:]){
         boolean expectSettled = expectedData.expectSettled != null ? expectedData.expectSettled : false
         assert xmlData.settled == expectSettled
+        assert xmlData.status == "OK"
         if(expectSettled){
             assert xmlData.preImageHash.toString() == invoice.preImageHash.toString()
             assert xmlData.token != null
@@ -508,7 +510,7 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
 
     private void verifyPaymentData(Map jsonData, DemoFullPaymentData data, Map expectedData = [:]){
         assert data.id > 0
-        assert data.preImageHash == Base64Utils.decodeBase64String(jsonData.preImageHash)
+        assert data.preImageHash == Base58.decode(jsonData.preImageHash)
         assert data.bolt11Invoice == "lntb10u1pwt6nk9pp59rulenhfxs7qcq867kfs3mx3pyehp5egjwa8zggaymp56kxr2hrsdqqcqzpgsn2swaz4q47u0dee8fsezqnarwlcjdhvdcdnv6avecqjldqx75yya7z8lw45qzh7jd9vgkwu38xeec620g4lsd6vstw8yrtkya96prsqru5vqa"
         assert data.description == "Some description"
         assert data.orderAmount.value > 0

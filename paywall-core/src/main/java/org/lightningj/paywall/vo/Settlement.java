@@ -17,7 +17,7 @@ package org.lightningj.paywall.vo;
 import org.jose4j.jwt.JwtClaims;
 import org.lightningj.paywall.paymenthandler.Payment;
 import org.lightningj.paywall.tokengenerator.JWTClaim;
-import org.lightningj.paywall.util.Base64Utils;
+import org.lightningj.paywall.util.Base58;
 
 import javax.json.JsonException;
 import javax.json.JsonObject;
@@ -176,7 +176,7 @@ public class Settlement extends JWTClaim  implements Payment {
      */
     @Override
     public void convertToJson(JsonObjectBuilder jsonObjectBuilder) throws JsonException {
-        add(jsonObjectBuilder,"preImageHash", Base64Utils.encodeBase64String(preImageHash));
+        addB58(jsonObjectBuilder,"preImageHash", Base58.encodeToString(preImageHash));
         addNotRequired(jsonObjectBuilder,"invoice", invoice);
         add(jsonObjectBuilder,"validUntil",validUntil);
         addNotRequired(jsonObjectBuilder,"validFrom",validFrom);
@@ -191,7 +191,7 @@ public class Settlement extends JWTClaim  implements Payment {
      */
     @Override
     public void parseJson(JsonObject jsonObject) throws JsonException {
-        this.preImageHash = getByteArrayFromB64(jsonObject,"preImageHash",true);
+        this.preImageHash = getByteArrayFromB58(jsonObject,"preImageHash",true);
         if(jsonObject.containsKey("invoice") && !jsonObject.isNull("invoice")) {
             this.invoice = new Invoice(getJsonObject(jsonObject, "invoice", true));
         }

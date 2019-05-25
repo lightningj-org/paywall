@@ -14,6 +14,8 @@
  *************************************************************************/
 package org.lightningj.paywall
 
+import org.lightningj.paywall.util.Base58
+import org.lightningj.paywall.util.Base64Utils
 import org.lightningj.paywall.vo.Invoice
 import org.lightningj.paywall.vo.InvoiceSpec
 import org.lightningj.paywall.btcpayserver.vo.Invoice as BtcPayInvoice
@@ -47,6 +49,8 @@ class JSONParsableSpec extends Specification {
 
     }
 
+    // TODO Base64 and Base58
+
     def "Verify addNotRequired and get<Type>IfSet works as expected"(){
         setup:
         def b = Json.createBuilderFactory().createObjectBuilder()
@@ -70,6 +74,9 @@ class JSONParsableSpec extends Specification {
         i.addNotRequired(b,"somebooleanlist", [true,false])
         i.addNotRequired(b,"someinstantlist", [Instant.ofEpochMilli(4000)])
         i.addNotRequired(b,"someobjectlist", [InvoiceSpec.genFullInvoiceData(false)])
+        i.addNotRequired(b,"somedate", new Date(1558450831326L))
+        i.addNotRequired(b,"somebase64", Base64Utils.encodeBase64String("123".bytes))
+        i.addNotRequired(b,"somebase58", Base58.encodeToString("123".bytes))
 
         JsonObject o  = b.build()
         then:
@@ -79,6 +86,7 @@ class JSONParsableSpec extends Specification {
         o.getJsonNumber("somelong").longValueExact() == 1234L
         o.getJsonNumber("somedouble").doubleValue() == 1.0
 
+        i.getDateIfSet(o,"somedate").time == new Date(1558450831326L).time
         i.getStringIfSet(o,"notexists") == null
         i.getStringIfSet(o,"somestring") == "somevalue"
         i.getIntIfSet(o,"notexists") == null
@@ -100,6 +108,8 @@ class JSONParsableSpec extends Specification {
         i.getJsonArray(o,"someinstantlist",true).size() == 1
         i.getJsonArray(o,"someinstantlist",true).getJsonNumber(0).longValue() == 4000
         i.getJsonArray(o,"someobjectlist",true).size() == 1
+        i.getByteArrayFromB64IfSet(o,"somebase64") == "123".bytes
+        i.getByteArrayFromB58IfSet(o,"somebase58") == "123".bytes
         org.lightningj.paywall.vo.Invoice invoice = new org.lightningj.paywall.vo.Invoice(i.getJsonArray(o,"someobjectlist",true).getJsonObject(0))
         invoice != null
     }
@@ -113,6 +123,19 @@ class JSONParsableSpec extends Specification {
         then:
         def e = thrown(JsonException)
         e.message == "Error building JSON object, required key somestring is null."
+    }
+
+    def "Verify that getDate throws JsonException if for invalid date string"(){
+        setup:
+        def b = Json.createBuilderFactory().createObjectBuilder()
+        JsonObject o = b.build()
+        b.add("somedate", "invalidString")
+        Invoice i = new Invoice()
+        when:
+        i.getDate(b.build(),"somedate",true)
+        then:
+        def e = thrown(JsonException)
+        e.message == "Error parsing JSON data, field key somedate is not a date in yyyy-MM-ddTHH:mm:ss.SSSZ format."
     }
 
     def "Verify that all get<Type> method throws JsonException if required but not set"(){
@@ -142,6 +165,11 @@ class JSONParsableSpec extends Specification {
         e.message == "Error parsing JSON data, field key notexists is required."
         when:
         i.getDouble(o,"notexists", true)
+        then:
+        e = thrown(JsonException)
+        e.message == "Error parsing JSON data, field key notexists is required."
+        when:
+        i.getDate(o,"notexists", true)
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key notexists is required."

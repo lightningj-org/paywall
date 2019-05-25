@@ -17,7 +17,7 @@ package org.lightningj.paywall.vo;
 import org.jose4j.jwt.JwtClaims;
 import org.lightningj.paywall.paymenthandler.Payment;
 import org.lightningj.paywall.tokengenerator.JWTClaim;
-import org.lightningj.paywall.util.Base64Utils;
+import org.lightningj.paywall.util.Base58;
 import org.lightningj.paywall.vo.amount.Amount;
 
 import javax.json.JsonException;
@@ -150,7 +150,7 @@ public class Order extends JWTClaim implements Payment {
      */
     @Override
     public void convertToJson(JsonObjectBuilder jsonObjectBuilder) throws JsonException {
-        add(jsonObjectBuilder,"preImageHash", Base64Utils.encodeBase64String(preImageHash));
+        addB58(jsonObjectBuilder,"preImageHash", Base58.encodeToString(preImageHash));
         addNotRequired(jsonObjectBuilder,"description",description);
         add(jsonObjectBuilder,"orderAmount", orderAmount);
         add(jsonObjectBuilder,"expireDate",expireDate);
@@ -164,7 +164,7 @@ public class Order extends JWTClaim implements Payment {
      */
     @Override
     public void parseJson(JsonObject jsonObject) throws JsonException {
-        preImageHash = getByteArrayFromB64(jsonObject,"preImageHash", true);
+        preImageHash = getByteArrayFromB58(jsonObject,"preImageHash", true);
         description = getStringIfSet(jsonObject,"description");
         orderAmount = Amount.parseAmountObject(getJsonObject(jsonObject,"orderAmount",true));
         expireDate = Instant.ofEpochMilli(getLong(jsonObject,"expireDate", true));

@@ -54,7 +54,7 @@ class RequestDataSpec extends Specification {
 
     def "Verify that toJsonAsString works as expected"(){
         expect:
-        new RequestData("123".getBytes(),Instant.ofEpochMilli(12345L)).toJsonAsString(false) == """{"significantData":"MTIz","requestDate":12345}"""
+        new RequestData("123".getBytes(),Instant.ofEpochMilli(12345L)).toJsonAsString(false) == """{"significantData":"HXRC","requestDate":12345}"""
         when:
         new RequestData(null,Instant.ofEpochMilli(12345L)).toJsonAsString(false)
         then:
@@ -69,7 +69,7 @@ class RequestDataSpec extends Specification {
 
     def "Verify that parsing of JSON data works as expected"(){
         when:
-        RequestData d = new RequestData(toJsonObject("""{"significantData":"MTIz","requestDate":12345}"""))
+        RequestData d = new RequestData(toJsonObject("""{"significantData":"HXRC","requestDate":12345}"""))
         then:
         d.getSignificantData() == "123".getBytes()
         d.getRequestDate().toEpochMilli() == 12345L
@@ -81,12 +81,12 @@ class RequestDataSpec extends Specification {
         e.message == "Error parsing JSON data, field key significantData is required."
 
         when:
-        new RequestData(toJsonObject("""{"significantData":"MTIz"}"""))
+        new RequestData(toJsonObject("""{"significantData":"HXRC"}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key requestDate is required."
         when:
-        new RequestData(toJsonObject("""{"significantData":"MTIz","requestDate":"abc"}"""))
+        new RequestData(toJsonObject("""{"significantData":"HXRC","requestDate":"abc"}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key requestDate is not a number."

@@ -24,6 +24,7 @@ import org.lightningj.paywall.spring.CommonBeanConfiguration;
 import org.lightningj.paywall.spring.PaywallProperties;
 import org.lightningj.paywall.spring.SpringDefaultFileKeyManager;
 import org.lightningj.paywall.spring.SpringLNDLightningHandler;
+import org.lightningj.paywall.spring.websocket.WebSocketSettledPaymentHandler;
 import org.lightningj.paywall.tokengenerator.SymmetricKeyTokenGenerator;
 import org.lightningj.paywall.tokengenerator.TokenGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +63,11 @@ public abstract class BaseLocalProfileBeanConfiguration extends CommonBeanConfig
     @Bean("paymentFlowManager")
     public PaymentFlowManager getPaymentFlowManager(){
         return new SpringLocalPaymentFlowManager();
+    }
+
+    @Bean("webSocketSettledPaymentHandler")
+    public WebSocketSettledPaymentHandler getWebSocketSettledPaymentHandler(){
+        return new WebSocketSettledPaymentHandler();
     }
 
     public abstract KeyManager getKeyManager();

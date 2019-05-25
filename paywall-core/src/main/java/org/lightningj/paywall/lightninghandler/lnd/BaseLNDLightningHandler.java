@@ -23,7 +23,7 @@ import org.lightningj.lnd.wrapper.message.GetInfoResponse;
 import org.lightningj.lnd.wrapper.message.InvoiceSubscription;
 import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.lightninghandler.*;
-import org.lightningj.paywall.util.Base64Utils;
+import org.lightningj.paywall.util.Base58;
 import org.lightningj.paywall.vo.ConvertedOrder;
 import org.lightningj.paywall.vo.Invoice;
 import org.lightningj.paywall.vo.NodeInfo;
@@ -75,7 +75,7 @@ public abstract class BaseLNDLightningHandler implements LightningHandler {
             }
             return invoice;
         } catch (Exception e) {
-            throw new InternalErrorException("Internal error adding invoice to LND, preImageHash: " + Base64Utils.encodeBase64String(paymentData.getPreImageHash()) + ", message: " + e.getMessage(),e);
+            throw new InternalErrorException("Internal error adding invoice to LND, preImageHash: " + Base58.encodeToString(paymentData.getPreImageHash()) + ", message: " + e.getMessage(),e);
         }
     }
 
@@ -101,7 +101,7 @@ public abstract class BaseLNDLightningHandler implements LightningHandler {
                     return null;
                 }
             }
-            throw new InternalErrorException("Internal error during lookup of invoice in LND, preImageHash: " + Base64Utils.encodeBase64String(preImageHash) + ", message: " + e.getMessage(),e);
+            throw new InternalErrorException("Internal error during lookup of invoice in LND, preImageHash: " + Base58.encodeToString(preImageHash) + ", message: " + e.getMessage(),e);
         }
     }
 

@@ -56,13 +56,13 @@ class SettlementResultSpec extends Specification {
 
     def "Verify that toJsonAsString works as expected"(){
         expect:
-        new SettlementResult(settlement, "sometokendata").toJsonAsString(false) == """{"settlement":{"preImageHash":"YWJhc3Jla3dzZGY=","validUntil":12340000,"payPerRequest":true},"token":"sometokendata"}"""
+        new SettlementResult(settlement, "sometokendata").toJsonAsString(false) == """{"settlement":{"preImageHash":"R9dmxd9mkash78y","validUntil":12340000,"payPerRequest":true},"token":"sometokendata"}"""
         new SettlementResult(null,null).toJsonAsString(false) == "{}"
     }
 
     def "Verify that parsing of JSON data works as expected"(){
         when:
-        SettlementResult d = new SettlementResult(toJsonObject("""{"settlement":{"preImageHash":"YWJhc3Jla3dzZGY=","validUntil":12340000,"payPerRequest":true},"token":"sometokendata"}"""))
+        SettlementResult d = new SettlementResult(toJsonObject("""{"settlement":{"preImageHash":"R9dmxd9mkash78y","validUntil":12340000,"payPerRequest":true},"token":"sometokendata"}"""))
         then:
         d.getSettlement() instanceof Settlement
         d.getToken() == "sometokendata"

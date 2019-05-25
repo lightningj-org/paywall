@@ -269,7 +269,7 @@ public abstract class BasePaymentFlowManager implements PaymentFlowManager{
      * @param parameterName the parameter name to lookup, null to skip.
      * @param headerName the header name to lookup, null to skip.
      * @param cookieName the cookie name to lookup, null to skip.
-     * @return the token found in order parameter -> header -> cookie or null if no token found.
+     * @return the token found in order parameter - header - cookie or null if no token found.
      */
     protected String findToken(CachableHttpServletRequest request, String parameterName, String headerName,  String cookieName){
         String retval = null;

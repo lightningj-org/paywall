@@ -49,4 +49,24 @@ class APIErrorSpec extends Specification {
         apiError.getErrors().size() == 1
         apiError.getReason() == TokenException.Reason.EXPIRED
     }
+
+    def "Verify that JSON Convertion works as expected"(){
+        expect:
+        new APIError(HttpStatus.TEMPORARY_REDIRECT, "Some Temporary Redirect", ["Some Constructed Message1", "Some Constructed Message2"]).toJsonAsString(false) == """{"status":"TEMPORARY_REDIRECT","message":"Some Temporary Redirect","errors":["Some Constructed Message1","Some Constructed Message2"]}"""
+        new APIError(HttpStatus.INTERNAL_SERVER_ERROR,null,null).toJsonAsString(false) == """{"status":"INTERNAL_SERVER_ERROR"}"""
+        when:
+        def e = new APIError(HttpStatus.TEMPORARY_REDIRECT, "Some Temporary Redirect", ["Some Constructed Message1", "Some Constructed Message2"])
+        e.reason = TokenException.Reason.EXPIRED
+        then:
+        e.toJsonAsString(true) == """
+{
+    "status": "TEMPORARY_REDIRECT",
+    "message": "Some Temporary Redirect",
+    "errors": [
+        "Some Constructed Message1",
+        "Some Constructed Message2"
+    ],
+    "reason": "EXPIRED"
+}"""
+    }
 }

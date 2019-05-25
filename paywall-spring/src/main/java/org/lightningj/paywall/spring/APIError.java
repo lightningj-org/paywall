@@ -14,9 +14,13 @@
  *************************************************************************/
 package org.lightningj.paywall.spring;
 
+import org.lightningj.paywall.JSONParsable;
 import org.lightningj.paywall.tokengenerator.TokenException;
 import org.springframework.http.HttpStatus;
 
+import javax.json.JsonException;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Arrays;
 import java.util.List;
@@ -26,7 +30,7 @@ import java.util.List;
  * JSON or XML.
  */
 @XmlRootElement
-public class APIError {
+public class APIError extends JSONParsable {
 
     private HttpStatus status;
     private String message;
@@ -63,6 +67,15 @@ public class APIError {
         this.status = status;
         this.message = message;
         errors = Arrays.asList(error);
+    }
+
+    /**
+     * JSON Parseable constructor
+     *
+     * @param jsonObject the json object to parse
+     */
+    public APIError(JsonObject jsonObject) throws JsonException {
+        super(jsonObject);
     }
 
     /**
@@ -131,6 +144,20 @@ public class APIError {
         this.reason = reason;
     }
 
+    /**
+     * Method that should set the objects property to Json representation.
+     *
+     * @param jsonObjectBuilder the json object build to use to set key/values in json
+     * @throws JsonException if problems occurred converting object to JSON.
+     */
+    @Override
+    public void convertToJson(JsonObjectBuilder jsonObjectBuilder) throws JsonException {
+        add(jsonObjectBuilder,"status", status.name());
+        addNotRequired(jsonObjectBuilder,"message",message);
+        addNotRequired(jsonObjectBuilder,"errors", errors);
+        addNotRequired(jsonObjectBuilder,"reason",reason == null ? null : reason.name());
+    }
+
     @Override
     public String toString() {
         return "APIError{" +
@@ -139,5 +166,16 @@ public class APIError {
                 ", errors=" + errors +
                 ", reason=" + reason +
                 '}';
+    }
+
+    /**
+     * Method to read all properties from a JsonObject into this value object.
+     *
+     * @param jsonObject the json object to read key and values from and set object properties.
+     * @throws JsonException if problems occurred converting object from JSON.
+     */
+    @Override
+    public void parseJson(JsonObject jsonObject) throws JsonException {
+        throw new JsonException("Cannot Parse APIError from JSON.");
     }
 }

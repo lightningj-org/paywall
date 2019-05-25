@@ -18,10 +18,13 @@ import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.paymentflow.InvoiceResult;
 import org.lightningj.paywall.requestpolicy.RequestPolicyType;
 import org.lightningj.paywall.spring.controller.GenerateQRCodeController;
-import org.lightningj.paywall.util.Base64Utils;
+import org.lightningj.paywall.util.Base58;
 import org.lightningj.paywall.vo.Invoice;
 import org.lightningj.paywall.web.HTTPConstants;
 
+import javax.json.JsonException;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.xml.bind.annotation.*;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -47,9 +50,13 @@ import java.util.Date;
         "payPerRequest",
         "requestPolicyType",
         "checkSettlementLink",
-        "qrLink"
+        "qrLink",
+        "checkSettlementWebSocketEndpoint",
+        "checkSettlementWebSocketQueue"
 })
-public class InvoiceResponse {
+public class InvoiceResponse extends Response{
+
+
 
     public static final String TYPE = "invoice";
 
@@ -57,7 +64,7 @@ public class InvoiceResponse {
     private String type=TYPE;
 
     @XmlElement(required = true)
-    private byte[] preImageHash;
+    private String preImageHash;
 
     @XmlElement(required = true)
     private String bolt11Invoice;
@@ -92,6 +99,12 @@ public class InvoiceResponse {
     @XmlElement()
     private String qrLink;
 
+    @XmlElement()
+    private String checkSettlementWebSocketEndpoint;
+
+    @XmlElement()
+    private String checkSettlementWebSocketQueue;
+
     /**
      * Empty constructor.
      */
@@ -103,18 +116,24 @@ public class InvoiceResponse {
      * @param invoiceResult The related invoice result
      * @param isPayPerRequest if invoice is required per request or if settlement with be valid for multiple requests
      *                        during a period of time.
+     * @param requestPolicyType the related request policy type.
      * @param includeNodeInfo if lightning connection information info should be included in the response.
      * @param checkSettlementLink link to check settlement controller.
      * @param qrLink link to generate QR Code controller.
+     * @param checkSettlementWebSocketEndpoint  the URL to the check settlement web socket end point.
+     * @param baseCheckSettlementWebSocketQueue the check settlement web socket queue name without preImageHash. (Should end with a /)
+     * @throws InternalErrorException if internal error occurred creating the object.
      */
     public InvoiceResponse(InvoiceResult invoiceResult,
                            boolean isPayPerRequest,
                            RequestPolicyType requestPolicyType,
                            boolean includeNodeInfo,
                            String checkSettlementLink,
-                           String qrLink) throws InternalErrorException {
+                           String qrLink,
+                           String checkSettlementWebSocketEndpoint,
+                           String baseCheckSettlementWebSocketQueue) throws InternalErrorException {
         Invoice invoice = invoiceResult.getInvoice();
-        preImageHash = invoice.getPreImageHash();
+        preImageHash = Base58.encodeToString(invoice.getPreImageHash());
         bolt11Invoice = invoice.getBolt11Invoice();
         description = invoice.getDescription();
         invoiceAmount = new CryptoAmount(invoice.getInvoiceAmount());
@@ -129,9 +148,12 @@ public class InvoiceResponse {
         try {
             this.checkSettlementLink = checkSettlementLink + "?" + HTTPConstants.PARAMETER_INVOICE_REQUEST + "=" + URLEncoder.encode(token, "UTF-8");
             this.qrLink = qrLink + "?" + GenerateQRCodeController.PARAMETER_DATA + "=" + URLEncoder.encode(invoice.getBolt11Invoice(), "UTF-8");
+            this.checkSettlementWebSocketEndpoint = checkSettlementWebSocketEndpoint;
+            this.checkSettlementWebSocketQueue = (baseCheckSettlementWebSocketQueue.endsWith("/") ? baseCheckSettlementWebSocketQueue: baseCheckSettlementWebSocketQueue + "/") + preImageHash;
         }catch (UnsupportedEncodingException e){
             throw new InternalErrorException("Internal error encoding invoice response, unsupported encoding when URL encoding.: " + e.getMessage(),e);
         }
+
     }
 
     /**
@@ -154,7 +176,7 @@ public class InvoiceResponse {
      *
      * @return the generated preImageHash from PreImageData which acts as an unique id for the payment.
      */
-    public byte[] getPreImageHash() {
+    public String getPreImageHash() {
         return preImageHash;
     }
 
@@ -162,7 +184,7 @@ public class InvoiceResponse {
      *
      * @param preImageHash the generated preImageHash from PreImageData which acts as an unique id for the payment.
      */
-    public void setPreImageHash(byte[] preImageHash) {
+    public void setPreImageHash(String preImageHash) {
         this.preImageHash = preImageHash;
     }
 
@@ -343,10 +365,65 @@ public class InvoiceResponse {
         this.qrLink = qrLink;
     }
 
+    /**
+     *
+     * @return URL to the WebSocket CheckSettlement EndPoint.
+     */
+    public String getCheckSettlementWebSocketEndpoint() {
+        return checkSettlementWebSocketEndpoint;
+    }
+
+    /**
+     *
+     * @param checkSettlementWebSocketEndpoint URL to the WebSocket CheckSettlement EndPoint.
+     */
+    public void setCheckSettlementWebSocketEndpoint(String checkSettlementWebSocketEndpoint) {
+        this.checkSettlementWebSocketEndpoint = checkSettlementWebSocketEndpoint;
+    }
+
+    /**
+     *
+     * @return the preImageHash unique web socket queue to subscribe to.
+     */
+    public String getCheckSettlementWebSocketQueue() {
+        return checkSettlementWebSocketQueue;
+    }
+
+    /**
+     *
+     * @param checkSettlementWebSocketQueue the preImageHash unique web socket queue to subscribe to.
+     */
+    public void setCheckSettlementWebSocketQueue(String checkSettlementWebSocketQueue) {
+        this.checkSettlementWebSocketQueue = checkSettlementWebSocketQueue;
+    }
+
+    /**
+     * Method that should set the objects property to Json representation.
+     *
+     * @param jsonObjectBuilder the json object build to use to set key/values in json
+     * @throws JsonException if problems occurred converting object to JSON.
+     */
+    @Override
+    public void convertToJson(JsonObjectBuilder jsonObjectBuilder) throws JsonException {
+        throw new JsonException("InvoiceResponse doesn't support JSONParsable conversion, use JacksonConverter instead.");
+    }
+
+    /**
+     * Method to read all properties from a JsonObject into this value object.
+     *
+     * @param jsonObject the json object to read key and values from and set object properties.
+     * @throws JsonException if problems occurred converting object from JSON.
+     */
+    @Override
+    public void parseJson(JsonObject jsonObject) throws JsonException {
+        throw new JsonException("InvoiceResponse doesn't support JSONParsable conversion, use JacksonConverter instead.");
+    }
+
     @Override
     public String toString() {
         return "InvoiceResponse{" +
-                ", preImageHash='" + (preImageHash != null ? Base64Utils.encodeBase64String(preImageHash) : null)  + '\'' +
+                "type='" + type + '\'' +
+                ", preImageHash='" + preImageHash + '\'' +
                 ", bolt11Invoice='" + bolt11Invoice + '\'' +
                 ", description='" + description + '\'' +
                 ", invoiceAmount=" + invoiceAmount +
@@ -355,9 +432,11 @@ public class InvoiceResponse {
                 ", invoiceDate=" + invoiceDate +
                 ", invoiceExpireDate=" + invoiceExpireDate +
                 ", payPerRequest=" + payPerRequest +
-                ", requestPolicyType=" + requestPolicyType +
+                ", requestPolicyType='" + requestPolicyType + '\'' +
                 ", checkSettlementLink='" + checkSettlementLink + '\'' +
                 ", qrLink='" + qrLink + '\'' +
+                ", checkSettlementWebSocketEndpoint='" + checkSettlementWebSocketEndpoint + '\'' +
+                ", checkSettlementWebSocketQueue='" + checkSettlementWebSocketQueue + '\'' +
                 '}';
     }
 }

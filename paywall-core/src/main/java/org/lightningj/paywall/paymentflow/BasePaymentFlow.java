@@ -26,7 +26,6 @@ import org.lightningj.paywall.requestpolicy.RequestPolicy;
 import org.lightningj.paywall.requestpolicy.RequestPolicyFactory;
 import org.lightningj.paywall.tokengenerator.TokenException;
 import org.lightningj.paywall.tokengenerator.TokenGenerator;
-import org.lightningj.paywall.util.Base64Utils;
 import org.lightningj.paywall.vo.*;
 import org.lightningj.paywall.web.CachableHttpServletRequest;
 

@@ -16,6 +16,7 @@ package org.lightningj.paywall.spring
 
 import org.lightningj.paywall.InternalErrorException
 import org.lightningj.paywall.spring.util.PaywallRuntimeException
+import org.lightningj.paywall.spring.util.RequestHelper
 import org.lightningj.paywall.tokengenerator.TokenException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -35,7 +36,6 @@ class SpringPaywallExceptionHandlerSpec extends Specification {
     MockHttpServletRequest request = new MockHttpServletRequest("GET", "/someuri.json")
     MockHttpServletResponse response = new MockHttpServletResponse()
 
-    // TODO Here fix internal exception
     def "Verify that handleException without any customized error message uses message from exception, if exception is not internal error."() {
         when:
         ResponseEntity<Object> result = handler.handleException(request, response, new PaywallRuntimeException(new IllegalArgumentException("Test Message")))
@@ -71,6 +71,18 @@ class SpringPaywallExceptionHandlerSpec extends Specification {
         result.body.errors.size() == 2
         result.body.errors[0] == "Some custom message1"
         result.body.errors[1] == "Some custom message2"
+    }
+
+    def "Verify that handleException for websocket without any customized error message uses message from exception, if exception is not internal error."() {
+        when:
+        ResponseEntity<Object> result = handler.handleException(RequestHelper.RequestType.JSON, new PaywallRuntimeException(new IllegalArgumentException("Test Message")))
+        then:
+        result.statusCode == HttpStatus.BAD_REQUEST
+        result.headers.get("Content-Type")[0] == "application/json"
+        result.body.status == HttpStatus.BAD_REQUEST
+        result.body.message == "Invalid Request: Test Message"
+        result.body.errors.size() == 1
+        result.body.errors[0] == "Test Message"
     }
 
     @Unroll

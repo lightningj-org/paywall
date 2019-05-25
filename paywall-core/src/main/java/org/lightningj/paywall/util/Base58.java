@@ -22,7 +22,7 @@ import java.math.BigInteger;
 /**
  * Utility class for Base58 encoding and decoding of data. Important, this
  * class in not fully optimized and is recommended to be used only in places
- * where highly optimised encoding is required.
+ * where highly optimised encoding is not required.
  *
  * Created by Philip Vendil on 2018-10-10.
  */
@@ -52,7 +52,7 @@ public class Base58 {
         }
 
         ByteArrayOutputStream result = new ByteArrayOutputStream();
-        BigInteger val = new BigInteger(data);
+        BigInteger val = new BigInteger(1, data);
         while(val.compareTo(BigInteger.ZERO) == 1){
           BigInteger rem = val.remainder(VAL_58);
           val = val.divide(VAL_58);
@@ -74,7 +74,9 @@ public class Base58 {
      * @return String representation of the base58 data.
      */
     public static String encodeToString(byte[] data) {
-       return new String(encode(data));
+        String retval = new String(encode(data));
+        return retval;
+      // return new String(encode(data));
     }
 
     /**

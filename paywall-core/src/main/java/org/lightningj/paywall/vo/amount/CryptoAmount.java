@@ -73,6 +73,15 @@ public class CryptoAmount extends Amount {
     }
 
     /**
+     * JSON Parseable constructor
+     * @param jsonObject the jsonObject to parse.
+     * @throws JsonException if problems occurred parsing the json data.
+     */
+    public CryptoAmount(JsonObject jsonObject) throws JsonException{
+        super(AmountType.CRYTOCURRENCY);
+        parseJson(jsonObject);
+    }
+    /**
      *
      * @return the amount in smallest unit for the cryptocurrency, for
      *              example set in satoshis for BTC.
@@ -124,13 +133,6 @@ public class CryptoAmount extends Amount {
         this.magnetude = magnetude;
     }
 
-    /**
-     * JSON Parseable constructor
-     */
-    public CryptoAmount(JsonObject jsonObject) throws JsonException{
-        super(AmountType.CRYTOCURRENCY);
-        parseJson(jsonObject);
-    }
 
     /**
      * Method that should set the objects property to Json representation.

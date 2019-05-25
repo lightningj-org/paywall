@@ -166,6 +166,8 @@ public abstract class DefaultFileKeyManager extends FileKeyManager implements As
 
     /**
      * Help method to parse existing keys or generate new ones if not exists.
+     * @return the related asymmetric key pair.
+     * @throws InternalErrorException if problems occurred reading the keys from file.
      */
     protected KeyPair getAsymKeyPair() throws InternalErrorException {
         if(asymKeyPair == null){
@@ -182,6 +184,8 @@ public abstract class DefaultFileKeyManager extends FileKeyManager implements As
 
     /**
      * Help method to parse existing keys for BTCPayServer or generate new ones if not exists.
+     * @return the related btc pay server key pair.
+     * @throws InternalErrorException if problems occurred reading the keys from file.
      */
     protected KeyPair getBTCPayServerKeyPair() throws InternalErrorException {
         if(btcKeyPair == null){
@@ -412,6 +416,9 @@ public abstract class DefaultFileKeyManager extends FileKeyManager implements As
 
     /**
      * Method to return the BTC Pay Server public file name with sIN value filename.
+     * @param sIN the related sIN value
+     * @return the file name for related value
+     * @throws InternalErrorException if problems occurred looking up the file name.
      */
     protected File genPublicBTCPayServerFile(String sIN) throws InternalErrorException{
         return new File(getDirectory("BTC Pay Server key store", "/keys") + (BTCPAY_SERVER_PUBLIC_KEYNAME.replace("@SIN@",sIN)));

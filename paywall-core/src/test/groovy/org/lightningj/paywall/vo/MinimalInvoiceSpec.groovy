@@ -49,7 +49,7 @@ class MinimalInvoiceSpec extends Specification {
         setup:
         def fullInvoice = genFullMinInvoiceData()
         expect:
-        fullInvoice.toJsonAsString(false) == """{"preImageHash":"MTIz"}"""
+        fullInvoice.toJsonAsString(false) == """{"preImageHash":"HXRC"}"""
 
         when:
         new MinimalInvoice().toJsonAsString(false)
@@ -60,7 +60,7 @@ class MinimalInvoiceSpec extends Specification {
 
     def "Verify that parsing of JSON data works as expected"(){
         when:
-        MinimalInvoice d = new MinimalInvoice(toJsonObject("""{"preImageHash":"MTIz"}"""))
+        MinimalInvoice d = new MinimalInvoice(toJsonObject("""{"preImageHash":"HXRC"}"""))
         then:
         d.preImageHash == "123".getBytes()
 

@@ -77,8 +77,8 @@ class SettlementSpec extends Specification {
 
     def "Verify that toJsonAsString works as expected"(){
         expect:
-        new Settlement("123".getBytes(),InvoiceSpec.genFullInvoiceData(true),Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(123446), true).toJsonAsString(false) == """{"preImageHash":"MTIz","invoice":{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","description":"test desc","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"settlementDate":12344},"validUntil":12345,"validFrom":123446,"payPerRequest":true}"""
-        new Settlement("123".getBytes(),null,Instant.ofEpochMilli(12345L),null, false).toJsonAsString(false) == """{"preImageHash":"MTIz","validUntil":12345,"payPerRequest":false}"""
+        new Settlement("123".getBytes(),InvoiceSpec.genFullInvoiceData(true),Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(123446), true).toJsonAsString(false) == """{"preImageHash":"HXRC","invoice":{"preImageHash":"HXRC","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","description":"test desc","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"settlementDate":12344},"validUntil":12345,"validFrom":123446,"payPerRequest":true}"""
+        new Settlement("123".getBytes(),null,Instant.ofEpochMilli(12345L),null, false).toJsonAsString(false) == """{"preImageHash":"HXRC","validUntil":12345,"payPerRequest":false}"""
         when:
         new Settlement(null,null,Instant.ofEpochMilli(12345L),null, true).toJsonAsString(false)
         then:
@@ -93,7 +93,7 @@ class SettlementSpec extends Specification {
 
     def "Verify that parsing of JSON data works as expected"(){
         when:
-        Settlement d = new Settlement(toJsonObject("""{"preImageHash":"MTIz","invoice":{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"settlementDate":12344},"validUntil":12345,"validFrom":12346,"payPerRequest":true}"""))
+        Settlement d = new Settlement(toJsonObject("""{"preImageHash":"HXRC","invoice":{"preImageHash":"HXRC","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"settlementDate":12344},"validUntil":12345,"validFrom":12346,"payPerRequest":true}"""))
         then:
         d.getPreImageHash() == "123".getBytes()
         d.getInvoice() instanceof Invoice
@@ -102,7 +102,7 @@ class SettlementSpec extends Specification {
         d.isPayPerRequest()
 
         when:
-        Settlement d2 = new Settlement(toJsonObject("""{"preImageHash":"MTIz","validUntil":12345,"payPerRequest":true}"""))
+        Settlement d2 = new Settlement(toJsonObject("""{"preImageHash":"HXRC","validUntil":12345,"payPerRequest":true}"""))
         then:
         d2.getPreImageHash() == "123".getBytes()
         d2.getInvoice() == null
@@ -117,13 +117,13 @@ class SettlementSpec extends Specification {
         e.message == "Error parsing JSON data, field key preImageHash is required."
 
         when:
-        new Settlement(toJsonObject("""{"preImageHash":"MTIz","payPerRequest":true}"""))
+        new Settlement(toJsonObject("""{"preImageHash":"HXRC","payPerRequest":true}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key validUntil is required."
 
         when:
-        new Settlement(toJsonObject("""{"preImageHash":"MTIz","validUntil":12345}"""))
+        new Settlement(toJsonObject("""{"preImageHash":"HXRC","validUntil":12345}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key payPerRequest is required."
@@ -132,22 +132,22 @@ class SettlementSpec extends Specification {
         new Settlement(toJsonObject("""{"preImageHash":"aäö","validUntil":12345}"""))
         then:
         e = thrown(JsonException)
-        e.message == "Error parsing JSON data, problem decoding base64 data from field preImageHash."
+        e.message == "Error parsing JSON data, problem decoding base58 data from field preImageHash."
 
         when:
-        new Settlement(toJsonObject("""{"preImageHash":"MTIz","validUntil":"abc"}"""))
+        new Settlement(toJsonObject("""{"preImageHash":"HXRC","validUntil":"abc"}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key validUntil is not a number."
 
         when:
-        new Settlement(toJsonObject("""{"preImageHash":"MTIz","validUntil":12345, "validFrom":"abc"}"""))
+        new Settlement(toJsonObject("""{"preImageHash":"HXRC","validUntil":12345, "validFrom":"abc"}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key validFrom is not a number."
 
         when:
-        new Settlement(toJsonObject("""{"preImageHash":"MTIz","invoice":"invalidinvoice","validUntil":"abc"}"""))
+        new Settlement(toJsonObject("""{"preImageHash":"HXRC","invoice":"invalidinvoice","validUntil":"abc"}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing json object invoice, message: org.glassfish.json.JsonStringImpl cannot be cast to javax.json.JsonObject"

@@ -38,7 +38,7 @@ public class InterceptorConfig implements WebMvcConfigurer {
      * Override this method to add Spring MVC interceptors for
      * pre- and post-processing of controller invocation.
      *
-     * @param registry
+     * @param registry the registry to register PaywallInterceptor to.
      * @see InterceptorRegistry
      */
     @Override

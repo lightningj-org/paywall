@@ -18,6 +18,7 @@ import org.lightningj.paywall.paymentflow.SettlementResult
 import org.lightningj.paywall.vo.Settlement
 import spock.lang.Specification
 
+import javax.json.Json
 import java.time.Instant
 
 /**
@@ -37,7 +38,7 @@ class SettlementResponseSpec extends Specification {
         SettlementResponse r = new SettlementResponse(settlementResult)
         then:
         r.settled
-        r.preImageHash == "YWJj"
+        r.preImageHash == "ZiCa"
         r.payPerRequest
         r.settlementValidFrom == new Date(5000);
         r.settlementValidUntil == new Date(10000)
@@ -63,6 +64,67 @@ class SettlementResponseSpec extends Specification {
 
     def "Verify toString"() {
         expect:
-        new SettlementResponse(settlementResult).toString() == "SettlementResponse{preImageHash='YWJj', token='SomeToken', settlementValidUntil=Thu Jan 01 01:00:10 CET 1970, settlementValidFrom=Thu Jan 01 01:00:05 CET 1970, payPerRequest=true, settled=true}"
+        new SettlementResponse(settlementResult).toString() == """SettlementResponse
+{
+    "status": "OK",
+    "preImageHash": "ZiCa",
+    "token": "SomeToken",
+    "settlementValidUntil": "1970-01-01T01:00:10.000+0100",
+    "settlementValidFrom": "1970-01-01T01:00:05.000+0100",
+    "payPerRequest": true,
+    "settled": true
+}"""
     }
+
+    def "Verify json convertion works."(){
+        when:
+        SettlementResponse r = new SettlementResponse(settlementResult)
+        def json1 = r.toJsonAsString(true)
+        then:
+        json1 == """
+{
+    "status": "OK",
+    "preImageHash": "ZiCa",
+    "token": "SomeToken",
+    "settlementValidUntil": "1970-01-01T01:00:10.000+0100",
+    "settlementValidFrom": "1970-01-01T01:00:05.000+0100",
+    "payPerRequest": true,
+    "settled": true
+}"""
+
+        when:
+        SettlementResponse r2 = new SettlementResponse(Json.createReader(new StringReader(json1)).readObject())
+
+        then:
+        r2.settled
+        r2.preImageHash == "ZiCa"
+        r2.payPerRequest
+        r2.settlementValidFrom == new Date(5000);
+        r2.settlementValidUntil == new Date(10000)
+        r2.token == "SomeToken"
+
+        when:
+        SettlementResponse r3 = new SettlementResponse()
+        def json2 = r3.toJsonAsString(true)
+        then:
+        json2 == """
+{
+    "status": "OK",
+    "settled": false
+}"""
+
+        when:
+        SettlementResponse r4 = new SettlementResponse(Json.createReader(new StringReader(json2)).readObject())
+        then:
+        !r4.settled
+        r4.preImageHash == null
+        !r4.payPerRequest
+        r4.settlementValidFrom == null
+        r4.settlementValidUntil == null
+        r4.token == null
+    }
+
+    // TODO To - from JSON
+
+    // TODO Complete all Code
 }

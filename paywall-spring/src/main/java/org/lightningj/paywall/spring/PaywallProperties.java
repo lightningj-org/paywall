@@ -60,6 +60,12 @@ public class PaywallProperties {
     public static final String DEFAULT_QR_CODE_URL = "/paywall/genqrcode";
     public static final String QR_CODE_DEFAULT_URL = "paywall.qrcode.url";
 
+    public static final boolean DEFAULT_WEBSOCKET_ENABLE = true;
+    public static final String WEBSOCKET_ENABLE = "paywall.websocket.enable";
+
+    public static final String DEFAULT_WEBSOCKET_CHECK_SETTLEMENT_URL = "/paywall/api/websocket/checksettlement";
+    public static final String WEBSOCKET_CHECK_SETTLEMENT_URL = "paywall.websocket.settlement.url";
+
     @Value("${" + LND_HOSTNAME +  ":}")
     private String lndHostname;
 
@@ -108,11 +114,16 @@ public class PaywallProperties {
     @Value("${" + QR_CODE_DEFAULT_URL +  ":" + DEFAULT_QR_CODE_URL + "}")
     private String qrCodeUrl;
 
+    @Value("${" + WEBSOCKET_ENABLE +  ":" + DEFAULT_WEBSOCKET_ENABLE + "}")
+    private String webSocketEnable;
+
+    @Value("${" + WEBSOCKET_CHECK_SETTLEMENT_URL +  ":" + DEFAULT_WEBSOCKET_CHECK_SETTLEMENT_URL+ "}")
+    private String webSocketCheckSettlementUrl;
+
     /**
      * Method that should return the hostname of IP address of the LND node to connect to.
      *
      * @return the hostname of IP address of the LND node to connect to.
-     * @throws InternalErrorException if problems occurred getting the configuration information.
      */
     public String getLndHostname() {
         return lndHostname;
@@ -254,5 +265,21 @@ public class PaywallProperties {
      */
     public String getQrCodeUrl() {
         return qrCodeUrl;
+    }
+
+    /**
+     *
+     * @return returns string "true" if WebSocket functionality should be enabled.
+     */
+    public String getWebSocketEnable() {
+        return webSocketEnable;
+    }
+
+    /**
+     *
+     * @return the URL end point where check settlement Web Socket is listening.
+     */
+    public String getWebSocketCheckSettlementUrl() {
+        return webSocketCheckSettlementUrl;
     }
 }

@@ -64,18 +64,9 @@ public class SpringPaywallExceptionHandler implements PaywallExceptionHandler{
     public ResponseEntity<Object> handleException(HttpServletRequest request,
                                                   HttpServletResponse response,
                                                   Exception exception){
-        List<String> errorMessages = new ArrayList<>();
-        String errorMessage;
-        if (exception instanceof PaywallRuntimeException) {
-            errorMessage = getErrorMessageFromException(exception.getCause());
-        } else {
-            errorMessage = getErrorMessageFromException(exception);
-        }
-        if (errorMessage != null) {
-            errorMessages.add(errorMessage);
-        }
 
-        return handleException(request,response,exception, errorMessages);
+
+        return handleException(request,response,exception, getErrorMessagesFromException(exception));
     }
 
 
@@ -111,6 +102,34 @@ public class SpringPaywallExceptionHandler implements PaywallExceptionHandler{
                                                   Exception exception, List<String> errorMessages){
 
         RequestHelper.RequestType requestType = requestHelper.getRequestType(request, RequestHelper.RequestType.JSON);
+        return handleException(requestType,exception,errorMessages);
+    }
+
+    /**
+     * Method to handle paywall related exceptions in a uniform way but from
+     * a WebSocket context.
+     * @param requestType the expected type in response.
+     * @param exception the exception thrown in controller.
+     * @return a response entity containing error information sent back to requester if exception
+     * occurs during processing.
+     */
+    public ResponseEntity<Object> handleException(RequestHelper.RequestType requestType,
+                                           Exception exception){
+        return handleException(requestType,exception,getErrorMessagesFromException(exception));
+    }
+    /**
+     * Method to handle paywall related exceptions in a uniform way but from
+     * a WebSocket context.
+     * @param requestType the expected type in response.
+     * @param exception the exception thrown in controller.
+     * @param errorMessages extra constructed error messages returned.
+     * @return a response entity containing error information sent back to requester if exception
+     * occurs during processing.
+     */
+    @Override
+    public ResponseEntity<Object> handleException(RequestHelper.RequestType requestType,
+                                           Exception exception,
+                                           List<String> errorMessages){
         if(exception instanceof PaywallRuntimeException){
             exception = (Exception) exception.getCause();
         }
@@ -151,5 +170,24 @@ public class SpringPaywallExceptionHandler implements PaywallExceptionHandler{
         }else{
             return INTERNAL_SERVER_ERROR_MSG;
         }
+    }
+
+    /**
+     * Help method to convert a exception to a errorMessage.
+     * @param exception exception to convert
+     * @return a error message list.
+     */
+    private List<String> getErrorMessagesFromException(Exception exception){
+        List<String> errorMessages = new ArrayList<>();
+        String errorMessage;
+        if (exception instanceof PaywallRuntimeException) {
+            errorMessage = getErrorMessageFromException(exception.getCause());
+        } else {
+            errorMessage = getErrorMessageFromException(exception);
+        }
+        if (errorMessage != null) {
+            errorMessages.add(errorMessage);
+        }
+        return errorMessages;
     }
 }

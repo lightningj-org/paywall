@@ -132,42 +132,43 @@ public class Token extends JSONParsable {
     }
 
     /**
-     * The id of the token, i.e the public key SIN
+     * @return The id of the token, i.e the public key SIN
      */
     public String getId() {
         return id;
     }
 
     /**
-     * The id of the token, i.e the public key SIN
+     * @param id the id of the token, i.e the public key SIN
+     *
      */
     public void setId(String id) {
         this.id = id;
     }
 
     /**
-     * The pairing code retrieved from BTC Pay Server
+     * @return The pairing code retrieved from BTC Pay Server
      */
     public String getPairingCode() {
         return pairingCode;
     }
 
     /**
-     * The pairing code retrieved from BTC Pay Server
+     * @param pairingCode the pairing code retrieved from BTC Pay Server
      */
     public void setPairingCode(String pairingCode) {
         this.pairingCode = pairingCode;
     }
 
     /**
-     * Name of this requesting application.
+     * @return the name of this requesting application.
      */
     public String getLabel() {
         return label;
     }
 
     /**
-     * Name of this requesting application.
+     * @param label the name of this requesting application.
      */
     public void setLabel(String label) {
         this.label = label;

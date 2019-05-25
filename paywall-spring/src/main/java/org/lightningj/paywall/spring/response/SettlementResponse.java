@@ -14,10 +14,14 @@
  *************************************************************************/
 package org.lightningj.paywall.spring.response;
 
+import org.lightningj.paywall.JSONParsable;
 import org.lightningj.paywall.paymentflow.SettlementResult;
-import org.lightningj.paywall.util.Base64Utils;
+import org.lightningj.paywall.util.Base58;
 import org.lightningj.paywall.vo.Settlement;
 
+import javax.json.JsonException;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.xml.bind.annotation.*;
 import java.util.Date;
 
@@ -37,12 +41,12 @@ import java.util.Date;
         "payPerRequest",
         "settled"
 })
-public class SettlementResponse {
+public class SettlementResponse extends Response {
 
-        public static final String TYPE = "settlement";
+    public static final String TYPE = "settlement";
 
-        @XmlTransient
-        private String type=TYPE;
+    @XmlTransient
+    private String type=TYPE;
 
     @XmlElement()
     private String preImageHash;
@@ -55,12 +59,13 @@ public class SettlementResponse {
     @XmlElement()
     private Boolean payPerRequest;
     @XmlElement(required = true)
-    private boolean settled = false;
+    private boolean settled;
 
     /**
      * Empty Constructor
      */
     public SettlementResponse(){
+        settled = false;
     }
 
     /**
@@ -71,7 +76,7 @@ public class SettlementResponse {
     public SettlementResponse(SettlementResult settlementResult){
         if(settlementResult != null && settlementResult.getSettlement() != null){
             Settlement settlement = settlementResult.getSettlement();
-            preImageHash = Base64Utils.encodeBase64String(settlement.getPreImageHash());
+            preImageHash = Base58.encodeToString(settlement.getPreImageHash());
             token = settlementResult.getToken();
             if(settlement.getValidUntil() != null) {
                 settlementValidUntil = new Date(settlement.getValidUntil().toEpochMilli());
@@ -82,6 +87,15 @@ public class SettlementResponse {
             payPerRequest = settlement.isPayPerRequest();
             settled = true;
         }
+    }
+
+    /**
+     * JSON Parseable constructor
+     *
+     * @param jsonObject the json object to parse
+     */
+    public SettlementResponse(JsonObject jsonObject) throws JsonException {
+        super(jsonObject);
     }
 
     /**
@@ -190,21 +204,44 @@ public class SettlementResponse {
 
     /**
      *
-     * @@param type  the type of response returned in JSON responses only.
+     * @param type the type of response returned in JSON responses only.
      */
     public void setType(String type){
         this.type= type;
     }
 
+    /**
+     * Method that should set the objects property to Json representation.
+     *
+     * @param jsonObjectBuilder the json object build to use to set key/values in json
+     * @throws JsonException if problems occurred converting object to JSON.
+     */
     @Override
-    public String toString() {
-        return "SettlementResponse{" +
-                "preImageHash='" + preImageHash + '\'' +
-                ", token='" + token + '\'' +
-                ", settlementValidUntil=" + settlementValidUntil +
-                ", settlementValidFrom=" + settlementValidFrom +
-                ", payPerRequest=" + payPerRequest +
-                ", settled=" + settled +
-                '}';
+    public void convertToJson(JsonObjectBuilder jsonObjectBuilder) throws JsonException {
+        super.convertToJson(jsonObjectBuilder);
+        addNotRequired(jsonObjectBuilder,"preImageHash",preImageHash);
+        addNotRequired(jsonObjectBuilder,"token",token);
+        addNotRequired(jsonObjectBuilder,"settlementValidUntil",settlementValidUntil);
+        addNotRequired(jsonObjectBuilder,"settlementValidFrom",settlementValidFrom);
+        addNotRequired(jsonObjectBuilder,"payPerRequest",payPerRequest);
+        add(jsonObjectBuilder,"settled",settled);
     }
+
+    /**
+     * Method to read all properties from a JsonObject into this value object.
+     *
+     * @param jsonObject the json object to read key and values from and set object properties.
+     * @throws JsonException if problems occurred converting object from JSON.
+     */
+    @Override
+    public void parseJson(JsonObject jsonObject) throws JsonException {
+        super.parseJson(jsonObject);
+        preImageHash = getStringIfSet(jsonObject,"preImageHash");
+        token = getStringIfSet(jsonObject,"token");
+        settlementValidUntil = getDateIfSet(jsonObject,"settlementValidUntil");
+        settlementValidFrom =  getDateIfSet(jsonObject,"settlementValidFrom");
+        payPerRequest = getBooleanIfSet(jsonObject,"payPerRequest");
+        settled = getBoolean(jsonObject,"settled",true);
+    }
+
 }

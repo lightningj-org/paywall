@@ -15,8 +15,7 @@
 package org.lightningj.paywall.springboot2.paymenthandler;
 
 import org.lightningj.paywall.paymenthandler.data.FullPaymentData;
-import org.lightningj.paywall.paymenthandler.data.PerRequestPaymentData;
-import org.lightningj.paywall.util.Base64Utils;
+import org.lightningj.paywall.util.Base58;
 import org.lightningj.paywall.vo.amount.Amount;
 import org.lightningj.paywall.vo.amount.BTC;
 import org.lightningj.paywall.vo.amount.CryptoAmount;
@@ -95,7 +94,7 @@ public class DemoFullPaymentData implements FullPaymentData {
      */
     @Override
     public byte[] getPreImageHash() {
-        return Base64Utils.decodeBase64String(this.preImageHash);
+        return Base58.decode(this.preImageHash);
     }
 
     /**
@@ -105,7 +104,7 @@ public class DemoFullPaymentData implements FullPaymentData {
      */
     @Override
     public void setPreImageHash(byte[] preImageHash) {
-        this.preImageHash = Base64Utils.encodeBase64String(preImageHash);
+        this.preImageHash = Base58.encodeToString(preImageHash);
     }
 
     /**

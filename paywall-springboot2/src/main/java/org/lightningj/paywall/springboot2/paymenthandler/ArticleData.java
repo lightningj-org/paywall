@@ -21,11 +21,11 @@ import javax.persistence.*;
  * of article id.
  *
  * It is a simple JPA Entity with following columns:
- * <p><ul>
+ * <ul>
  * <li>id: primary id in database</li>
  * <li>articleId: unique article id for a payment required resource.</li>
  * <li>price: the price in satoshis for per unit.</li>
- * </ul><p>
+ * </ul>
  */
 @Entity
 public class ArticleData {

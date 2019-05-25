@@ -14,6 +14,7 @@
  *************************************************************************/
 package org.lightningj.paywall.spring;
 
+import org.lightningj.paywall.spring.util.RequestHelper;
 import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;
@@ -65,6 +66,30 @@ public interface PaywallExceptionHandler {
      */
     ResponseEntity<Object> handleException(HttpServletRequest request,
                                            HttpServletResponse response,
+                                           Exception exception,
+                                           List<String> errorMessages);
+
+    /**
+     * Method to handle paywall related exceptions in a uniform way but from
+     * a WebSocket context.
+     * @param requestType the expected type in response.
+     * @param exception the exception thrown in controller.
+     * @return a response entity containing error information sent back to requester if exception
+     * occurs during processing.
+     */
+    ResponseEntity<Object> handleException(RequestHelper.RequestType requestType,
+                                           Exception exception);
+
+    /**
+     * Method to handle paywall related exceptions in a uniform way but from
+     * a WebSocket context.
+     * @param requestType the expected type in response.
+     * @param exception the exception thrown in controller.
+     * @param errorMessages extra constructed error messages returned.
+     * @return a response entity containing error information sent back to requester if exception
+     * occurs during processing.
+     */
+    ResponseEntity<Object> handleException(RequestHelper.RequestType requestType,
                                            Exception exception,
                                            List<String> errorMessages);
 }

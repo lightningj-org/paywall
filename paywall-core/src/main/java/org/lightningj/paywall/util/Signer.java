@@ -79,12 +79,12 @@ public class Signer {
     }
 
     /**
-     *
-     * @param pubKey
-     * @param data
-     * @param signature
-     * @return
-     * @throws InternalErrorException
+     * Help method to verify a signature.
+     * @param pubKey the public key to verify.
+     * @param data the data to verify
+     * @param signature the signature to verify
+     * @return true if signature verifies.
+     * @throws InternalErrorException in problems occurred verifying the signature.
      */
     public boolean verify(PublicKey pubKey, byte[] data, byte[] signature) throws InternalErrorException{
         try {

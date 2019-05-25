@@ -105,9 +105,9 @@ class InvoiceSpec extends Specification {
         def fullInvoice = genFullInvoiceData(true)
         fullInvoice.sourceNode = "SomeSourceNode"
         expect:
-        new Invoice("123".getBytes(),"fksjeoskajduakdfhaskdismensuduajseusdke","test desc",new BTC(123),new NodeInfo("12312312@10.10.01.1"),Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(2345L)).toJsonAsString(false) == """{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","description":"test desc","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":false}"""
-        new Invoice("123".getBytes(),"fksjeoskajduakdfhaskdismensuduajseusdke",null,null,null,Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(2345L)).toJsonAsString(false) == """{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345,"invoiceDate":2345,"settled":false}"""
-        fullInvoice.toJsonAsString(false) == """{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","description":"test desc","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"settlementDate":12344,"sourceNode":"SomeSourceNode"}"""
+        new Invoice("123".getBytes(),"fksjeoskajduakdfhaskdismensuduajseusdke","test desc",new BTC(123),new NodeInfo("12312312@10.10.01.1"),Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(2345L)).toJsonAsString(false) == """{"preImageHash":"HXRC","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","description":"test desc","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":false}"""
+        new Invoice("123".getBytes(),"fksjeoskajduakdfhaskdismensuduajseusdke",null,null,null,Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(2345L)).toJsonAsString(false) == """{"preImageHash":"HXRC","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345,"invoiceDate":2345,"settled":false}"""
+        fullInvoice.toJsonAsString(false) == """{"preImageHash":"HXRC","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","description":"test desc","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"settlementDate":12344,"sourceNode":"SomeSourceNode"}"""
 
         when:
         new Invoice(null,"fksjeoskajduakdfhaskdismensuduajseusdke",null,null,null,Instant.ofEpochMilli(12345L),Instant.ofEpochMilli(2345L)).toJsonAsString(false)
@@ -133,7 +133,7 @@ class InvoiceSpec extends Specification {
 
     def "Verify that parsing of JSON data works as expected"(){
         when:
-        Invoice d = new Invoice(toJsonObject("""{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","description": "test desc","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"settlementDate":12344,"sourceNode":"SomeSourceNode"}"""))
+        Invoice d = new Invoice(toJsonObject("""{"preImageHash":"HXRC","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","description": "test desc","invoiceAmount":{"type":"CRYTOCURRENCY","value":123,"currencyCode":"BTC","magnetude":"NONE"},"nodeInfo":{"publicKeyInfo":"12312312","nodeAddress":"10.10.01.1","connectString":"12312312@10.10.01.1"},"expireDate":12345,"invoiceDate":2345,"settled":true,"settledAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"settlementDate":12344,"sourceNode":"SomeSourceNode"}"""))
         then:
         d.preImageHash == "123".getBytes()
         d.bolt11Invoice == "fksjeoskajduakdfhaskdismensuduajseusdke"
@@ -148,7 +148,7 @@ class InvoiceSpec extends Specification {
         d.getSourceNode() == "SomeSourceNode"
 
         when:
-        d = new Invoice(toJsonObject("""{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345,"invoiceDate":2345, "settled": false}"""))
+        d = new Invoice(toJsonObject("""{"preImageHash":"HXRC","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345,"invoiceDate":2345, "settled": false}"""))
         then:
         d.preImageHash == "123".getBytes()
         d.bolt11Invoice == "fksjeoskajduakdfhaskdismensuduajseusdke"
@@ -166,19 +166,19 @@ class InvoiceSpec extends Specification {
         e.message == "Error parsing JSON data, field key preImageHash is required."
 
         when:
-        new Invoice(toJsonObject("""{"preImageHash":"MTIz","expireDate":12345,"invoiceDate":2345}"""))
+        new Invoice(toJsonObject("""{"preImageHash":"HXRC","expireDate":12345,"invoiceDate":2345}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key bolt11Invoice is required."
 
         when:
-        new Invoice(toJsonObject("""{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","invoiceDate":2345, "settled": false}"""))
+        new Invoice(toJsonObject("""{"preImageHash":"HXRC","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","invoiceDate":2345, "settled": false}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key expireDate is required."
 
         when:
-        new Invoice(toJsonObject("""{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345, "settled": false}"""))
+        new Invoice(toJsonObject("""{"preImageHash":"HXRC","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345, "settled": false}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key invoiceDate is required."
@@ -187,28 +187,28 @@ class InvoiceSpec extends Specification {
         new Invoice(toJsonObject("""{"preImageHash":"åäö","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345,"invoiceDate":2345, "settled": false}"""))
         then:
         e = thrown(JsonException)
-        e.message == "Error parsing JSON data, problem decoding base64 data from field preImageHash."
+        e.message == "Error parsing JSON data, problem decoding base58 data from field preImageHash."
 
         when:
-        new Invoice(toJsonObject("""{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":"abc","invoiceDate":2345, "settled": false}"""))
+        new Invoice(toJsonObject("""{"preImageHash":"HXRC","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":"abc","invoiceDate":2345, "settled": false}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key expireDate is not a number."
 
         when:
-        new Invoice(toJsonObject("""{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345,"invoiceDate":"cds", "settled": false}"""))
+        new Invoice(toJsonObject("""{"preImageHash":"HXRC","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345,"invoiceDate":"cds", "settled": false}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key invoiceDate is not a number."
 
         when:
-        new Invoice(toJsonObject("""{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345,"invoiceDate":2345, "settled": false, "settledAmount": "123"}"""))
+        new Invoice(toJsonObject("""{"preImageHash":"HXRC","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345,"invoiceDate":2345, "settled": false, "settledAmount": "123"}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing json object settledAmount, message: org.glassfish.json.JsonStringImpl cannot be cast to javax.json.JsonObject"
 
         when:
-        new Invoice(toJsonObject("""{"preImageHash":"MTIz","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345,"invoiceDate":2345, "settled": false, "settlementDate": "abc"}"""))
+        new Invoice(toJsonObject("""{"preImageHash":"HXRC","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345,"invoiceDate":2345, "settled": false, "settlementDate": "abc"}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key settlementDate is not a number."

@@ -70,7 +70,7 @@ class TokenSpec extends Specification {
 
     def "Verify toString()"(){
         expect:
-        new Token("someid","token1",Instant.ofEpochMilli(123L), MERCHANT).toString() == """
+        new Token("someid","token1",Instant.ofEpochMilli(123L), MERCHANT).toString() == """Token
 {
     "id": "someid",
     "token": "token1",

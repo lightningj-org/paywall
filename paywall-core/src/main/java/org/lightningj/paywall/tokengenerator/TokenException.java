@@ -28,6 +28,7 @@ public class TokenException extends Exception {
      * Exception thrown by TokenGenerator if verification of a token failed.
      *
      * @param message descriptive message.
+     * @param reason the related reason code.
      */
     public TokenException(String message, Reason reason){
         super(message);
@@ -39,6 +40,7 @@ public class TokenException extends Exception {
      *
      * @param message descriptive message.
      * @param cause causing exception.
+     * @param reason the related reason code.
      */
     public TokenException(String message, Throwable cause, Reason reason){
         super(message,cause);

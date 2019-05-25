@@ -15,13 +15,11 @@
 package org.lightningj.paywall.vo;
 
 import org.lightningj.paywall.JSONParsable;
-import org.lightningj.paywall.util.Base64Utils;
-import org.lightningj.paywall.util.HexUtils;
+import org.lightningj.paywall.util.Base58;
 
 import javax.json.JsonException;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import java.util.Base64;
 
 /**
  * PreImageData is a value object containing the secret preimage value used
@@ -104,8 +102,8 @@ public class PreImageData extends JSONParsable{
      */
     @Override
     public void convertToJson(JsonObjectBuilder jsonObjectBuilder) throws JsonException {
-        addNotRequired(jsonObjectBuilder,"preImage", Base64Utils.encodeBase64String(preImage));
-        addNotRequired(jsonObjectBuilder,"preImageHash", Base64Utils.encodeBase64String(preImageHash));
+        addNotRequiredB58(jsonObjectBuilder,"preImage", Base58.encodeToString(preImage));
+        addB58(jsonObjectBuilder,"preImageHash", Base58.encodeToString(preImageHash));
     }
 
     /**
@@ -116,7 +114,7 @@ public class PreImageData extends JSONParsable{
      */
     @Override
     public void parseJson(JsonObject o) throws JsonException {
-        preImage = getByteArrayFromB64IfSet(o,"preImage");
-        preImageHash = getByteArrayFromB64(o,"preImageHash",true);
+        preImage = getByteArrayFromB58IfSet(o,"preImage");
+        preImageHash = getByteArrayFromB58(o,"preImageHash",true);
     }
 }

@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  */
 public class DefaultLocalBeanCondition implements Condition {
 
-    static Logger log = Logger.getLogger(PaywallInterceptor.class.getName());
+    static Logger log = Logger.getLogger(DefaultLocalBeanCondition.class.getName());
 
     /**
      * Determine if the condition matches.

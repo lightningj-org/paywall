@@ -22,7 +22,7 @@ import org.lightningj.paywall.lightninghandler.LightningHandler
 import org.lightningj.paywall.lightninghandler.LightningHandlerContext
 import org.lightningj.paywall.lightninghandler.lnd.LNDLightningHandlerContext
 import org.lightningj.paywall.paymenthandler.data.PaymentData
-import org.lightningj.paywall.util.Base64Utils
+import org.lightningj.paywall.util.Base58
 import org.lightningj.paywall.vo.Invoice
 import org.lightningj.paywall.vo.Order
 import org.lightningj.paywall.vo.OrderRequest
@@ -106,7 +106,7 @@ doesn't return PaymentData implementing PerRequestPaymentData"""(){
     def "Verify that lookupInvoice returns calls findPaymentData and converts the PaymentData into an invoice."(){
         setup:
         Invoice invoice = genFullInvoiceData(true)
-        byte[] preImageHash = Base64Utils.decodeBase64String("MTIz")
+        byte[] preImageHash = Base58.decode("HXRC")
         when:
         Invoice result = paymentHandler.lookupInvoice(preImageHash)
         then:
@@ -132,7 +132,7 @@ doesn't return PaymentData implementing PerRequestPaymentData"""(){
 was returned with the includeInvoice flag."""(){
         setup:
         Invoice invoice = genFullInvoiceData(true)
-        byte[] preImageHash = Base64Utils.decodeBase64String("MTIzSettled")
+        byte[] preImageHash = "HXRCSettled".bytes
         invoice.preImageHash = preImageHash
         when:
         Settlement result = paymentHandler.checkSettlement(preImageHash, true)
@@ -152,7 +152,7 @@ was returned with the includeInvoice flag."""(){
 was returned without the includeInvoice flag."""(){
         setup:
         Invoice invoice = genFullInvoiceData(true)
-        byte[] preImageHash = Base64Utils.decodeBase64String("MTIzSettled")
+        byte[] preImageHash = "HXRCSettled".toString()
         invoice.preImageHash = preImageHash
         when:
         Settlement result = paymentHandler.checkSettlement(preImageHash, false)
@@ -171,7 +171,7 @@ was returned without the includeInvoice flag."""(){
     def """Verify that checkSettlement returns null if related invoice was not settled."""(){
         setup:
         Invoice invoice = genFullInvoiceData(true)
-        byte[] preImageHash = Base64Utils.decodeBase64String("MTIz")
+        byte[] preImageHash = Base58.decode("HXRC")
         invoice.preImageHash = preImageHash
         when:
         Settlement result = paymentHandler.checkSettlement(preImageHash, false)
@@ -227,7 +227,7 @@ was returned without the includeInvoice flag."""(){
         then:
         def e = thrown AlreadyExecutedException
         e.preImageHash == "PerReqSettledExecuted".bytes
-        e.message == "Invalid request with preImageHash: UGVyUmVxU2V0dGxlZEV4ZWN1dGVk, request have already been processed."
+        e.message == "Invalid request with preImageHash: 5wjafDXjRV2rvA8ox2WahTuBtLiFD, request have already been processed."
         paymentHandler.findPaymentDataCalls.size() == 1
         paymentHandler.findPaymentDataCalls[0].preImageHash == preImageHash
     }
@@ -235,12 +235,12 @@ was returned without the includeInvoice flag."""(){
     def "Verify that registerSettledInvoice throws IllegalArgumentException if payment is already settled in the system."(){
         setup:
         Invoice invoice = genFullInvoiceData(true)
-        invoice.preImageHash = Base64Utils.decodeBase64String("MTIzSettled")
+        invoice.preImageHash = "HXRCSettled".bytes
         when:
         paymentHandler.registerSettledInvoice(invoice,false,  new OrderRequest(), context)
         then:
         def e = thrown IllegalArgumentException
-        e.message == "Error trying to register settled invoice with preImageHash MTIzSettlec=. Payment is already settled."
+        e.message == "Error trying to register settled invoice with preImageHash JwWJmahksHX4jYX. Payment is already settled."
     }
 
     def "Verify that registerSettledInvoice updates existing payment data if exists and not prior settled."(){
@@ -264,7 +264,7 @@ was returned without the includeInvoice flag."""(){
         setup:
         OrderRequest orderRequest = new OrderRequest()
         Invoice invoice = genFullInvoiceData(true)
-        invoice.preImageHash = Base64Utils.decodeBase64String("akdamdns")
+        invoice.preImageHash = Base58.decode("akdamdns")
         when:
         Settlement settlement = paymentHandler.registerSettledInvoice(invoice,true,orderRequest,context)
         then:
@@ -288,7 +288,7 @@ PerRequestPaymentData even though OrderRequest contains payPerRequest flag."""()
         OrderRequest orderRequest = new OrderRequest()
         orderRequest.payPerRequest = true
         Invoice invoice = genFullInvoiceData(true)
-        invoice.preImageHash = Base64Utils.decodeBase64String("akdamdns")
+        invoice.preImageHash = Base58.decode("akdamdns")
         when:
         paymentHandler.registerSettledInvoice(invoice,true,orderRequest,context)
         then:
@@ -305,7 +305,7 @@ PerRequestPaymentData even though OrderRequest contains payPerRequest flag."""()
         paymentHandler.registerSettledInvoice(invoice,false, new OrderRequest(), context)
         then:
         def e = thrown IllegalArgumentException
-        e.message == "Error trying to register unknown settled invoice. Invoice preImageHash: dW5rbm93bg=="
+        e.message == "Error trying to register unknown settled invoice. Invoice preImageHash: 5T7D1EnDq7"
     }
 
     def "Verify that markAsExecuted updates a PerRequestPaymentData with executed flag if related payment exists"(){
@@ -324,7 +324,7 @@ PerRequestPaymentData even though OrderRequest contains payPerRequest flag."""()
         paymentHandler.markAsExecuted("unknown".bytes)
         then:
         def e = thrown InternalErrorException
-        e.message == "Internal Error marking payment with preImageHash dW5rbm93bg== as executed. Payment not found."
+        e.message == "Internal Error marking payment with preImageHash 5T7D1EnDq7 as executed. Payment not found."
     }
 
     def "Verify that markAsExecuted throws InternalErrorException if related payment doesn't implement PerRequestPaymentData."(){
@@ -332,7 +332,7 @@ PerRequestPaymentData even though OrderRequest contains payPerRequest flag."""()
         paymentHandler.markAsExecuted("abc".bytes)
         then:
         def e = thrown InternalErrorException
-        e.message == "Internal Error marking payment with preImageHash YWJj as executed. Related PaymentData doesn't implement PerRequestPaymentData."
+        e.message == "Internal Error marking payment with preImageHash ZiCa as executed. Related PaymentData doesn't implement PerRequestPaymentData."
     }
 
     def "Verify that registerListener calls register in event bus."(){
@@ -389,7 +389,7 @@ PerRequestPaymentData even though OrderRequest contains payPerRequest flag."""()
         paymentHandler.updatePaymentDataCalls[0].context == context
         1 * BasePaymentHandler.log.log(Level.FINE, {it =~ "Received lightningEvent:"})
         1 * paymentHandler.paymentEventBus.triggerEvent(PaymentEventType.INVOICE_SETTLED, _ as Settlement) >> { def type, Settlement settlement ->
-            assert settlement.preImageHash == Base64Utils.decodeBase64String("MTIz")
+            assert settlement.preImageHash == Base58.decode("HXRC")
             assert settlement.validUntil.toEpochMilli() == 1544917414514
             assert settlement.invoice.bolt11Invoice == "fksjeoskajduakdfhaskdismensuduajseusdke"
 
@@ -405,7 +405,7 @@ PerRequestPaymentData even though OrderRequest contains payPerRequest flag."""()
         paymentHandler.onLightningEvent(new LightningEvent(LightningEventType.SETTLEMENT,invoice, context))
         then:
         1 * BasePaymentHandler.log.log(Level.FINE, {it =~ "Received lightningEvent:"})
-        1 * BasePaymentHandler.log.log(Level.INFO, """Received Lightning Invoice that does not exists as payment data, invoice preImageHash: dW5rbm93bg==. Skipping.""")
+        1 * BasePaymentHandler.log.log(Level.INFO, """Received Lightning Invoice that does not exists as payment data, invoice preImageHash: 5T7D1EnDq7. Skipping.""")
 
     }
 
@@ -417,7 +417,7 @@ PerRequestPaymentData even though OrderRequest contains payPerRequest flag."""()
         paymentHandler.onLightningEvent(new LightningEvent(LightningEventType.SETTLEMENT,genFullInvoiceData(false), context))
         then:
         1 * BasePaymentHandler.log.log(Level.FINE, {it =~ "Received lightningEvent:"})
-        1 * BasePaymentHandler.log.log(Level.SEVERE, "Error updating payment data on Lightning event of type SETTLEMENT, invoice preimage hash: MTIz, message: Some Error",_ as InternalErrorException)
+        1 * BasePaymentHandler.log.log(Level.SEVERE, "Error updating payment data on Lightning event of type SETTLEMENT, invoice preimage hash: HXRC, message: Some Error",_ as InternalErrorException)
     }
 
     static class TestPaymentHandler extends BasePaymentHandler{
@@ -454,10 +454,10 @@ PerRequestPaymentData even though OrderRequest contains payPerRequest flag."""()
         @Override
         protected PaymentData findPaymentData(byte[] preImageHash) throws IOException, InternalErrorException {
             findPaymentDataCalls << [preImageHash: preImageHash]
-            if(preImageHash == "abc".bytes || preImageHash == Base64Utils.decodeBase64String("MTIz")) {
+            if(preImageHash == "abc".bytes || preImageHash == Base58.decode("HXRC")) {
                 return new TestMinimalData(preImageHash: preImageHash, orderAmount: new BTC(1000))
             }
-            if(preImageHash == Base64Utils.decodeBase64String("MTIzSettled")) {
+            if(preImageHash == "HXRCSettled".bytes) {
                 return new TestMinimalData(preImageHash: preImageHash, orderAmount: new BTC(1000), settled: true)
             }
             if(preImageHash == "PerReqSettled".bytes) {

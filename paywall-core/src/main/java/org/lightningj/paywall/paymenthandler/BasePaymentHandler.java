@@ -20,7 +20,7 @@ import org.lightningj.paywall.lightninghandler.*;
 import org.lightningj.paywall.lightninghandler.lnd.LNDLightningHandlerContext;
 import org.lightningj.paywall.paymenthandler.data.PaymentData;
 import org.lightningj.paywall.paymenthandler.data.PerRequestPaymentData;
-import org.lightningj.paywall.util.Base64Utils;
+import org.lightningj.paywall.util.Base58;
 import org.lightningj.paywall.vo.Invoice;
 import org.lightningj.paywall.vo.Order;
 import org.lightningj.paywall.vo.OrderRequest;
@@ -113,7 +113,7 @@ public abstract class BasePaymentHandler implements PaymentHandler, LightningEve
             retval = paymentDataConverter.convertToInvoice(paymentData);
         }
         if(log.isLoggable(Level.FINE)) {
-            log.log(Level.FINE, "Lookup of preImageHash: " + Base64Utils.encodeBase64String(preImageHash) + " resulted in invoice: " + retval);
+            log.log(Level.FINE, "Lookup of preImageHash: " + Base58.encodeToString(preImageHash) + " resulted in invoice: " + retval);
         }
         return retval;
     }
@@ -137,7 +137,7 @@ public abstract class BasePaymentHandler implements PaymentHandler, LightningEve
         if(paymentData != null){
             if(paymentData instanceof PerRequestPaymentData && ((PerRequestPaymentData) paymentData).isPayPerRequest()){
                 if(((PerRequestPaymentData) paymentData).isExecuted()){
-                    throw new AlreadyExecutedException(preImageHash,"Invalid request with preImageHash: " + Base64Utils.encodeBase64String(preImageHash) + ", request have already been processed.");
+                    throw new AlreadyExecutedException(preImageHash,"Invalid request with preImageHash: " + Base58.encodeToString(preImageHash) + ", request have already been processed.");
                 }
             }
             if(paymentDataConverter.isSettled(paymentData)){
@@ -145,7 +145,7 @@ public abstract class BasePaymentHandler implements PaymentHandler, LightningEve
             }
         }
         if(log.isLoggable(Level.FINE)) {
-            log.log(Level.FINE, "Check settlement of preImageHash: " + Base64Utils.encodeBase64String(preImageHash) + " resulted in settlement: " + retval);
+            log.log(Level.FINE, "Check settlement of preImageHash: " + Base58.encodeToString(preImageHash) + " resulted in settlement: " + retval);
         }
         return retval;
     }
@@ -171,18 +171,18 @@ public abstract class BasePaymentHandler implements PaymentHandler, LightningEve
     public Settlement registerSettledInvoice(Invoice settledInvoice, boolean registerNew, OrderRequest orderRequest,
                                              LightningHandlerContext context) throws IllegalArgumentException,IOException,InternalErrorException{
         if(!settledInvoice.isSettled()){
-            throw new IllegalArgumentException("Error trying to register settled invoice with preImageHash " + Base64Utils.encodeBase64String(settledInvoice.getPreImageHash()) + ". Invoice is not settled.");
+            throw new IllegalArgumentException("Error trying to register settled invoice with preImageHash " + Base58.encodeToString(settledInvoice.getPreImageHash()) + ". Invoice is not settled.");
         }
         PaymentData paymentData = findPaymentData(settledInvoice.getPreImageHash());
         if(paymentData != null && paymentDataConverter.isSettled(paymentData)){
-            throw new IllegalArgumentException("Error trying to register settled invoice with preImageHash " + Base64Utils.encodeBase64String(settledInvoice.getPreImageHash()) + ". Payment is already settled.");
+            throw new IllegalArgumentException("Error trying to register settled invoice with preImageHash " + Base58.encodeToString(settledInvoice.getPreImageHash()) + ". Payment is already settled.");
         }
         if(paymentData == null){
             if(registerNew){
                 paymentData = newPaymentData(settledInvoice.getPreImageHash(), orderRequest);
                 checkIfPayPerRequest(paymentData,orderRequest);
             }else{
-                throw new IllegalArgumentException("Error trying to register unknown settled invoice. Invoice preImageHash: " + Base64Utils.encodeBase64String(settledInvoice.getPreImageHash()));
+                throw new IllegalArgumentException("Error trying to register unknown settled invoice. Invoice preImageHash: " + Base58.encodeToString(settledInvoice.getPreImageHash()));
             }
         }
 
@@ -191,7 +191,7 @@ public abstract class BasePaymentHandler implements PaymentHandler, LightningEve
         Settlement settlement = paymentDataConverter.convertToSettlement(paymentData,false);
         settlement.setInvoice(settledInvoice);
         if(log.isLoggable(Level.FINE)) {
-            log.log(Level.FINE, "Register settled invoice of preImageHash: " + Base64Utils.encodeBase64String(settledInvoice.getPreImageHash()) + " resulted in settlement: " + settlement);
+            log.log(Level.FINE, "Register settled invoice of preImageHash: " + Base58.encodeToString(settledInvoice.getPreImageHash()) + " resulted in settlement: " + settlement);
         }
         return settlement;
     }
@@ -205,13 +205,13 @@ public abstract class BasePaymentHandler implements PaymentHandler, LightningEve
     public void markAsExecuted(byte[] preImageHash) throws IOException, InternalErrorException{
         PaymentData paymentData = findPaymentData(preImageHash);
         if(paymentData == null){
-            throw new InternalErrorException("Internal Error marking payment with preImageHash " + Base64Utils.encodeBase64String(preImageHash) + " as executed. Payment not found.");
+            throw new InternalErrorException("Internal Error marking payment with preImageHash " + Base58.encodeToString(preImageHash) + " as executed. Payment not found.");
         }
         if(paymentData instanceof PerRequestPaymentData){
             ((PerRequestPaymentData) paymentData).setExecuted(true);
             updatePaymentData(PaymentEventType.REQUEST_EXECUTED,paymentData,null);
         }else{
-            throw new InternalErrorException("Internal Error marking payment with preImageHash " + Base64Utils.encodeBase64String(preImageHash) + " as executed. Related PaymentData doesn't implement PerRequestPaymentData.");
+            throw new InternalErrorException("Internal Error marking payment with preImageHash " + Base58.encodeToString(preImageHash) + " as executed. Related PaymentData doesn't implement PerRequestPaymentData.");
         }
     }
 
@@ -347,7 +347,7 @@ public abstract class BasePaymentHandler implements PaymentHandler, LightningEve
             byte[] preImageHash = event.getInvoice().getPreImageHash();
             PaymentData paymentData = findPaymentData(preImageHash);
             if(paymentData == null){
-                log.log(Level.INFO, "Received Lightning Invoice that does not exists as payment data, invoice preImageHash: " + Base64Utils.encodeBase64String(preImageHash) + ". Skipping.");
+                log.log(Level.INFO, "Received Lightning Invoice that does not exists as payment data, invoice preImageHash: " + Base58.encodeToString(preImageHash) + ". Skipping.");
                 return;
             }
             paymentDataConverter.populatePaymentDataFromInvoice(event.getInvoice(),paymentData);
@@ -359,7 +359,7 @@ public abstract class BasePaymentHandler implements PaymentHandler, LightningEve
             }
             paymentEventBus.triggerEvent(type, eventPayment);
         }catch(Exception e){
-            log.log(Level.SEVERE, "Error updating payment data on Lightning event of type " + event.getType() + ", invoice preimage hash: " + Base64Utils.encodeBase64String(event.getInvoice().getPreImageHash()) + ", message: " + e.getMessage(),e);
+            log.log(Level.SEVERE, "Error updating payment data on Lightning event of type " + event.getType() + ", invoice preimage hash: " + Base58.encodeToString(event.getInvoice().getPreImageHash()) + ", message: " + e.getMessage(),e);
         }
     }
 

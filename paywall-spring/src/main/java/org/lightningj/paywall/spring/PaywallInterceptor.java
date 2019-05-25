@@ -27,8 +27,10 @@ import org.lightningj.paywall.paymenthandler.PaymentHandler;
 import org.lightningj.paywall.spring.response.InvoiceResponse;
 import org.lightningj.paywall.spring.util.RequestHelper;
 import org.lightningj.paywall.spring.util.SpringCachableHttpServletRequest;
+import org.lightningj.paywall.spring.websocket.PaywallWebSocketConfig;
 import org.lightningj.paywall.tokengenerator.TokenException;
 import org.lightningj.paywall.tokengenerator.TokenGenerator;
+import org.lightningj.paywall.util.Base58;
 import org.lightningj.paywall.util.SettingUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -237,12 +239,22 @@ public class PaywallInterceptor implements HandlerInterceptor {
      * @throws InternalErrorException if internal configuration was faulty.
      */
     private InvoiceResponse genInvoiceResponse(InvoiceResult invoiceResult, PaymentRequired paymentRequired) throws InternalErrorException {
+
+        String webSocketCheckSettlementUrl = null;
+        String webSocketCheckSettlementQueue = null;
+        if(SettingUtils.checkBooleanWithDefault(paywallProperties.getWebSocketEnable(), PaywallProperties.WEBSOCKET_ENABLE, PaywallProperties.DEFAULT_WEBSOCKET_ENABLE)){
+            webSocketCheckSettlementUrl = paywallProperties.getWebSocketCheckSettlementUrl();
+            webSocketCheckSettlementQueue = PaywallWebSocketConfig.CHECK_SETTLEMENT_QUEUE_PREFIX;
+        }
+
         return new InvoiceResponse(invoiceResult,
                 paymentRequired.payPerRequest(),
                 paymentRequired.requestPolicy(),
                 SettingUtils.checkRequiredBoolean(paywallProperties.getInvoiceIncludeNodeInfo(),PaywallProperties.INVOICE_INCLUDE_NODEINFO),
                 paywallProperties.getCheckSettlementURL(),
-                paywallProperties.getQrCodeUrl());
+                paywallProperties.getQrCodeUrl(),
+                webSocketCheckSettlementUrl,
+                webSocketCheckSettlementQueue);
     }
 
 
@@ -335,7 +347,16 @@ public class PaywallInterceptor implements HandlerInterceptor {
      * @return a displayable version of the preImageHash
      */
     private String displayablePreImageHash(byte[] preImageHash){
-        return preImageHash != null ? new String(Base64.getEncoder().encode(preImageHash)) : "null";
+        return preImageHash != null ? Base58.encodeToString(preImageHash) : "null";
+    }
+
+    /**
+     *
+     * @param preImageHash the String representation of the preImageHash
+     * @return a displayable version of the preImageHash
+     */
+    private String displayablePreImageHash(String preImageHash){
+        return preImageHash != null ? preImageHash : "null";
     }
 
 }

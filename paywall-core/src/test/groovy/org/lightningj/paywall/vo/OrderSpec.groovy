@@ -61,8 +61,8 @@ class OrderSpec extends Specification {
 
     def "Verify that toJsonAsString works as expected"(){
         expect:
-        new Order("123".getBytes(),"SomeDescription",new BTC(1234),Instant.ofEpochMilli(12345L)).toJsonAsString(false) == """{"preImageHash":"MTIz","description":"SomeDescription","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345}"""
-        new Order("123".getBytes(),null,new BTC(1234),Instant.ofEpochMilli(12345L)).toJsonAsString(false) == """{"preImageHash":"MTIz","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345}"""
+        new Order("123".getBytes(),"SomeDescription",new BTC(1234),Instant.ofEpochMilli(12345L)).toJsonAsString(false) == """{"preImageHash":"HXRC","description":"SomeDescription","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345}"""
+        new Order("123".getBytes(),null,new BTC(1234),Instant.ofEpochMilli(12345L)).toJsonAsString(false) == """{"preImageHash":"HXRC","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345}"""
         when:
         new Order(null,null,new BTC(1234),Instant.ofEpochMilli(12345L)).toJsonAsString(false)
         then:
@@ -82,7 +82,7 @@ class OrderSpec extends Specification {
 
     def "Verify that parsing of JSON data works as expected"(){
         when:
-        Order d = new Order(toJsonObject("""{"preImageHash":"MTIz","description":"SomeDescription","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345}"""))
+        Order d = new Order(toJsonObject("""{"preImageHash":"HXRC","description":"SomeDescription","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345}"""))
         then:
         d.preImageHash == "123".getBytes()
         d.description == "SomeDescription"
@@ -91,7 +91,7 @@ class OrderSpec extends Specification {
         d.expireDate == Instant.ofEpochMilli(12345L)
 
         when:
-        d = new Order(toJsonObject("""{"preImageHash":"MTIz","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345}"""))
+        d = new Order(toJsonObject("""{"preImageHash":"HXRC","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345}"""))
         then:
         d.preImageHash == "123".getBytes()
         d.description == null
@@ -103,13 +103,13 @@ class OrderSpec extends Specification {
         e.message == "Error parsing JSON data, field key preImageHash is required."
 
         when:
-        new Order(toJsonObject("""{"preImageHash":"MTIz","expireDate":12345}"""))
+        new Order(toJsonObject("""{"preImageHash":"HXRC","expireDate":12345}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key orderAmount is required."
 
         when:
-        new Order(toJsonObject("""{"preImageHash":"MTIz","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"}}"""))
+        new Order(toJsonObject("""{"preImageHash":"HXRC","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"}}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key expireDate is required."
@@ -118,10 +118,10 @@ class OrderSpec extends Specification {
         new Order(toJsonObject("""{"preImageHash":"åäö","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345}"""))
         then:
         e = thrown(JsonException)
-        e.message == "Error parsing JSON data, problem decoding base64 data from field preImageHash."
+        e.message == "Error parsing JSON data, problem decoding base58 data from field preImageHash."
 
         when:
-        new Order(toJsonObject("""{"preImageHash":"MTIz","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":"abc"}"""))
+        new Order(toJsonObject("""{"preImageHash":"HXRC","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":"abc"}"""))
         then:
         e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key expireDate is not a number."

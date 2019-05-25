@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Helper class in charge of notifying listeners matching
@@ -28,7 +29,7 @@ import java.util.List;
  */
 public class PaymentEventBus {
 
-    protected List<PaymentListener> listeners = Collections.synchronizedList(new ArrayList<PaymentListener>());
+    protected List<PaymentListener> listeners = new CopyOnWriteArrayList(new ArrayList<PaymentListener>());
 
     /**
      * Method to add the listener to the set of listeners listening

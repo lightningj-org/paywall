@@ -71,8 +71,10 @@ public class SettingUtils {
     /**
      * Method that returns related integer or default value if setting is empty.
      * @param settingValue the value of setting
+     * @param settingKey the related setting key
      * @param defaultValue the default value if not set or empty.
      * @return either the setting or the default value
+     * @throws InternalErrorException if setting value was empty or non-integer.
      */
     public static int checkIntegerWithDefault(String settingValue, String settingKey, int defaultValue) throws InternalErrorException{
         if(isEmpty(settingValue)){
@@ -99,8 +101,10 @@ public class SettingUtils {
     /**
      * Method that returns related long or default value if setting is empty.
      * @param settingValue the value of setting
+     * @param settingKey the related setting key
      * @param defaultValue the default value if not set or empty.
      * @return either the setting or the default value
+     * @throws InternalErrorException if setting value was empty or non-integer.
      */
     public static long checkLongWithDefault(String settingValue, String settingKey, long defaultValue) throws InternalErrorException{
         if(isEmpty(settingValue)){
@@ -127,8 +131,10 @@ public class SettingUtils {
     /**
      * Method that returns related boolean or default value if setting is empty.
      * @param settingValue the value of setting
+     * @param settingKey the related setting key
      * @param defaultValue the default value if not set or empty.
      * @return either the setting or the default value
+     * @throws InternalErrorException if setting value was non-boolean.
      */
     public static boolean checkBooleanWithDefault(String settingValue, String settingKey, boolean defaultValue) throws InternalErrorException{
         if(isEmpty(settingValue)){

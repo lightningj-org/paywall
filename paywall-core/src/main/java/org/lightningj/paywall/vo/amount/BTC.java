@@ -41,6 +41,8 @@ public class BTC extends CryptoAmount {
 
     /**
      * JSON Parseable constructor
+     * @param jsonObject the jsonObject to parse.
+     * @throws JsonException if problems occurred parsing the json data.
      */
     public BTC(JsonObject jsonObject) throws JsonException {
         parseJson(jsonObject);

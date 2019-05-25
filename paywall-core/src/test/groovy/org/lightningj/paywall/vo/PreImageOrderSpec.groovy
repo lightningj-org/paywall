@@ -73,7 +73,7 @@ class PreImageOrderSpec extends Specification {
 
     def "Verify that toJsonAsString works as expected"(){
         expect:
-        new PreImageOrder("234".getBytes(),new Order("123".getBytes(),"SomeDescription",new BTC(1234),Instant.ofEpochMilli(12345L))).toJsonAsString(false) == """{"preImageHash":"MTIz","description":"SomeDescription","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345,"preImage":"MjM0"}"""
+        new PreImageOrder("234".getBytes(),new Order("123".getBytes(),"SomeDescription",new BTC(1234),Instant.ofEpochMilli(12345L))).toJsonAsString(false) == """{"preImageHash":"HXRC","description":"SomeDescription","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345,"preImage":"HryZ"}"""
         when:
         new PreImageOrder(null,new Order("123".getBytes(),"SomeDescription",new BTC(1234),Instant.ofEpochMilli(12345L))).toJsonAsString(false)
         then:
@@ -83,7 +83,7 @@ class PreImageOrderSpec extends Specification {
 
     def "Verify that parsing of JSON data works as expected"(){
         when:
-        PreImageOrder d = new PreImageOrder(toJsonObject("""{"preImageHash":"MTIz","description":"SomeDescription","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345,"preImage":"MjM0"}"""))
+        PreImageOrder d = new PreImageOrder(toJsonObject("""{"preImageHash":"HXRC","description":"SomeDescription","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345,"preImage":"HryZ"}"""))
         then:
         d.preImage == "234".getBytes()
         d.preImageHash == "123".getBytes()
@@ -93,7 +93,7 @@ class PreImageOrderSpec extends Specification {
         d.expireDate == Instant.ofEpochMilli(12345L)
 
         when:
-        new PreImageOrder(toJsonObject("""{"preImageHash":"MTIz","description":"SomeDescription","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345}"""))
+        new PreImageOrder(toJsonObject("""{"preImageHash":"HXRC","description":"SomeDescription","orderAmount":{"type":"CRYTOCURRENCY","value":1234,"currencyCode":"BTC","magnetude":"NONE"},"expireDate":12345}"""))
         then:
         def e = thrown(JsonException)
         e.message == "Error parsing JSON data, field key preImage is required."

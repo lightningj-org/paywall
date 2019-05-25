@@ -60,6 +60,7 @@ public class Rate extends JSONParsable{
 
     /**
      * See property comment
+     * @return the rate's code field.
      */
     public String getCode() {
         return code;
@@ -67,6 +68,7 @@ public class Rate extends JSONParsable{
 
     /**
      * See property comment
+     * @param code the rate's code field.
      */
     public void setCode(String code) {
         this.code = code;
@@ -74,6 +76,7 @@ public class Rate extends JSONParsable{
 
     /**
      * See property comment
+     * @return the rate's name field.
      */
     public String getName() {
         return name;
@@ -81,6 +84,7 @@ public class Rate extends JSONParsable{
 
     /**
      * See property comment
+     * @param name the rate's name field.
      */
     public void setName(String name) {
         this.name = name;
@@ -88,6 +92,7 @@ public class Rate extends JSONParsable{
 
     /**
      * See property comment
+     * @return the rate's rate field.
      */
     public Double getRate() {
         return rate;
@@ -95,6 +100,7 @@ public class Rate extends JSONParsable{
 
     /**
      * See property comment
+     * @param rate the rate's rate field.
      */
     public void setRate(Double rate) {
         this.rate = rate;

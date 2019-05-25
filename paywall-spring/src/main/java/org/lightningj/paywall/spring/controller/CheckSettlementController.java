@@ -39,6 +39,9 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 public class CheckSettlementController {
 
+    // TODO enable settings were settlement controller is disabled, when supporting other
+    // than local payment flow.
+
     RequestHelper requestHelper = new RequestHelper();
 
     @Autowired
@@ -47,7 +50,6 @@ public class CheckSettlementController {
     @Autowired
     PaywallExceptionHandler paywallExceptionHandler;
 
-    // TODO Next is WebSocket
 
     /**
      * Main controller action checking settlement for a generated invoice token set in header wih name

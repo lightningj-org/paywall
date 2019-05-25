@@ -162,7 +162,7 @@ class PaymentDataConverterSpec extends Specification {
         then:
         1 * lightningHandler.lookupInvoice("abc".bytes) >> {return null}
         def e = thrown(InternalErrorException)
-        e.message == "Internal error converting payment data into invoice, invoice with preImageHash YWJj not found by LightningHandler."
+        e.message == "Internal error converting payment data into invoice, invoice with preImageHash ZiCa not found by LightningHandler."
     }
 
     def "Verify that convertToInvoice throws InternalErrorException if payment data isn't implementing MinimalPaymentData"(){

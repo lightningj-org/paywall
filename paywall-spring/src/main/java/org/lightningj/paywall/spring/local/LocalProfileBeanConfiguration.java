@@ -42,4 +42,5 @@ public class LocalProfileBeanConfiguration extends BaseLocalProfileBeanConfigura
     public KeyManager getKeyManager(){
         return new SpringDefaultFileKeyManager();
     }
+
 }

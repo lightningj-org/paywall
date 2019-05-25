@@ -17,13 +17,11 @@ package org.lightningj.paywall.vo;
 import org.jose4j.jwt.JwtClaims;
 import org.lightningj.paywall.paymenthandler.Payment;
 import org.lightningj.paywall.tokengenerator.JWTClaim;
-import org.lightningj.paywall.util.Base64Utils;
-import org.lightningj.paywall.vo.amount.CryptoAmount;
+import org.lightningj.paywall.util.Base58;
 
 import javax.json.JsonException;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import java.time.Instant;
 
 /**
  * Minimal Invoice used inside JWT tokens that is intended to have as small size as possible
@@ -93,7 +91,7 @@ public class MinimalInvoice extends JWTClaim implements Payment {
      */
     @Override
     public void convertToJson(JsonObjectBuilder jsonObjectBuilder) throws JsonException {
-        add(jsonObjectBuilder,"preImageHash", Base64Utils.encodeBase64String(preImageHash));
+        addB58(jsonObjectBuilder,"preImageHash", Base58.encodeToString(preImageHash));
     }
 
     /**
@@ -104,7 +102,7 @@ public class MinimalInvoice extends JWTClaim implements Payment {
      */
     @Override
     public void parseJson(JsonObject jsonObject) throws JsonException {
-        preImageHash = getByteArrayFromB64(jsonObject,"preImageHash",true);
+        preImageHash = getByteArrayFromB58(jsonObject,"preImageHash",true);
     }
 
     @Override

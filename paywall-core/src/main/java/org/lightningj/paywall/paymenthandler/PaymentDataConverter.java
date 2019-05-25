@@ -17,7 +17,7 @@ package org.lightningj.paywall.paymenthandler;
 import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.lightninghandler.LightningHandler;
 import org.lightningj.paywall.paymenthandler.data.*;
-import org.lightningj.paywall.util.Base64Utils;
+import org.lightningj.paywall.util.Base58;
 import org.lightningj.paywall.vo.Invoice;
 import org.lightningj.paywall.vo.NodeInfo;
 import org.lightningj.paywall.vo.Order;
@@ -117,7 +117,7 @@ public class PaymentDataConverter {
             byte[] preImageHash = ((MinimalPaymentData) paymentData).getPreImageHash();
             Invoice invoice = lightningHandler.lookupInvoice(preImageHash);
             if(invoice == null){
-                throw new InternalErrorException("Internal error converting payment data into invoice, invoice with preImageHash " + Base64Utils.encodeBase64String(preImageHash) + " not found by LightningHandler.");
+                throw new InternalErrorException("Internal error converting payment data into invoice, invoice with preImageHash " + Base58.encodeToString(preImageHash) + " not found by LightningHandler.");
             }
             return invoice;
         }

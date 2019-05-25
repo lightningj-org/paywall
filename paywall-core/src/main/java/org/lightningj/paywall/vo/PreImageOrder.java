@@ -16,14 +16,11 @@ package org.lightningj.paywall.vo;
 
 import org.jose4j.jwt.JwtClaims;
 import org.lightningj.paywall.paymenthandler.Payment;
-import org.lightningj.paywall.tokengenerator.JWTClaim;
-import org.lightningj.paywall.util.Base64Utils;
-import org.lightningj.paywall.vo.amount.Amount;
+import org.lightningj.paywall.util.Base58;
 
 import javax.json.JsonException;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import java.time.Instant;
 
 /**
  * Value object extending the standard by including the secret preImage
@@ -106,7 +103,7 @@ public class PreImageOrder extends Order implements Payment {
     @Override
     public void convertToJson(JsonObjectBuilder jsonObjectBuilder) throws JsonException {
         super.convertToJson(jsonObjectBuilder);
-        add(jsonObjectBuilder,"preImage", Base64Utils.encodeBase64String(preImage));
+        addB58(jsonObjectBuilder,"preImage", Base58.encodeToString(preImage));
     }
 
     /**
@@ -118,7 +115,7 @@ public class PreImageOrder extends Order implements Payment {
     @Override
     public void parseJson(JsonObject jsonObject) throws JsonException {
         super.parseJson(jsonObject);
-        preImage = getByteArrayFromB64(jsonObject,"preImage", true);
+        preImage = getByteArrayFromB58(jsonObject,"preImage", true);
     }
 
 }

@@ -39,6 +39,7 @@ public class PaymentOption extends JSONParsable {
 
     /**
      * Constructor converting an annotated payment option into a value object.
+     * @param paymentOption the related paymentOption annotation.
      */
     public PaymentOption(org.lightningj.paywall.annotations.vo.PaymentOption paymentOption){
         this.option = paymentOption.option();

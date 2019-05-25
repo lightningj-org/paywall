@@ -27,7 +27,8 @@ public abstract class JWTClaim extends JSONParsable{
     /**
      * JSON Parseable constructor
      *
-     * @param jsonObject
+     * @param jsonObject the jsonObject to parse
+     * @throws JsonException if problems occurred parsing the JWT claim.
      */
     public JWTClaim(JsonObject jsonObject) throws JsonException {
         super(jsonObject);

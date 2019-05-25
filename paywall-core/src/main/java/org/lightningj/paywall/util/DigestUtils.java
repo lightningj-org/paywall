@@ -27,32 +27,25 @@ import java.security.NoSuchProviderException;
  */
 public class DigestUtils {
 
-    private static MessageDigest sha256Digest;
-    private static MessageDigest ripeMD160Digest;
-
     public static byte[] sha256(byte[] data) throws InternalErrorException {
-        if(sha256Digest == null){
-            try {
-                sha256Digest = MessageDigest.getInstance("SHA-256","BC");
-            } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-                throw new InternalErrorException("Internal error generating SHA256 digest: " + e.getMessage(),e);
-            }
+        try {
+            MessageDigest sha256Digest = MessageDigest.getInstance("SHA-256","BC");
+            sha256Digest.reset();
+            sha256Digest.update(data);
+            return sha256Digest.digest();
+        } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+            throw new InternalErrorException("Internal error generating SHA256 digest: " + e.getMessage(),e);
         }
-        sha256Digest.reset();
-        sha256Digest.update(data);
-        return sha256Digest.digest();
     }
 
     public static byte[] ripeMD160(byte[] data) throws InternalErrorException {
-        if(ripeMD160Digest == null){
-            try {
-                ripeMD160Digest = MessageDigest.getInstance("RipeMD160","BC");
-            } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-                throw new InternalErrorException("Internal error generating RipeMD160 digest: " + e.getMessage(),e);
-            }
+        try {
+            MessageDigest ripeMD160Digest = MessageDigest.getInstance("RipeMD160","BC");
+            ripeMD160Digest.reset();
+            ripeMD160Digest.update(data);
+            return ripeMD160Digest.digest();
+        } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+            throw new InternalErrorException("Internal error generating RipeMD160 digest: " + e.getMessage(),e);
         }
-        ripeMD160Digest.reset();
-        ripeMD160Digest.update(data);
-        return ripeMD160Digest.digest();
     }
 }
