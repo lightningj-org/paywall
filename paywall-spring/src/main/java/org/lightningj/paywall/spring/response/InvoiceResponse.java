@@ -148,8 +148,11 @@ public class InvoiceResponse extends Response{
         try {
             this.checkSettlementLink = checkSettlementLink + "?" + HTTPConstants.PARAMETER_INVOICE_REQUEST + "=" + URLEncoder.encode(token, "UTF-8");
             this.qrLink = qrLink + "?" + GenerateQRCodeController.PARAMETER_DATA + "=" + URLEncoder.encode(invoice.getBolt11Invoice(), "UTF-8");
+
             this.checkSettlementWebSocketEndpoint = checkSettlementWebSocketEndpoint;
-            this.checkSettlementWebSocketQueue = (baseCheckSettlementWebSocketQueue.endsWith("/") ? baseCheckSettlementWebSocketQueue: baseCheckSettlementWebSocketQueue + "/") + preImageHash;
+            if(baseCheckSettlementWebSocketQueue != null) {
+                this.checkSettlementWebSocketQueue = (baseCheckSettlementWebSocketQueue.endsWith("/") ? baseCheckSettlementWebSocketQueue : baseCheckSettlementWebSocketQueue + "/") + preImageHash;
+            }
         }catch (UnsupportedEncodingException e){
             throw new InternalErrorException("Internal error encoding invoice response, unsupported encoding when URL encoding.: " + e.getMessage(),e);
         }

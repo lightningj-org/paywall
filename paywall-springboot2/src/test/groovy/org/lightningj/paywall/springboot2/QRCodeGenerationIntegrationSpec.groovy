@@ -15,6 +15,7 @@
 package org.lightningj.paywall.springboot2
 
 import groovyx.net.http.RESTClient
+import org.lightningj.paywall.util.BCUtils
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.test.context.TestPropertySource
@@ -40,18 +41,13 @@ class QRCodeGenerationIntegrationSpec extends Specification {
 
     static final String data = "lnbc30u1pwtvwpvpp5hvsr5ch6qsyp6wx7ek2sya2gy9lakzvc4fj96ez3kf4p4cu3gzasdp62phkcmr0vejk2epwvdhk6gpdypcxz7fqw3hjqen9v4jzqcmgd93kketwwvxqzjccqp2rzjqwac3nxyg3f5mfa4ke9577c4u8kvkx8pqtdsusqdfww0aymk823x6zyc0gqqqngqqqqqqq8mqqqqqqcqjqed7f8atc09d362xvmpryujfwjcycgar7lvlem5ulttsgh9eay58hhvwjqmqveqxjwk8gf4r9w0dux0prknclxz7euetkjnk9563022cpruw4jn"
 
+    def setupSpec(){
+        BCUtils.installBCProvider()
+    }
+
     def setup() {
         restClient = new RESTClient( "http://localhost:${randomServerPort}" )
     }
-
-    // TODO Test both payPerRequest or without
-
-    // Next step set up article inventory.
-    // Next step is to start implementing filter with bells and wisels
-
-    // Test all edge cases
-
-    // How to test clock?
 
 
     def "Generate a valid QR Code Generation Request with standared size"(){

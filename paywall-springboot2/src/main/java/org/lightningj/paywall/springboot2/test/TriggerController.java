@@ -6,13 +6,13 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+//@RestController
 public class TriggerController {
 
-    @Autowired
+    //@Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    @RequestMapping("/triggerws1")
+    //@RequestMapping("/triggerws1")
     public String trigger1(){
 
         // 1. Test to trigger before, connected
