@@ -1,0 +1,29 @@
+plugins {
+    id "com.moowork.node" version "1.3.1"
+    id "com.moowork.grunt" version "1.3.0"
+}
+
+group 'org.lightningj'
+
+description = "LightningJ Paywall JavaScript Library."
+
+node {
+    download = true
+}
+
+// TODO Remove
+task helloWorld( type: GruntTask, dependsOn: installGrunt ) {}
+
+test.dependsOn grunt_jasmine
+
+// TODO JsDoc
+// TODO hint?
+// TODO Minify
+// Then what, copy in spring-boot?
+// 
+
+// TODO Remove
+build.dependsOn('helloWorld')
+
+
+

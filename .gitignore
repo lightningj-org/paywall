@@ -3,3 +3,6 @@ build
 paywall-core.iml
 paywall-core.ipr
 paywall-core.iws
+test.html
+test.txt
+paywall-js/node_modules
