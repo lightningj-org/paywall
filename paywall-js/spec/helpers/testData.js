@@ -68,3 +68,8 @@ var errorInvalid1 = {
     ],
     "reason": "INVALID"
 };
+
+var apiError1 = {
+    "status": "INTERNAL_ERROR",
+    "message": "Some api error",
+};

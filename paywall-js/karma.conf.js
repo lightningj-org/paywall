@@ -15,7 +15,9 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-        'spec/testData/*.js',
+        'node_modules/stompjs/lib/stomp.js',
+        'node_modules/sockjs-client/dist/sockjs.js',
+        'spec/helpers/*.js',
         'src/*.js',
         'spec/**/*Spec.js'
     ],
