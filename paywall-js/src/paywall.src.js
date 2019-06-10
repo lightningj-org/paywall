@@ -97,6 +97,33 @@
     };
 
     /**
+     * Enumeration of known status values in the status field of response objects json object.
+     * @enum {string}
+     * @readonly
+     * @global
+     */
+    global.PaywallResponseStatus = {
+        /** Processing went ok, no exception occurred. */
+        OK: "OK",
+        /**
+         * Invalid data was sent to service..
+         */
+        BAD_REQUEST: "BAD_REQUEST",
+        /**
+         * Temporary internal problems at the service. Possible to try again.
+         */
+        SERVICE_UNAVAILABLE: "SERVICE_UNAVAILABLE",
+        /**
+         * Usually due to invalid token sent to service.
+         */
+        UNAUTHORIZED: "UNAUTHORIZED",
+        /**
+         * Internal error occurred at the service.
+         */
+        INTERNAL_SERVER_ERROR: "INTERNAL_SERVER_ERROR"
+    };
+
+    /**
      * TODO
      *
      * @constructor Paywall
@@ -130,7 +157,6 @@
                 return PaywallState.INVOICE;
             } else {
                 if(settlement.settlementValidFrom !== null){
-                    var time = new Date(settlement.settlementValidFrom).getTime();
                     if(new Date(settlement.settlementValidFrom).getTime() > now){
                         // Settlement not yet valid.
                         return PaywallState.SETTLEMENT_NOT_YET_VALID;
@@ -273,8 +299,11 @@
             }
 
         };
+
         // Define eventBus that is dependant on API object.
         var eventBus = new PaywallEventBus(api);
+        var webSocketHandler = new PaywallWebSocket(api,eventBus);
+
 
         /* test-code */
         // Help code to access private fields during unit tests.
@@ -298,6 +327,9 @@
         };
         api.getEventBus = function (){
             return eventBus;
+        };
+        api.getWebSocketHandler = function (){
+            return webSocketHandler;
         };
         /* end-test-code */
 
@@ -622,6 +654,104 @@
     /* test-code */
     // Define PaywallEventBuss as class available to test scripts.
     global.PaywallEventBus = PaywallEventBus;
+    /* end-test-code */
+
+    /**
+     * Private class in charge of maintaining WebSocket connection and callbacks
+     * to the related payment flow.
+     *
+     * @param {Paywall|object} paywall the related payment flow.
+     * @param {PaywallEventBus|object} eventBus the related payment flow event bus.
+     * @constructor PaywallWebSocket
+     */
+    function PaywallWebSocket(paywall, eventBus) {
+
+        var socket;
+        var stompSocket;
+
+        function processWebSocketMessage(message){
+            if(message.body){
+                var object = JSON.parse(message.body);
+                if(object.status === PaywallResponseStatus.OK){
+                    var eventType = getSettledStatus(object);
+                    console.debug("Paywall WebSocket, received message if type: " + eventType);
+                    eventBus.onEvent(eventType,object);
+                }else{
+                    console.debug("Paywall WebSocket, received error message: " + object);
+                    eventBus.onEvent(PaywallEventType.PAYWALL_ERROR,object);
+                }
+            }else{
+                console.debug("Paywall WebSocket, received empty message, ignoring.");
+            }
+        }
+
+        function processWebSocketError(error){
+            var errorObject = {status: PaywallResponseStatus.SERVICE_UNAVAILABLE,
+                message: error.headers.message,
+                errors: [error.headers.message]
+            };
+            console.debug("Paywall WebSocket connection error: " + errorObject);
+            eventBus.onEvent(PaywallEventType.PAYWALL_ERROR,errorObject);
+        }
+
+        function getSettledStatus(settlement){
+            var now = Date.now();
+            if(settlement.settlementValidFrom !== null){
+                if(new Date(settlement.settlementValidFrom).getTime() > now){
+                    // Settlement not yet valid.
+                    return PaywallEventType.SETTLEMENT_NOT_YET_VALID;
+                }
+            }
+            if(new Date(settlement.settlementValidUntil).getTime() < now){
+                // Settlement expired
+                return PaywallEventType.SETTLEMENT_EXPIRED;
+            }
+            return PaywallEventType.SETTLED;
+        }
+
+
+
+        /**
+         * Method to close underlying resources and background check.
+         * @param {object} invoice the newly generated invoice.
+         * @memberof PaywallWebSocket
+         */
+        var connect = function(invoice){
+            socket = new WebSocket(invoice.checkSettlementWebSocketEndpoint);
+            stompSocket = Stomp.over(socket);
+
+            var headers = {"token": invoice.token};
+            stompSocket.connect({}, function(frame) {
+                stompSocket.subscribe(invoice.checkSettlementWebSocketQueue, processWebSocketMessage, headers);
+            }, processWebSocketError);
+        };
+        this.connect = connect;
+
+        /**
+         * Method to close underlying WebSocket.
+         * @memberof PaywallWebSocket
+         */
+        var close = function(){
+            if(stompSocket !== undefined){
+                console.debug("Paywall WebSocket, closing connection.");
+                stompSocket.close();
+            }
+        };
+        this.close = close;
+
+
+
+        /* test-code */
+        // Help code to access private fields during unit tests.
+        this.processWebSocketMessage = processWebSocketMessage;
+        this.processWebSocketError = processWebSocketError;
+        /* end-test-code */
+    }
+
+
+    /* test-code */
+    // Define PaywallWebSocket as class available to test scripts.
+    global.PaywallWebSocket = PaywallWebSocket;
     /* end-test-code */
 
 })(this);

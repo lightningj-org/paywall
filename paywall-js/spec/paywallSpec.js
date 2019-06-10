@@ -1,12 +1,4 @@
 
-describe("Stomptest", function(){
-   it("test1",function(){
-       var socket = new WebSocket('ws://localhost:8080/checkSettlementWebSocket');
-       ws1 = Stomp.over(socket);
-       expect(true).toBe(true);
-   });
-});
-
 
 describe("Verify that Paywall methods returns expected result", function(){
     beforeEach(function (){
@@ -97,7 +89,7 @@ describe("Verify that Paywall methods returns expected result", function(){
         paywall.registerListener("Listener1",PaywallEventType.INVOICE, function (type, object) {});
         expect(paywall.getEventBus().getListeners().length).toBe(1);
 
-        paywall.unregisterListener("Listener1")
+        paywall.unregisterListener("Listener1");
         expect(paywall.getEventBus().getListeners().length).toBe(0);
     });
 
@@ -229,62 +221,80 @@ describe("Verify that PaywallTime calculates remaining times correctly", functio
 
 
 describe("Verify PaywallState enum values", function() {
-    it("Expect PaywallState enum NEW has value 'NEW", function() {
+    it("Expect PaywallState enum NEW has value 'NEW'", function() {
         expect(PaywallState.NEW).toBe("NEW");
     });
-    it("Expect PaywallState enum INVOICE has value 'INVOICE", function() {
+    it("Expect PaywallState enum INVOICE has value 'INVOICE'", function() {
         expect(PaywallState.INVOICE).toBe("INVOICE");
     });
-    it("Expect PaywallState enum INVOICE_EXPIRED has value 'INVOICE_EXPIRED", function() {
+    it("Expect PaywallState enum INVOICE_EXPIRED has value 'INVOICE_EXPIRED'", function() {
         expect(PaywallState.INVOICE_EXPIRED).toBe("INVOICE_EXPIRED");
     });
-    it("Expect PaywallState enum SETTLED has value 'SETTLED", function() {
+    it("Expect PaywallState enum SETTLED has value 'SETTLED'", function() {
         expect(PaywallState.SETTLED).toBe("SETTLED");
     });
-    it("Expect PaywallState enum EXECUTED has value 'EXECUTED", function() {
+    it("Expect PaywallState enum EXECUTED has value 'EXECUTED'", function() {
         expect(PaywallState.EXECUTED).toBe("EXECUTED");
     });
-    it("Expect PaywallState enum SETTLEMENT_NOT_YET_VALID has value 'SETTLEMENT_NOT_YET_VALID", function() {
+    it("Expect PaywallState enum SETTLEMENT_NOT_YET_VALID has value 'SETTLEMENT_NOT_YET_VALID'", function() {
         expect(PaywallState.SETTLEMENT_NOT_YET_VALID).toBe("SETTLEMENT_NOT_YET_VALID");
     });
-    it("Expect PaywallState enum SETTLEMENT_EXPIRED has value 'SETTLEMENT_EXPIRED", function() {
+    it("Expect PaywallState enum SETTLEMENT_EXPIRED has value 'SETTLEMENT_EXPIRED'", function() {
         expect(PaywallState.SETTLEMENT_EXPIRED).toBe("SETTLEMENT_EXPIRED");
     });
-    it("Expect PaywallState enum PAYWALL_ERROR has value 'PAYWALL_ERROR", function() {
+    it("Expect PaywallState enum PAYWALL_ERROR has value 'PAYWALL_ERROR'", function() {
         expect(PaywallState.PAYWALL_ERROR).toBe("PAYWALL_ERROR");
     });
-    it("Expect PaywallState enum API_ERROR has value 'API_ERROR", function() {
+    it("Expect PaywallState enum API_ERROR has value 'API_ERROR'", function() {
         expect(PaywallState.API_ERROR).toBe("API_ERROR");
     });
 });
 
 describe("Verify PaywallEventType enum values", function() {
-    it("Expect PaywallEventType enum ALL has value 'ALL", function() {
+    it("Expect PaywallEventType enum ALL has value 'ALL'", function() {
         expect(PaywallEventType.ALL).toBe("ALL");
     });
-    it("Expect PaywallEventType enum INVOICE has value 'INVOICE", function() {
+    it("Expect PaywallEventType enum INVOICE has value 'INVOICE'", function() {
         expect(PaywallEventType.INVOICE).toBe("INVOICE");
     });
-    it("Expect PaywallEventType enum INVOICE_EXPIRED has value 'INVOICE_EXPIRED", function() {
+    it("Expect PaywallEventType enum INVOICE_EXPIRED has value 'INVOICE_EXPIRED'", function() {
         expect(PaywallEventType.INVOICE_EXPIRED).toBe("INVOICE_EXPIRED");
     });
-    it("Expect PaywallEventType enum SETTLED has value 'SETTLED", function() {
+    it("Expect PaywallEventType enum SETTLED has value 'SETTLED'", function() {
         expect(PaywallEventType.SETTLED).toBe("SETTLED");
     });
-    it("Expect PaywallEventType enum EXECUTED has value 'EXECUTED", function() {
+    it("Expect PaywallEventType enum EXECUTED has value 'EXECUTED'", function() {
         expect(PaywallEventType.EXECUTED).toBe("EXECUTED");
     });
-    it("Expect PaywallEventType enum SETTLEMENT_NOT_YET_VALID has value 'SETTLEMENT_NOT_YET_VALID", function() {
+    it("Expect PaywallEventType enum SETTLEMENT_NOT_YET_VALID has value 'SETTLEMENT_NOT_YET_VALID'", function() {
         expect(PaywallEventType.SETTLEMENT_NOT_YET_VALID).toBe("SETTLEMENT_NOT_YET_VALID");
     });
-    it("Expect PaywallEventType enum SETTLEMENT_EXPIRED has value 'SETTLEMENT_EXPIRED", function() {
+    it("Expect PaywallEventType enum SETTLEMENT_EXPIRED has value 'SETTLEMENT_EXPIRED'", function() {
         expect(PaywallEventType.SETTLEMENT_EXPIRED).toBe("SETTLEMENT_EXPIRED");
     });
-    it("Expect PaywallEventType enum PAYWALL_ERROR has value 'PAYWALL_ERROR", function() {
+    it("Expect PaywallEventType enum PAYWALL_ERROR has value 'PAYWALL_ERROR'", function() {
         expect(PaywallEventType.PAYWALL_ERROR).toBe("PAYWALL_ERROR");
     });
-    it("Expect PaywallEventType enum API_ERROR has value 'API_ERROR", function() {
+    it("Expect PaywallEventType enum API_ERROR has value 'API_ERROR'", function() {
         expect(PaywallEventType.API_ERROR).toBe("API_ERROR");
+    });
+});
+
+describe("Verify PaywallResponseStatus enum values", function() {
+    it("Expect PaywallResponseStatus enum OK has value 'OK'", function() {
+        expect(PaywallResponseStatus.OK).toBe("OK");
+    });
+    it("Expect PaywallResponseStatus enum BAD_REQUEST has value 'BAD_REQUEST'", function() {
+        expect(PaywallResponseStatus.BAD_REQUEST).toBe("BAD_REQUEST");
+    });
+    it("Expect PaywallResponseStatus enum SERVICE_UNAVAILABLE has value 'SERVICE_UNAVAILABLE'", function() {
+        expect(PaywallResponseStatus.SERVICE_UNAVAILABLE).toBe("SERVICE_UNAVAILABLE");
+    });
+    it("Expect PaywallResponseStatus enum UNAUTHORIZED has value 'UNAUTHORIZED'", function() {
+        expect(PaywallResponseStatus.UNAUTHORIZED).toBe("UNAUTHORIZED");
+    });
+    it("Expect PaywallResponseStatus enum INTERNAL_SERVER_ERROR has value 'INTERNAL_SERVER_ERROR'", function() {
+        expect(PaywallResponseStatus.INTERNAL_SERVER_ERROR).toBe("INTERNAL_SERVER_ERROR");
     });
 });
 
@@ -496,3 +506,109 @@ describe("Verify PaywallEventBus background thread transistions state properly",
         jasmine.clock().uninstall();
     });
 });
+
+describe("Verify PaywallWebSocket processWebSocketError callback function", function() {
+
+    beforeEach(function(){
+        this.paywall = new Paywall();
+        this.paywallWebSocket = this.paywall.getWebSocketHandler();
+    });
+
+    it("Verify that processWebSocketError converts to paywall api error object", function(){
+        var objects = [];
+        this.paywall.registerListener("PaywallErrorListener", PaywallEventType.PAYWALL_ERROR,  function(type, object){
+            objects.push(object);
+        });
+
+        this.paywallWebSocket.processWebSocketError({headers:{message: "Some Message"}});
+
+        expect(objects.length).toBe(1);
+        expect(objects[0].status).toBe(PaywallResponseStatus.SERVICE_UNAVAILABLE);
+        expect(objects[0].message).toBe("Some Message");
+        expect(objects[0].errors.length).toBe(1);
+        expect(objects[0].errors[0]).toBe("Some Message");
+
+    });
+});
+
+describe("Verify PaywallWebSocket processWebSocketMessage callback function", function() {
+
+    beforeEach(function(){
+        jasmine.clock().uninstall();
+        jasmine.clock().install();
+        this.paywall = new Paywall();
+        this.paywallWebSocket = this.paywall.getWebSocketHandler();
+    });
+
+    it("Verify that processWebSocketMessage converts valid settlement with event type SETTLED", function(){
+        jasmine.clock().mockDate(new Date("2019-06-01T08:04:51.540+0000"));
+
+        var objects = [];
+        this.paywall.registerListener("PaywallListener", PaywallEventType.SETTLED,  function(type, object){
+            objects.push(object);
+        });
+        this.paywall.setInvoice(invoice1);
+
+        this.paywallWebSocket.processWebSocketMessage({body:JSON.stringify(settlement1)});
+
+        expect(objects.length).toBe(1);
+        expect(objects[0].status).toBe(PaywallResponseStatus.OK);
+        expect(objects[0].type).toBe("settlement");
+
+    });
+
+    it("Verify that processWebSocketMessage converts not yet valid settlement with event type SETTLEMENT_NOT_YET_VALID", function(){
+        jasmine.clock().mockDate(new Date("2019-06-02T06:09:29.354+0000"));
+
+        var objects = [];
+        this.paywall.registerListener("PaywallListener", PaywallEventType.SETTLEMENT_NOT_YET_VALID,  function(type, object){
+            objects.push(object);
+        });
+        this.paywall.setInvoice(invoice1);
+
+        this.paywallWebSocket.processWebSocketMessage({body:JSON.stringify(settlement2)});
+
+        expect(objects.length).toBe(1);
+        expect(objects[0].status).toBe(PaywallResponseStatus.OK);
+        expect(objects[0].type).toBe("settlement");
+
+    });
+
+    it("Verify that processWebSocketMessage converts not expired settlement with event type SETTLEMENT_EXPIRED", function(){
+        jasmine.clock().mockDate(new Date("2019-06-02T08:04:51.540+0000"));
+
+        var objects = [];
+        this.paywall.registerListener("PaywallListener", PaywallEventType.SETTLEMENT_EXPIRED,  function(type, object){
+            objects.push(object);
+        });
+        this.paywall.setInvoice(invoice1);
+
+        this.paywallWebSocket.processWebSocketMessage({body:JSON.stringify(settlement1)});
+
+        expect(objects.length).toBe(1);
+        expect(objects[0].status).toBe(PaywallResponseStatus.OK);
+        expect(objects[0].type).toBe("settlement");
+
+    });
+
+    it("Verify that processWebSocketMessage converts paywall error messate correctly with event type PAYWALL_ERROR", function(){
+        var objects = [];
+        this.paywall.registerListener("PaywallListener", PaywallEventType.PAYWALL_ERROR,  function(type, object){
+            objects.push(object);
+        });
+        this.paywall.setInvoice(invoice1);
+
+        this.paywallWebSocket.processWebSocketMessage({body:JSON.stringify(errorInvalid1)});
+
+        expect(objects.length).toBe(1);
+        expect(objects[0].status).toBe(PaywallResponseStatus.UNAUTHORIZED);
+        expect(objects[0].message).toBe("JWT Token Problem: Unable to decrypt token: Authentication tag check failed. Message=A1qdSfqu7PEOt1ddbMaqpA calculated=sfJe73RWoSJeMdKmLTokjw");
+
+    });
+
+    afterEach(function (){
+        jasmine.clock().uninstall();
+    });
+});
+
+// The PaywallWebSocket connect and close methods are tested during functional tests.
