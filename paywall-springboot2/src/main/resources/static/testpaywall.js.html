@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test paywall.js1</title>
+    <script src="../js/sockjs.js"></script>
+    <script src="../js/stomp.js"></script>
+    <script src="../js/paywall.js"></script>
+    <script type="text/javascript">
+        function addEvent(eventtype, message) {
+            var tableRef = document.getElementById('eventable');
+            var newRow = tableRef.insertRow();
+            var newCell1 = newRow.insertCell(0);
+            newCell1.setAttribute("class",eventtype)
+            var eventText = document.createTextNode(eventtype + ": " );
+
+            newCell1.appendChild(eventText);
+        }
+
+        var paywallReq;
+
+        function payInvoice() {
+            var req = new XMLHttpRequest()
+            req.onload = function(){
+                var invoicepanel = document.getElementById('invoicepanel');
+                invoicepanel.style.display = "none";
+                requestButtonsDisabled(false);
+
+            };
+            req.open("GET",window.location.origin + "/paywall/test/payinvoice/" + paywallReq.paywall.getInvoice().preImageHash);
+            req.send();
+            
+        }
+        
+        function makePaywallRequest1() {
+            requestButtonsDisabled(true);
+            paywallReq = new PaywallHttpRequest();
+            setupPaywallReq(paywallReq);
+            paywallReq.open("GET","/demo");
+            paywallReq.send();
+
+        }
+
+        function setupPaywallReq(paywallReq){
+            paywallReq.paywall.addEventListener("InvoiceListener", PaywallEventType.INVOICE, function (type, object) {
+                var invoice = object;
+                var invoicepanel = document.getElementById('invoicepanel');
+                invoicepanel.style.display = "block";
+                var invoicedesc = document.getElementById("invoicetext");
+                invoicedesc.innerText = invoice.description;
+                var invoiceqr = document.getElementById('invoiceqr');
+                invoiceqr.src = window.location.origin + invoice.qrLink;
+                var invoiceamount = document.getElementById('invoiceamount');
+                invoiceamount.innerText = invoice.invoiceAmount.value;
+                var invoicebolt11 = document.getElementById('invoicebolt11');
+                invoicebolt11.innerText = invoice.bolt11Invoice;
+                var invoiceNodeInfo = document.getElementById('invoiceNodeInfo');
+                invoiceNodeInfo.innerText = invoice.nodeInfo.connectString;
+
+            });
+            paywallReq.paywall.addEventListener("AllEventListnener", PaywallEventType.ALL, function (type, object) {
+                var tableRef = document.getElementById('eventable');
+                var newRow = tableRef.insertRow();
+                var newCell1 = newRow.insertCell(0);
+                newCell1.setAttribute("class","PAYWALL_" + type);
+                var eventText = document.createTextNode(type);
+
+                newCell1.appendChild(eventText);
+            });
+            paywallReq.onload = function () {
+                var tableRef = document.getElementById('eventable');
+                var newRow = tableRef.insertRow();
+                var newCell1 = newRow.insertCell(0);
+                newCell1.setAttribute("class","SUCCESS");
+                var eventText = document.createTextNode("SUCCESS");
+                newCell1.appendChild(eventText);
+                var newCell2 = newRow.insertCell(1);
+                var eventText2 = document.createTextNode(paywallReq.responseText);
+                newCell2.appendChild(eventText2);
+            }
+        }
+
+        function makePaywallRequest2() {
+            requestButtonsDisabled(true);
+            paywallReq = new PaywallHttpRequest();
+            setupPaywallReq(paywallReq);
+            paywallReq.open("GET","/demoPayPerRequest");
+            paywallReq.send();
+
+        }
+
+        function requestButtonsDisabled(disabled){
+            var button1 = document.getElementById('makePaywallRequest1');
+            button1.disabled = disabled;
+            var button2 = document.getElementById('makePaywallRequest2');
+            button2.disabled = disabled;
+        }
+    </script>
+</head>
+<body>
+<p>
+<button id="makePaywallRequest1" onclick="makePaywallRequest1()" >Make Call</button>
+    <button id="makePaywallRequest2" onclick="makePaywallRequest2()" >Make PerRequest Call</button>
+</p>
+<div id="invoicepanel" style="display: none">
+    <p>Invoice</p>
+    <p id="invoicetext"></p>
+    <p>Amount: <span id="invoiceamount"></span></p>
+    <p>Invoice: <span id="invoicebolt11"></span></p>
+    <p>NodeInfo: <span id="invoiceNodeInfo"></span></p>
+    <img id="invoiceqr"/>
+    <p>
+    <button id="payinvoice" onclick="payInvoice()">Simulate Pay Invoice</button>
+    </p>
+</div>
+<table id="eventable">
+    <tr>
+        <td>Event</td>
+        <td>Message</td>
+    </tr>
+</table>
+
+</body>
+</html>

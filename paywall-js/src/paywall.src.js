@@ -46,7 +46,11 @@
         /**
          * Regular API related error occurred during processing, see apiError object for details.
          */
-        API_ERROR: "API_ERROR"
+        API_ERROR: "API_ERROR",
+        /**
+         * Request was aborted by the user.
+         */
+        ABORTED : "ABORTED"
     };
 
     /**
@@ -124,23 +128,50 @@
     };
 
     /**
-     * TODO
-     *
-     * @constructor Paywall
+     * Internal Enum of used http statuses.
+     * @enum {number}
+     * @readonly
+     * @global
      */
-    global.Paywall = function Paywall() {
+    var HttpStatus = {
+        /** Payment is required notification. **/
+        PAYMENT_REQUIRED : 402
+    };
+
+    /**
+     * TODO HELLO
+     *
+     * TODO How to close? Close websocket when recieved SETTLEMENT? And error and status =4
+     * @constructor PaywallHttpRequest
+     */
+    // TODO rename to PaywallHttpRequest
+    global.PaywallHttpRequest = function PaywallHttpRequest() {
         var invoice;
         var settlement;
         var paywallError;
         var apiError;
         var executed = false;
+        var aborted = false;
 
-        function getState() {
+        var xmlHttpRequest = new XMLHttpRequest();
+
+        var waitingInvoice = false;
+
+
+        var xhrOpenData = {method: null, url: null, async: true, username: null, password: null,
+            eventListeners:[], uploadEventListeners:[]};
+        var xhrSendData = {body: null, requestHeaders: []};
+
+
+        function getPaywallState() {
             if (apiError !== undefined) {
                 return PaywallState.API_ERROR;
             }
             if (paywallError !== undefined) {
                 return PaywallState.PAYWALL_ERROR;
+            }
+            if (aborted){
+                return PaywallState.ABORTED;
             }
             if (executed) {
                 return PaywallState.EXECUTED;
@@ -170,166 +201,482 @@
             }
         }
 
-        var api = {
-            /**
-             * Method to retrieve invoice if exists in related payment flow.
-             * @returns {Object} related invoice if generated in payment flow, otherwise undefined.
-             * @memberof Paywall
-             */
-            getInvoice : function (){
-                return invoice;
-            },
-            /**
-             * Returns true if invoice exists in related payment flow.
-             * @returns {boolean} true if invoice exist
-             * @memberof Paywall
-             */
-            hasInvoice : function (){
-                return invoice !== undefined;
-            },
-            /**
-             * Help method to construct a PaywallTime object of invoice expiration date, used to
-             * simply output remaining hours, minutes, etc of invoice.
-             *
-             * @returns {PaywallTime} if invoice exist
-             * @throws error if no invoice currently exists in payment flow.
-             * @memberof Paywall
-             */
-            getInvoiceExpiration : function(){
-                if(invoice !== undefined){
-                    return new PaywallTime(invoice.invoiceExpireDate);
+
+        function addEventListener(eventListenerList, type, callback, options){
+            var index = findEventListenerIndex(eventListenerList, type);
+            if(index === -1) {
+                listeners.push({type: type, callback: callback, options: options});
+            }else{
+                listeners.splice(index,1,{type: type, callback: callback, options: options});
+            }
+        }
+
+        function removeEventListener(eventListenerList, type) {
+            var index = findEventListenerIndex(type);
+            if(index !== -1){
+                eventListenerList.splice(index,1);
+            }
+        }
+
+
+        function findEventListenerIndex(eventListenerList,type ){
+            for(var i=0; i<eventListenerList.length; i++){
+                if(eventListenerList[i].type === type){
+                    return i;
                 }
-                throw("Invalid state " + getState() + " when calling method getInvoiceExpiration().");
-            },
-            /**
-             * Method to retrieve settlement if exists in related payment flow.
-             * @returns {Object} related settlement if generated in payment flow, otherwise undefined.
-             * @memberof Paywall
-             */
-            getSettlement : function (){
-                return settlement;
-            },
-            /**
-             * Returns true if settlement exists in related payment flow.
-             * @returns {boolean} true if settlement exist
-             * @memberof Paywall
-             */
-            hasSettlement : function (){
-                return settlement !== undefined;
-            },
-            /**
-             * Help method to construct a PaywallTime object of settlement expiration date, used to
-             * simply output remaining hours, minutes, etc of settlement validity.
-             *
-             * @returns {PaywallTime} if settlement exist
-             * @throws error if no settlement currently exists in payment flow. It is best to check
-             * this before calling method.
-             * @memberof Paywall
-             */
-            getSettlementExpiration : function(){
-                if(settlement !== undefined){
-                    return new PaywallTime(settlement.settlementValidUntil);
+            }
+            return -1;
+        }
+
+        function afterSettlementReadyStateHandler(){
+            populateResponseAttributes();
+            triggerOnReadyStateHandler();
+        }
+
+        var paywallOnReadyStateChangeListener = function (type, object) {
+            if(type === PaywallEventType.SETTLED){
+                waitingInvoice = false;
+                settlement = object;
+                xmlHttpRequest = new XMLHttpRequest();
+                xmlHttpRequest.onreadystatechange = afterSettlementReadyStateHandler;
+                populateAllEventListeners();
+
+                if(xhrOpenData.async === undefined) {
+                    xmlHttpRequest.open(xhrOpenData.method,xhrOpenData.url);
+                }else{
+                    xmlHttpRequest.open(xhrOpenData.method,xhrOpenData.url,
+                        xhrOpenData.async, xhrOpenData.username, xhrOpenData.password);
                 }
-                throw("Invalid state " + getState() + " when calling method getSettlementExpiration().");
-            },
-            /**
-             * Help method to construct a PaywallTime object of settlement valid from date, used to
-             * simply output remaining hours, minutes, etc until settlement validity. If no validFrom
-             * field is set in settlement is current date returned.
-             *
-             * @returns {PaywallTime} if settlement exist
-             * @throws error if no settlement currently exists in payment flow. It is best to check
-             * this before calling method.
-             * @memberof Paywall
-             */
-            getSettlementValidFrom : function(){
-                if(settlement !== undefined){
-                    if(settlement.settlementValidFrom != null) {
-                        return new PaywallTime(settlement.settlementValidFrom);
+                populateRequestAttributes();
+                setTokenHeader();
+
+                xmlHttpRequest.send(xhrSendData.body);
+            }else{
+                if(type === PaywallEventType.PAYWALL_ERROR ||
+                    type === PaywallEventType.API_ERROR ||
+                    type === PaywallEventType.INVOICE_EXPIRED ||
+                    type === PaywallEventType.SETTLEMENT_NOT_YET_VALID ||
+                    type === PaywallEventType.SETTLEMENT_EXPIRED) {
+                    // TODO check that onerror is called.
+                    dispatchEvent(new Event("error"));
+                }
+            }
+        };
+
+
+        function onReadyStateHandler() {
+            if(!waitingInvoice) {
+                if (xmlHttpRequest.readyState === XMLHttpRequest.HEADERS_RECEIVED) {
+                    if (xmlHttpRequest.status === HttpStatus.PAYMENT_REQUIRED) {
+                        waitingInvoice = true;
+
+
+                    } else {
+                        populateResponseAttributes();
+                        triggerOnReadyStateHandler();
+                        if (xmlHttpRequest.readyState > XMLHttpRequest.HEADERS_RECEIVED) {
+                            populateBaseEventListeners();
+                        }
                     }
-                    return new PaywallTime(new Date().toDateString());
+                } else {
+                    populateResponseAttributes();
+                    triggerOnReadyStateHandler();
                 }
-                throw("Invalid state " + getState() + " or when calling method getSettlementValidFrom().");
-            },
-            /**
-             * Method to retrieve error object containing error information if paywall related error occurred during payment flow.
-             * @returns {Object} related error if generated in payment flow, otherwise undefined.
-             * @memberof Paywall
-             */
-            getPaywallError : function (){
-                return paywallError;
-            },
-            /**
-             * Method to retrieve error object containing error information if underlying api error occurred during payment flow.
-             * @returns {Object} related error if generated in payment flow, otherwise undefined.
-             * @memberof Paywall
-             */
-            getAPIError : function (){
-                return apiError;
-            },
-            /**
-             * Method to retrieve current state of payment flow, will return one of PaywallState enums.
-             * State EXPIRED will be returned both if invoice or settlement have expired. If state is EXPIRED
-             * and settlement is null, then it's the invoice that have expired.
-             *
-             * @return {string} one of PaywallState enumeration values.
-             * @memberof Paywall
-             */
-            getState : getState,
+            }else{
+                if(xmlHttpRequest.readyState === XMLHttpRequest.DONE) {
+                    invoice = JSON.parse(xmlHttpRequest.responseText);
+                    paywallEventBus.triggerEventFromState();
+                    api.paywall.addEventListener("OnReadyStateListener", PaywallEventType.ALL, paywallOnReadyStateChangeListener);
+                    paywallWebSocketHandler.connect(invoice);
+                }
+            }
+        }
 
-            /**
-             * Method to add a listener, if listener already exists with given name it will be updated.
-             * @param {string} name the unique name of the listener within this payment flow.
-             * @param {PaywallEventType} type the type of event to listen to, or special ALL that receives all events.
-             * @param {function} callback method that should be called on given event. The function should have two parameters
-             * one PaywallEventType and one object containing the object data. Type of object differs for each event.
-             * @memberof Paywall
-             */
-            registerListener : function (name, type, callback) {
-                eventBus.addListener(name,type,callback);
+        function triggerOnReadyStateHandler() {
+            if(api.onstatechange !== undefined){
+                api.readyState = xmlHttpRequest.readyState;
+                api.onstatechange();
+            }
+        }
+
+        function populateBaseEventListeners() {
+            xmlHttpRequest.onabort = api.onabort;
+            xmlHttpRequest.onerror = api.onerror;
+
+            for(var i=0; i <xhrOpenData.eventListeners.length ; i++){
+                var listener = xhrOpenData.eventListeners[i];
+                if(listener.type === "abort" || listener.type === "error" ) {
+                    xmlHttpRequest.addEventListener(listener.type, listener.callback, listener.options);
+                }
+            }
+
+            if(xmlHttpRequest.upload !== undefined){
+                xmlHttpRequest.upload.onabort = api.upload.onabort;
+                xmlHttpRequest.upload.onerror = api.upload.onerror;
+
+                for(var j=0; j <xhrOpenData.uploadEventListeners.length ; j++){
+                    var listener1 = xhrOpenData.uploadEventListeners[j];
+                    if(listener1.type === "abort" || listener1.type === "error" ) {
+                        xmlHttpRequest.upload.addEventListener(listener1.type, listener1.callback, listener1.options);
+                    }
+                }
+            }
+
+        }
+
+        function setTokenHeader(){
+            if(getPaywallState() === PaywallState.SETTLED){
+                xmlHttpRequest.setRequestHeader("Payment", api.paywall.getSettlement().token);
+            }
+        }
+
+
+        /**
+         *
+         * @param XMLHttpRequestEventTarget eventTarget
+         */
+        function populateAllEventListeners() {
+            xmlHttpRequest.onloadstart = api.onloadstart;
+            xmlHttpRequest.onload = api.onload;
+            xmlHttpRequest.onprogress = api.onprogress;
+            xmlHttpRequest.onabort = api.onabort;
+            xmlHttpRequest.onerror = api.onerror;
+            xmlHttpRequest.ontimeout = api.ontimeout;
+            xmlHttpRequest.onloadend = api.onloadend;
+
+            for(var i=0; i <xhrOpenData.eventListeners.length ; i++){
+                var listener = xhrOpenData.eventListeners[i];
+                xmlHttpRequest.addEventListener(listener.type, listener.callback, listener.options);
+            }
+
+            if(xmlHttpRequest.upload !== undefined){
+                xmlHttpRequest.upload.onloadstart = api.upload.onloadstart;
+                xmlHttpRequest.upload.onload = api.upload.onload;
+                xmlHttpRequest.upload.onprogress = api.upload.onprogress;
+                xmlHttpRequest.upload.onabort = api.upload.onabort;
+                xmlHttpRequest.upload.onerror = api.upload.onerror;
+                xmlHttpRequest.upload.ontimeout = api.upload.ontimeout;
+                xmlHttpRequest.upload.onloadend = api.upload.onloadend;
+
+                for(var j=0; j <xhrOpenData.uploadEventListeners.length ; j++){
+                    var listener1 = xhrOpenData.uploadEventListeners[j];
+                    xmlHttpRequest.upload.addEventListener(listener1.type, listener1.callback, listener1.options);
+                }
+            }
+        }
+
+        /**
+         * TOOD When should this be called?
+         */
+        function populateRequestAttributes() {
+            xmlHttpRequest.timeout = api.timeout;
+            xmlHttpRequest.withCredentials = api.withCredentials;
+        }
+
+        /**
+         *
+         * @param {boolean} onlyStatus
+         */
+        function populateResponseAttributes(onlyStatus) {
+            api.status = xmlHttpRequest.status;
+            api.statusText = xmlHttpRequest.statusText;
+            api.responseURL = xmlHttpRequest.responseURL;
+            if(onlyStatus === undefined || onlyStatus === false){
+                api.responseType = xmlHttpRequest.responseType;
+                api.response = xmlHttpRequest.response;
+                api.responseText = xmlHttpRequest.responseText;
+                api.responseXML = xmlHttpRequest.responseXML;
+            }
+        }
+
+        var api = {
+            // XMLRequestData Request Attributes, TODO
+
+            // TODO
+            // Request attributes
+            timeout : 0,
+            withCredentials : false,
+            upload: {
+                onload: undefined,
+                onloadstart: undefined,
+                onloadend: undefined,
+                onerror: undefined,
+                onprogress: undefined,
+                onstatechange: undefined,
+                ontimeout: undefined,
+
+                addEventListener : function(type, callback, options){
+                    xmlHttpRequest.upload.addEventListener(type,callback,options);
+                    addEventListener(xhrOpenData.uploadEventListeners,type,callback,options);
+                },
+
+                removeEventListener : function(type, callback, options){
+                    xmlHttpRequest.upload.removeEventListener(type,callback,options);
+                    removeEventListener(xhrOpenData.uploadEventListeners,type);
+                },
+
+                /**
+                 * //TODO
+                 * @param {Event} event
+                 * @return {boolean}
+                 */
+                dispatchEvent : function(event){
+                    throw("Internal dispatchEvent should never be called.");
+                }
             },
 
-            /**
-             * Method to remove listener with given name if exists.
-             * @param {string} name the name of listener to remove.
-             * @memberof Paywall
-             */
-            unregisterListener : function(name) {
-                eventBus.removeListener(name);
+            readyState: XMLHttpRequest.UNSENT,
+
+            // response attributes
+            responseURL : undefined,
+            status: undefined,
+            statusText: undefined,
+            responseType : undefined,
+            response: undefined,
+            responseText: undefined,
+            responseXML: undefined,
+
+            // Events
+            onload: undefined,
+            onloadstart: undefined,
+            onloadend: undefined,
+            onerror: undefined,
+            onprogress: undefined,
+            onstatechange: undefined,
+            ontimeout: undefined,
+
+
+            addEventListener : function(type, callback, options){
+                xmlHttpRequest.addEventListener(type,callback,options);
+                addEventListener(xhrOpenData.eventListeners,type,callback,options);
+            },
+
+            removeEventListener : function(type, callback, options){
+                xmlHttpRequest.removeEventListener(type,callback,options);
+                removeEventListener(xhrOpenData.eventListeners,type);
+            },
+
+            dispatchEvent : function(event){
+                throw("Internal dispatchEvent should never be called.");
+            },
+
+
+            // TODO
+            abort : function(){
+              aborted = true;
+              paywallEventBus.close();
+              paywallWebSocketHandler.close();
+              xmlHttpRequest.abort();
+            },
+
+            setRequestHeader : function(name, value){
+              xhrSendData.requestHeaders.push({name: name, value: value});
+            },
+
+            open : function(method, url, async, username, password){
+                // Reset send data
+                xhrOpenData.method = method;
+                xhrOpenData.url = url;
+                xhrSendData = {body: null, requestHeaders: []};
+                xmlHttpRequest.onreadystatechange = onReadyStateHandler;
+                populateBaseEventListeners();
+                if(async === undefined) {
+                    xmlHttpRequest.open(method, url);
+                }else{
+                    xhrOpenData.async = async;
+                    xhrOpenData.username = username;
+                    xhrOpenData.password = password;
+                    xmlHttpRequest.open(method, url, async, username, password);
+                }
+            },
+            send : function(body){
+                xhrSendData.body = body;
+                populateRequestAttributes();
+                populateBaseEventListeners();
+                for(var i=0;i<xhrSendData.requestHeaders.length;i++){
+                    var requestHeader = xhrSendData.requestHeaders[0];
+                    xmlHttpRequest.setRequestHeader(requestHeader.name, requestHeader.value);
+                }
+                setTokenHeader();
+                xmlHttpRequest.send(body);
+            },
+
+
+            getResponseHeader : function(name){
+                return xmlHttpRequest.getResponseHeader(name);
+            },
+            getAllResponseHeaders: function(){
+                return xmlHttpRequest.getAllResponseHeaders();
+
+            },
+            overrideMimeType : function(mime){
+                return xmlHttpRequest.overrideMimeType(mime);
+            },
+
+            paywall : {
+
+                /**
+                 * Method to retrieve invoice if exists in related payment flow.
+                 * @returns {Object} related invoice if generated in payment flow, otherwise undefined.
+                 * @memberof Paywall
+                 */
+                getInvoice: function () {
+                    return invoice;
+                },
+                /**
+                 * Returns true if invoice exists in related payment flow.
+                 * @returns {boolean} true if invoice exist
+                 * @memberof Paywall
+                 */
+                hasInvoice: function () {
+                    return invoice !== undefined;
+                },
+                /**
+                 * Help method to construct a PaywallTime object of invoice expiration date, used to
+                 * simply output remaining hours, minutes, etc of invoice.
+                 *
+                 * @returns {PaywallTime} if invoice exist
+                 * @throws error if no invoice currently exists in payment flow.
+                 * @memberof Paywall
+                 */
+                getInvoiceExpiration: function () {
+                    if (invoice !== undefined) {
+                        return new PaywallTime(invoice.invoiceExpireDate);
+                    }
+                    throw("Invalid state " + getPaywallState() + " when calling method getInvoiceExpiration().");
+                },
+                /**
+                 * Method to retrieve settlement if exists in related payment flow.
+                 * @returns {Object} related settlement if generated in payment flow, otherwise undefined.
+                 * @memberof Paywall
+                 */
+                getSettlement: function () {
+                    return settlement;
+                },
+                /**
+                 * Returns true if settlement exists in related payment flow.
+                 * @returns {boolean} true if settlement exist
+                 * @memberof Paywall
+                 */
+                hasSettlement: function () {
+                    return settlement !== undefined;
+                },
+                /**
+                 * Help method to construct a PaywallTime object of settlement expiration date, used to
+                 * simply output remaining hours, minutes, etc of settlement validity.
+                 *
+                 * @returns {PaywallTime} if settlement exist
+                 * @throws error if no settlement currently exists in payment flow. It is best to check
+                 * this before calling method.
+                 * @memberof Paywall
+                 */
+                getSettlementExpiration: function () {
+                    if (settlement !== undefined) {
+                        return new PaywallTime(settlement.settlementValidUntil);
+                    }
+                    throw("Invalid state " + getPaywallState() + " when calling method getSettlementExpiration().");
+                },
+                /**
+                 * Help method to construct a PaywallTime object of settlement valid from date, used to
+                 * simply output remaining hours, minutes, etc until settlement validity. If no validFrom
+                 * field is set in settlement is current date returned.
+                 *
+                 * @returns {PaywallTime} if settlement exist
+                 * @throws error if no settlement currently exists in payment flow. It is best to check
+                 * this before calling method.
+                 * @memberof Paywall
+                 */
+                getSettlementValidFrom: function () {
+                    if (settlement !== undefined) {
+                        if (settlement.settlementValidFrom != null) {
+                            return new PaywallTime(settlement.settlementValidFrom);
+                        }
+                        return new PaywallTime(new Date().toDateString());
+                    }
+                    throw("Invalid state " + getPaywallState() + " or when calling method getSettlementValidFrom().");
+                },
+                /**
+                 * Method to retrieve error object containing error information if paywall related error occurred during payment flow.
+                 * @returns {Object} related error if generated in payment flow, otherwise undefined.
+                 * @memberof Paywall
+                 */
+                getPaywallError: function () {
+                    return paywallError;
+                },
+                /**
+                 * Method to retrieve error object containing error information if underlying api error occurred during payment flow.
+                 * @returns {Object} related error if generated in payment flow, otherwise undefined.
+                 * @memberof Paywall
+                 */
+                getAPIError: function () {
+                    return apiError;
+                },
+                /**
+                 * Method to retrieve current state of payment flow, will return one of PaywallState enums.
+                 * State EXPIRED will be returned both if invoice or settlement have expired. If state is EXPIRED
+                 * and settlement is null, then it's the invoice that have expired.
+                 *
+                 * @return {string} one of PaywallState enumeration values.
+                 * @memberof Paywall
+                 */
+                getState: getPaywallState,
+
+                /**
+                 * Method to add a listener, if listener already exists with given name it will be updated.
+                 * Multiple listeners for the same type is supported.
+                 *
+                 * @param {string} name the unique name of the listener within this payment flow.
+                 * @param {PaywallEventType} type the type of event to listen to, or special ALL that receives all events.
+                 * @param {function} callback method that should be called on given event. The function should have two parameters
+                 * one PaywallEventType and one object containing the object data. Type of object differs for each event.
+                 * @memberof Paywall
+                 */
+                addEventListener: function (name, type, callback) {
+                    paywallEventBus.addListener(name, type, callback);
+                },
+
+                /**
+                 * Method to remove listener with given name if exists.
+                 * @param {string} name the name of listener to remove.
+                 * @memberof Paywall
+                 */
+                removeEventListener: function (name) {
+                    paywallEventBus.removeListener(name);
+                }
             }
 
         };
 
         // Define eventBus that is dependant on API object.
-        var eventBus = new PaywallEventBus(api);
-        var webSocketHandler = new PaywallWebSocket(api,eventBus);
+        var paywallEventBus = new PaywallEventBus(api);
+        var paywallWebSocketHandler = new PaywallWebSocket(api,paywallEventBus);
 
 
         /* test-code */
         // Help code to access private fields during unit tests.
-        api.setInvoice = function (inv) {
+        api.setPaywallInvoice = function (inv) {
             invoice = inv;
         };
-        api.setSettlement = function (setl) {
+        api.setPaywallSettlement = function (setl) {
             settlement = setl;
         };
         api.setPaywallError = function (err) {
             paywallError = err;
         };
-        api.setAPIError = function (err) {
+        api.setPaywallAPIError = function (err) {
             apiError = err;
         };
-        api.setExecuted = function (exec) {
+        api.setPaywallExecuted = function (exec) {
             executed = exec;
         };
-        api.getExecuted = function () {
+        api.getPaywallExecuted = function () {
             return executed;
         };
-        api.getEventBus = function (){
-            return eventBus;
+        api.getPaywallEventBus = function (){
+            return paywallEventBus;
         };
-        api.getWebSocketHandler = function (){
-            return webSocketHandler;
+        api.getPaywallWebSocketHandler = function (){
+            return paywallWebSocketHandler;
         };
         /* end-test-code */
 
@@ -475,17 +822,17 @@
      * It allows for registration and un-registration of a listener and onEvent forwards
      * the event to all matching listeners.
      *
-     * @param {Paywall|object} paywall the related payment flow.
+     * @param {Paywall|object} paywallHttpRequest the related payment flow.
      * @constructor PaywallEventBus
      */
-    function PaywallEventBus(paywall) {
+    function PaywallEventBus(paywallHttpRequest) {
         var listeners = [];
-        var currentState = paywall.getState();
+        var currentState = paywallHttpRequest.paywall.getState();
 
 
         function checkStateTransition(){
-            var newState = paywall.getState();
-            if(currentState !== newState){
+            var newState = paywallHttpRequest.paywall.getState();
+            if(currentState !== newState && newState !== PaywallState.SETTLED){
                 currentState = newState;
                 if(isFinalState(newState)){
                     clearInterval(stateChecker);
@@ -545,6 +892,7 @@
          * @memberof PaywallEventBus
          */
         var onEvent = function(type, object) {
+            currentState = paywallHttpRequest.paywall.getState();
             var matchingListeners = listeners.filter(function(item){
                 return item.type === type || item.type === PaywallEventType.ALL;});
             for(var i=0;i<matchingListeners.length;i++){
@@ -553,6 +901,17 @@
         };
 
         this.onEvent = onEvent;
+
+        /**
+         * Method to trigger an event from the current status of the payment flow
+         * the event type and related object will be calculated automatically.
+         * @memberof PaywallEventBus
+         */
+        var triggerEventFromState = function () {
+            var state = paywallHttpRequest.paywall.getState();
+            onEvent(getRelatedType(state),getRelatedObject(state));
+        };
+        this.triggerEventFromState = triggerEventFromState;
 
         function findIndex(name){
             for(var i=0; i<listeners.length; i++){
@@ -615,21 +974,21 @@
         function getRelatedObject(state){
             switch (state) {
                 case PaywallState.INVOICE:
-                    return paywall.getInvoice();
+                    return paywallHttpRequest.paywall.getInvoice();
                 case PaywallState.INVOICE_EXPIRED:
-                    return paywall.getInvoice();
+                    return paywallHttpRequest.paywall.getInvoice();
                 case PaywallState.SETTLED:
-                    return paywall.getSettlement();
+                    return paywallHttpRequest.paywall.getSettlement();
                 case PaywallState.EXECUTED:
-                    return paywall.getSettlement();
+                    return paywallHttpRequest.paywall.getSettlement();
                 case PaywallState.SETTLEMENT_NOT_YET_VALID:
-                    return paywall.getSettlement();
+                    return paywallHttpRequest.paywall.getSettlement();
                 case PaywallState.SETTLEMENT_EXPIRED:
-                    return paywall.getSettlement();
+                    return paywallHttpRequest.paywall.getSettlement();
                 case PaywallState.PAYWALL_ERROR:
-                    return paywall.getPaywallError();
+                    return paywallHttpRequest.paywall.getPaywallError();
                 case PaywallState.API_ERROR:
-                    return paywall.getAPIError();
+                    return paywallHttpRequest.paywall.getAPIError();
             }
             throw "Invalid state sent to Paywall EventBus: " + state;
         }
@@ -686,10 +1045,19 @@
         }
 
         function processWebSocketError(error){
-            var errorObject = {status: PaywallResponseStatus.SERVICE_UNAVAILABLE,
-                message: error.headers.message,
-                errors: [error.headers.message]
-            };
+            var errorObject;
+            if(error.headers !== undefined){
+                errorObject = {status: PaywallResponseStatus.SERVICE_UNAVAILABLE,
+                    message: error.headers.message,
+                    errors: [error.headers.message]
+                };
+            }else{
+                errorObject = {status: PaywallResponseStatus.SERVICE_UNAVAILABLE,
+                    message: error,
+                    errors: [error  ]
+                };
+            }
+
             console.debug("Paywall WebSocket connection error: " + errorObject);
             eventBus.onEvent(PaywallEventType.PAYWALL_ERROR,errorObject);
         }
@@ -717,7 +1085,7 @@
          * @memberof PaywallWebSocket
          */
         var connect = function(invoice){
-            socket = new WebSocket(invoice.checkSettlementWebSocketEndpoint);
+            socket = new SockJS(window.location.origin +invoice.checkSettlementWebSocketEndpoint);
             stompSocket = Stomp.over(socket);
 
             var headers = {"token": invoice.token};

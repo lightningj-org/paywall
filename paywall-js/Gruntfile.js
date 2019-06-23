@@ -50,7 +50,8 @@ module.exports = function(grunt) {
                     // includes files within path
                     {expand: true, flatten: true, src: ['node_modules/stompjs/lib/stomp.js'], dest: 'build/dist/', filter: 'isFile'},
                     {expand: true, flatten: true, src: ['node_modules/stompjs/lib/stomp.min.js'], dest: 'build/dist/', filter: 'isFile'},
-                    {expand: true, flatten: true, src: ['node_modules/sockjs-client/dist/*.js'], dest: 'build/dist/', filter: 'isFile'}
+                    {expand: true, flatten: true, src: ['node_modules/sockjs-client/dist/*.js'], dest: 'build/dist/', filter: 'isFile'},
+
                 ]
             }
         },
