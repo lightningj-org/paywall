@@ -1,4 +1,192 @@
 
+describe("Verify that PaywallHttpRequest upload methods methods returns expected result", function(){
+
+    it("Verify that addEventListener adds listener for given type if not exists", function () {
+        var paywallHttpRequest = new PaywallHttpRequest();
+        paywallHttpRequest.upload.addEventListener("abort", function () {
+
+        }, {somekey: "somevalue"});
+        expect(paywallHttpRequest.getXhrOpenData().uploadEventListeners.length).toBe(1);
+        expect(paywallHttpRequest.getXhrOpenData().uploadEventListeners[0].type).toBe("abort");
+        expect(paywallHttpRequest.getXhrOpenData().uploadEventListeners[0].callback).not.toBe(undefined);
+        expect(paywallHttpRequest.getXhrOpenData().uploadEventListeners[0].options.somekey).toBe("somevalue");
+    });
+
+    it("Verify that addEventListener replace listener for given type if already exists", function () {
+        var paywallHttpRequest = new PaywallHttpRequest();
+        paywallHttpRequest.upload.addEventListener("abort", function () {
+
+        }, {somekey: "somevalue1"});
+        paywallHttpRequest.upload.addEventListener("error", function () {
+
+        }, {somekey: "somevalue2"});
+        paywallHttpRequest.upload.addEventListener("abort", function () {
+
+        }, {somekey: "somevalue3"});
+        expect(paywallHttpRequest.getXhrOpenData().uploadEventListeners.length).toBe(2);
+        expect(paywallHttpRequest.getXhrOpenData().uploadEventListeners[0].type).toBe("abort");
+        expect(paywallHttpRequest.getXhrOpenData().uploadEventListeners[0].callback).not.toBe(undefined);
+        expect(paywallHttpRequest.getXhrOpenData().uploadEventListeners[0].options.somekey).toBe("somevalue3");
+    });
+
+    it("Verify that removeEventListener removes listener for given type if exists", function () {
+        var paywallHttpRequest = new PaywallHttpRequest();
+        paywallHttpRequest.upload.addEventListener("abort", function () {
+
+        }, {somekey: "somevalue1"});
+        paywallHttpRequest.upload.addEventListener("error", function () {
+
+        }, {somekey: "somevalue2"});
+        paywallHttpRequest.upload.removeEventListener("abort", function () {
+
+        }, {somekey: "somevalue3"});
+        expect(paywallHttpRequest.getXhrOpenData().uploadEventListeners.length).toBe(1);
+        expect(paywallHttpRequest.getXhrOpenData().uploadEventListeners[0].type).toBe("error");
+        expect(paywallHttpRequest.getXhrOpenData().uploadEventListeners[0].callback).not.toBe(undefined);
+        expect(paywallHttpRequest.getXhrOpenData().uploadEventListeners[0].options.somekey).toBe("somevalue2");
+
+        paywallHttpRequest.upload.removeEventListener("error", function () {
+
+        }, {somekey: "somevalue3"});
+        expect(paywallHttpRequest.getXhrOpenData().uploadEventListeners.length).toBe(0);
+
+        paywallHttpRequest.upload.removeEventListener("error", function () {
+
+        }, {somekey: "somevalue3"});
+        expect(paywallHttpRequest.getXhrOpenData().uploadEventListeners.length).toBe(0);
+
+    });
+
+    it("Verify that upload.dispatchEvent throws error", function () {
+        var paywallHttpRequest = new PaywallHttpRequest();
+        expect( function(){ paywallHttpRequest.upload.dispatchEvent(null); } ).toThrow("Internal dispatchEvent should never be called.");
+    });
+});
+
+describe("Verify that PaywallHttpRequest base methods methods returns expected result", function(){
+
+    it("Verify that addEventListener adds listener for given type if not exists", function () {
+        var paywallHttpRequest = new PaywallHttpRequest();
+        paywallHttpRequest.addEventListener("abort", function () {
+
+        }, {somekey: "somevalue"});
+        expect(paywallHttpRequest.getXhrOpenData().eventListeners.length).toBe(1);
+        expect(paywallHttpRequest.getXhrOpenData().eventListeners[0].type).toBe("abort");
+        expect(paywallHttpRequest.getXhrOpenData().eventListeners[0].callback).not.toBe(undefined);
+        expect(paywallHttpRequest.getXhrOpenData().eventListeners[0].options.somekey).toBe("somevalue");
+    });
+
+    it("Verify that addEventListener replace listener for given type if already exists", function () {
+        var paywallHttpRequest = new PaywallHttpRequest();
+        paywallHttpRequest.addEventListener("abort", function () {
+
+        }, {somekey: "somevalue1"});
+        paywallHttpRequest.addEventListener("error", function () {
+
+        }, {somekey: "somevalue2"});
+        paywallHttpRequest.addEventListener("abort", function () {
+
+        }, {somekey: "somevalue3"});
+        expect(paywallHttpRequest.getXhrOpenData().eventListeners.length).toBe(2);
+        expect(paywallHttpRequest.getXhrOpenData().eventListeners[0].type).toBe("abort");
+        expect(paywallHttpRequest.getXhrOpenData().eventListeners[0].callback).not.toBe(undefined);
+        expect(paywallHttpRequest.getXhrOpenData().eventListeners[0].options.somekey).toBe("somevalue3");
+    });
+
+    it("Verify that removeEventListener removes listener for given type if exists", function () {
+        var paywallHttpRequest = new PaywallHttpRequest();
+        paywallHttpRequest.addEventListener("abort", function () {
+
+        }, {somekey: "somevalue1"});
+        paywallHttpRequest.addEventListener("error", function () {
+
+        }, {somekey: "somevalue2"});
+        paywallHttpRequest.removeEventListener("abort", function () {
+
+        }, {somekey: "somevalue3"});
+        expect(paywallHttpRequest.getXhrOpenData().eventListeners.length).toBe(1);
+        expect(paywallHttpRequest.getXhrOpenData().eventListeners[0].type).toBe("error");
+        expect(paywallHttpRequest.getXhrOpenData().eventListeners[0].callback).not.toBe(undefined);
+        expect(paywallHttpRequest.getXhrOpenData().eventListeners[0].options.somekey).toBe("somevalue2");
+
+        paywallHttpRequest.removeEventListener("error", function () {
+
+        }, {somekey: "somevalue3"});
+        expect(paywallHttpRequest.getXhrOpenData().eventListeners.length).toBe(0);
+
+        paywallHttpRequest.removeEventListener("error", function () {
+
+        }, {somekey: "somevalue3"});
+        expect(paywallHttpRequest.getXhrOpenData().eventListeners.length).toBe(0);
+
+    });
+
+    it("Verify that dispatchEvent throws error", function () {
+        var paywallHttpRequest = new PaywallHttpRequest();
+        expect( function(){ paywallHttpRequest.dispatchEvent(null); } ).toThrow("Internal dispatchEvent should never be called.");
+    });
+
+    it("Verify that abort() sets state to abort and all underlying resources are closed.", function () {
+        var paywallHttpRequest = new PaywallHttpRequest();
+        var eventBus = new PaywallEventBus(paywallHttpRequest);
+        var eventBusClose = spyOn(eventBus, "close");
+        paywallHttpRequest.setPaywallEventBus(eventBus);
+        var webSocketHandler = new PaywallWebSocket(paywallHttpRequest, eventBus);
+        var webSocketHandlerClose = spyOn(webSocketHandler, "close");
+        paywallHttpRequest.setPaywallWebSocketHandler(webSocketHandler);
+        var xmlHttpRequest = new XMLHttpRequest();
+        var xmlHttpRequestAbort = spyOn(xmlHttpRequest, "abort");
+        paywallHttpRequest.setXMLHttpRequest(xmlHttpRequest);
+
+        paywallHttpRequest.abort();
+        expect( paywallHttpRequest.paywall.getState() ).toBe(PaywallState.ABORTED);
+        expect(eventBusClose).toHaveBeenCalled();
+        expect(webSocketHandlerClose).toHaveBeenCalled();
+        expect(xmlHttpRequestAbort).toHaveBeenCalled();
+    });
+
+    it("Verify that setRequestHeader adds header data to xhrSendData", function () {
+        var paywallHttpRequest = new PaywallHttpRequest();
+        paywallHttpRequest.setRequestHeader("SomeHeader1","SomeValue1");
+        expect(paywallHttpRequest.getXhrSendData().requestHeaders.length ).toBe(1);
+        paywallHttpRequest.setRequestHeader("SomeHeader2","SomeValue2");
+        expect(paywallHttpRequest.getXhrSendData().requestHeaders.length ).toBe(2);
+        expect(paywallHttpRequest.getXhrSendData().requestHeaders[0].name ).toBe("SomeHeader1");
+        expect(paywallHttpRequest.getXhrSendData().requestHeaders[0].value ).toBe("SomeValue1");
+        expect(paywallHttpRequest.getXhrSendData().requestHeaders[1].name ).toBe("SomeHeader2");
+        expect(paywallHttpRequest.getXhrSendData().requestHeaders[1].value ).toBe("SomeValue2");
+    });
+
+    it("Verify that getResponseHeader calls underlying XMLHttpRequest object", function () {
+        var paywallHttpRequest = new PaywallHttpRequest();
+        var xmlHttpRequest = new XMLHttpRequest();
+        var xmlHttpRequestGetResponseHeader = spyOn(xmlHttpRequest, "getResponseHeader");
+        paywallHttpRequest.setXMLHttpRequest(xmlHttpRequest);
+
+        paywallHttpRequest.getResponseHeader("SomeHeader")
+        expect(xmlHttpRequestGetResponseHeader).toHaveBeenCalledWith("SomeHeader");
+    });
+
+    it("Verify that getAllResponseHeaders calls underlying XMLHttpRequest object", function () {
+        var paywallHttpRequest = new PaywallHttpRequest();
+        var xmlHttpRequest = new XMLHttpRequest();
+        var xmlHttpRequestGetAllResponseHeaders = spyOn(xmlHttpRequest, "getAllResponseHeaders");
+        paywallHttpRequest.setXMLHttpRequest(xmlHttpRequest);
+
+        paywallHttpRequest.getAllResponseHeaders();
+        expect(xmlHttpRequestGetAllResponseHeaders).toHaveBeenCalled();
+    });
+
+    it("Verify that overrideMimeType calls underlying XMLHttpRequest object", function () {
+        var paywallHttpRequest = new PaywallHttpRequest();
+        var xmlHttpRequest = new XMLHttpRequest();
+        var xmlHttpRequestOverrideMimeType = spyOn(xmlHttpRequest, "overrideMimeType");
+        paywallHttpRequest.setXMLHttpRequest(xmlHttpRequest);
+
+        paywallHttpRequest.overrideMimeType("application/json");
+        expect(xmlHttpRequestOverrideMimeType).toHaveBeenCalledWith("application/json");
+    });
+});
 
 describe("Verify that PaywallHttpRequest paywall methods returns expected result", function(){
     beforeEach(function (){
@@ -28,6 +216,17 @@ describe("Verify that PaywallHttpRequest paywall methods returns expected result
         var paywallHttpRequest = new PaywallHttpRequest();
         jasmine.clock().mockDate(new Date("2019-06-01T07:50:51.540+0000"));
         expect( function(){ paywallHttpRequest.paywall.getInvoiceExpiration(); } ).toThrow("Invalid state NEW when calling method getInvoiceExpiration().");
+    });
+
+    it("Verify that getInvoiceExpigetInvoiceAmountration returns a PaywallAmount instance from the invoice amount field", function () {
+        var paywallHttpRequest = new PaywallHttpRequest();
+        paywallHttpRequest.setPaywallInvoice(invoice1);
+        expect(paywallHttpRequest.paywall.getInvoiceAmount().as(BTCUnit.BIT)).toBe(0.1);
+    });
+
+    it("Verify that getInvoiceAmount throws error if invoice is not yet set", function () {
+        var paywallHttpRequest = new PaywallHttpRequest();
+        expect( function(){ paywallHttpRequest.paywall.getInvoiceAmount(); } ).toThrow("Invalid state NEW when calling method getInvoiceAmount().");
     });
 
     it("Verify that getSettlement returns settlement field if set", function () {
@@ -77,11 +276,6 @@ describe("Verify that PaywallHttpRequest paywall methods returns expected result
         var paywallHttpRequest = new PaywallHttpRequest();
         paywallHttpRequest.setPaywallError(errorInvalid1);
         expect(paywallHttpRequest.paywall.getPaywallError().status).toBe("UNAUTHORIZED");
-    });
-    it("Verify getAPIError returns the api error", function() {
-        var paywallHttpRequest = new PaywallHttpRequest();
-        paywallHttpRequest.setPaywallAPIError(apiError1);
-        expect(paywallHttpRequest.paywall.getAPIError().status).toBe("INTERNAL_ERROR");
     });
     it("Verify that registerListener adds a listener to the event bus and unregister that removes it.", function () {
         var paywallHttpRequest = new PaywallHttpRequest();
@@ -165,16 +359,6 @@ describe("Verify that Paywall.getState calculates the correct status", function(
         paywallHttpRequest.setPaywallError(errorInvalid1);
         expect(paywallHttpRequest.paywall.getState()).toBe(PaywallState.PAYWALL_ERROR);
     });
-    it("Verify that Paywall flow where underlying apu error occurred returns API_ERROR and that it has president over PAYWALL_ERROR.", function() {
-        jasmine.clock().mockDate(new Date("2019-06-02T06:09:29.354+0000"));
-        var paywallHttpRequest = new PaywallHttpRequest();
-        paywallHttpRequest.setPaywallInvoice(invoice1);
-        paywallHttpRequest.setPaywallSettlement(settlement2);
-        paywallHttpRequest.setPaywallExecuted(true);
-        paywallHttpRequest.setPaywallError(errorInvalid1);
-        paywallHttpRequest.setPaywallAPIError(errorInvalid1);
-        expect(paywallHttpRequest.paywall.getState()).toBe(PaywallState.API_ERROR);
-    });
     afterEach(function (){
         jasmine.clock().uninstall();
     });
@@ -253,9 +437,6 @@ describe("Verify PaywallState enum values", function() {
     it("Expect PaywallState enum PAYWALL_ERROR has value 'PAYWALL_ERROR'", function() {
         expect(PaywallState.PAYWALL_ERROR).toBe("PAYWALL_ERROR");
     });
-    it("Expect PaywallState enum API_ERROR has value 'API_ERROR'", function() {
-        expect(PaywallState.API_ERROR).toBe("API_ERROR");
-    });
     it("Expect PaywallState enum ABORTED has value 'ABORTED'", function() {
         expect(PaywallState.ABORTED).toBe("ABORTED");
     });
@@ -286,9 +467,6 @@ describe("Verify PaywallEventType enum values", function() {
     it("Expect PaywallEventType enum PAYWALL_ERROR has value 'PAYWALL_ERROR'", function() {
         expect(PaywallEventType.PAYWALL_ERROR).toBe("PAYWALL_ERROR");
     });
-    it("Expect PaywallEventType enum API_ERROR has value 'API_ERROR'", function() {
-        expect(PaywallEventType.API_ERROR).toBe("API_ERROR");
-    });
 });
 
 describe("Verify PaywallResponseStatus enum values", function() {
@@ -309,6 +487,56 @@ describe("Verify PaywallResponseStatus enum values", function() {
     });
 });
 
+describe("Verify HttpStatus enum values", function() {
+    it("Expect HttpStatus enum PAYMENT_REQUIRED has value 402", function() {
+        expect(HttpStatus.PAYMENT_REQUIRED).toBe(402);
+    });
+});
+
+describe("Verify HttpHeader enum values", function() {
+    it("Expect HttpHeader enum PAYWALL_MESSAGE has value 'PAYWALL_MESSAGE'", function() {
+        expect(HttpHeader.PAYWALL_MESSAGE).toBe("PAYWALL_MESSAGE");
+    });
+});
+
+describe("Verify BTCUnit enum values", function() {
+    it("Expect BTCUnit enum BTC has value 'BTC'", function() {
+        expect(BTCUnit.BTC).toBe("BTC");
+    });
+    it("Expect BTCUnit enum MILLIBTC has value 'MILLIBTC'", function() {
+        expect(BTCUnit.MILLIBTC).toBe("MILLIBTC");
+    });
+    it("Expect BTCUnit enum BIT has value 'BIT'", function() {
+        expect(BTCUnit.BIT).toBe("BIT");
+    });
+    it("Expect BTCUnit enum SAT has value 'SAT'", function() {
+        expect(BTCUnit.SAT).toBe("SAT");
+    });
+    it("Expect BTCUnit enum MILLISAT has value 'MILLISAT'", function() {
+        expect(BTCUnit.MILLISAT).toBe("MILLISAT");
+    });
+    it("Expect BTCUnit enum NANOSAT has value 'NANOSAT'", function() {
+        expect(BTCUnit.NANOSAT).toBe("NANOSAT");
+    });
+});
+
+describe("Verify Magnetude enum values", function() {
+    it("Expect Magnetude enum NONE has value 'NONE'", function() {
+        expect(Magnetude.NONE).toBe("NONE");
+    });
+    it("Expect Magnetude enum MILLI has value 'MILLI'", function() {
+        expect(Magnetude.MILLI).toBe("MILLI");
+    });
+    it("Expect Magnetude enum NANO has value 'NANO'", function() {
+        expect(Magnetude.NANO).toBe("NANO");
+    });
+});
+
+describe("Verify CurrencyCode enum values", function() {
+    it("Expect CurrencyCode enum BTC has value 'BTC'", function() {
+        expect(CurrencyCode.BTC).toBe("BTC");
+    });
+});
 
 describe("Verify PaywallEventBus public methods handle events properly", function() {
 
@@ -317,7 +545,6 @@ describe("Verify PaywallEventBus public methods handle events properly", functio
         this.paywall.setPaywallInvoice(invoice1);
         this.paywall.setPaywallSettlement(settlement1);
         this.paywall.setPaywallError(errorInvalid1);
-        this.paywall.setPaywallAPIError(apiError1);
 
         this.eventBus = new PaywallEventBus(this.paywall);
     });
@@ -327,12 +554,12 @@ describe("Verify PaywallEventBus public methods handle events properly", functio
         expect(eventBus.getListeners().length).toBe(0);
 
         var listener1Calls = [];
-        eventBus.addListener("Listener1", PaywallEventType.API_ERROR, function(type, object){
+        eventBus.addListener("Listener1", PaywallEventType.PAYWALL_ERROR, function(type, object){
             listener1Calls.push({type: type, object: object});
         });
         expect(eventBus.getListeners().length).toBe(1);
         expect(eventBus.getListeners()[0].name).toBe("Listener1");
-        expect(eventBus.getListeners()[0].type).toBe(PaywallEventType.API_ERROR);
+        expect(eventBus.getListeners()[0].type).toBe(PaywallEventType.PAYWALL_ERROR);
         expect(eventBus.getListeners()[0].onEvent).toBeDefined();
 
         var listener2Calls = [];
@@ -345,49 +572,47 @@ describe("Verify PaywallEventBus public methods handle events properly", functio
         expect(eventBus.getListeners()[1].onEvent).toBeDefined();
 
         var listener3Calls = [];
-        eventBus.addListener("Listener3", PaywallEventType.PAYWALL_ERROR, function(type, object){
+        eventBus.addListener("Listener3", PaywallEventType.ABORTED, function(type, object){
             listener3Calls.push({type: type, object: object});
         });
         expect(eventBus.getListeners().length).toBe(3);
         expect(eventBus.getListeners()[2].name).toBe("Listener3");
-        expect(eventBus.getListeners()[2].type).toBe(PaywallEventType.PAYWALL_ERROR);
+        expect(eventBus.getListeners()[2].type).toBe(PaywallEventType.ABORTED);
         expect(eventBus.getListeners()[2].onEvent).toBeDefined();
 
-        eventBus.onEvent(PaywallEventType.API_ERROR, {name: "apierror1"});
+        eventBus.onEvent(PaywallEventType.PAYWALL_ERROR, {});
         expect(listener1Calls.length).toBe(1);
-        expect(listener1Calls[0].type).toBe(PaywallEventType.API_ERROR);
-        expect(listener1Calls[0].object.name).toBe("apierror1");
+        expect(listener1Calls[0].type).toBe(PaywallEventType.PAYWALL_ERROR);
         expect(listener2Calls.length).toBe(1);
-        expect(listener2Calls[0].type).toBe(PaywallEventType.API_ERROR);
-        expect(listener2Calls[0].object.name).toBe("apierror1");
+        expect(listener2Calls[0].type).toBe(PaywallEventType.PAYWALL_ERROR);
         expect(listener3Calls.length).toBe(0);
 
         eventBus.triggerEventFromState();
         expect(listener1Calls.length).toBe(2);
-        expect(listener1Calls[1].type).toBe(PaywallEventType.API_ERROR);
-        expect(listener1Calls[1].object.status).toBe("INTERNAL_ERROR");
+        expect(listener1Calls[1].type).toBe(PaywallEventType.PAYWALL_ERROR);
+        expect(listener1Calls[1].object.status).toBe("UNAUTHORIZED");
         expect(listener2Calls.length).toBe(2);
-        expect(listener2Calls[1].type).toBe(PaywallEventType.API_ERROR);
-        expect(listener2Calls[1].object.status).toBe("INTERNAL_ERROR");
+        expect(listener2Calls[1].type).toBe(PaywallEventType.PAYWALL_ERROR);
+        expect(listener2Calls[1].object.status).toBe("UNAUTHORIZED");
         expect(listener3Calls.length).toBe(0);
 
         // Verify that addListener replaces existing listener
         var listener4Calls = [];
-        eventBus.addListener("Listener2", PaywallEventType.PAYWALL_ERROR, function(type, object){
+        eventBus.addListener("Listener2", PaywallEventType.ABORTED, function(type, object){
             listener4Calls.push({type: type, object: object});
         });
         expect(eventBus.getListeners().length).toBe(3);
         expect(eventBus.getListeners()[1].name).toBe("Listener2");
-        expect(eventBus.getListeners()[1].type).toBe(PaywallEventType.PAYWALL_ERROR);
+        expect(eventBus.getListeners()[1].type).toBe(PaywallEventType.ABORTED);
         expect(eventBus.getListeners()[1].onEvent).toBeDefined();
 
-        eventBus.onEvent(PaywallEventType.PAYWALL_ERROR, {name: "paywallerror1"});
+        eventBus.onEvent(PaywallEventType.ABORTED, {name: "abort1"});
         expect(listener3Calls.length).toBe(1);
-        expect(listener3Calls[0].type).toBe(PaywallEventType.PAYWALL_ERROR);
-        expect(listener3Calls[0].object.name).toBe("paywallerror1");
+        expect(listener3Calls[0].type).toBe(PaywallEventType.ABORTED);
+        expect(listener3Calls[0].object.name).toBe("abort1");
         expect(listener4Calls.length).toBe(1);
-        expect(listener4Calls[0].type).toBe(PaywallEventType.PAYWALL_ERROR);
-        expect(listener4Calls[0].object.name).toBe("paywallerror1");
+        expect(listener4Calls[0].type).toBe(PaywallEventType.ABORTED);
+        expect(listener4Calls[0].object.name).toBe("abort1");
         expect(listener1Calls.length).toBe(2);
 
         eventBus.removeListener("NonExisting");
@@ -430,8 +655,7 @@ describe("Verify PaywallEventBus public methods handle events properly", functio
         {state: PaywallState.SETTLED, expectedFinal: false, expectedType: PaywallEventType.SETTLED, expectedObject: settlement1},
         {state: PaywallState.SETTLEMENT_EXPIRED, expectedFinal: true, expectedType: PaywallEventType.SETTLEMENT_EXPIRED, expectedObject: settlement1},
         {state: PaywallState.EXECUTED, expectedFinal: true, expectedType: PaywallEventType.EXECUTED, expectedObject: settlement1},
-        {state: PaywallState.PAYWALL_ERROR, expectedFinal: true, expectedType: PaywallEventType.PAYWALL_ERROR, expectedObject: errorInvalid1},
-        {state: PaywallState.API_ERROR, expectedFinal: true, expectedType: PaywallEventType.API_ERROR, expectedObject: apiError1}
+        {state: PaywallState.PAYWALL_ERROR, expectedFinal: true, expectedType: PaywallEventType.PAYWALL_ERROR, expectedObject: errorInvalid1}
         ];
 
     using(stateTestData, function(testData){
@@ -446,6 +670,49 @@ describe("Verify PaywallEventBus public methods handle events properly", functio
         } );
     });
 
+});
+
+describe("Verify PaywallAmount convertion.", function() {
+
+    it("Verify that amount object must contain value property.", function(){
+        expect( function(){ new PaywallAmount({}).as(BTCUnit.SAT); }).toThrow("Invalid invoice amount object in PaywallAmount.");
+    });
+
+    it("Verify that amount object cannot be string.", function(){
+        expect( function(){ new PaywallAmount("test").as(BTCUnit.SAT); } ).toThrow("Invalid invoice amount object in PaywallAmount.");
+    });
+
+    it("Verify that amount object cannot be number.", function(){
+        expect( function(){ new PaywallAmount(1).as(BTCUnit.SAT); } ).toThrow("Invalid invoice amount object in PaywallAmount.");
+    });
+
+    it("Verify that amount currency code must be BTC if exists.", function(){
+        expect( function(){ new PaywallAmount({value: 10, currencyCode: "OTHER"}).as(BTCUnit.SAT); } ).toThrow("Invalid invoice currency code OTHER in PaywallAmount, currently only BTC is supported.");
+    });
+
+    it("Verify that magnetude must be a valid value.", function(){
+        expect( function(){ new PaywallAmount({value: 10, magnetude: "OTHER"}).as(BTCUnit.SAT); } ).toThrow("Invalid magnetude from invoice OTHER in PaywallAmount.");
+    });
+
+    var amountTestData = [
+        {amount: {value: 10}, unit: BTCUnit.SAT, expectedValue: 10, desc: " assumes magnetude NONE and currency code BTC for minimal amount object."},
+        {amount: {value: 10, magnetude: Magnetude.NANO}, unit: BTCUnit.SAT, expectedValue: 0.00001, desc: " assumes converts nano satoshis to satoshis properly."},
+        {amount: {value: 10, magnetude: Magnetude.MILLI}, unit: BTCUnit.SAT, expectedValue: 0.01, desc: " assumes converts milli satoshis to satoshis properly."},
+        {amount: {value: 1, magnetude: Magnetude.NANO}, unit: BTCUnit.BTC, expectedValue: 0.00000000000001, desc: " assumes converts nano satoshis to BTC properly."},
+        {amount: {value: 23, magnetude: Magnetude.MILLI}, unit: BTCUnit.BTC, expectedValue: 0.00000000023, desc: " assumes converts milli satoshis to BTC properly."},
+        {amount: {value: 23000, magnetude: Magnetude.NONE}, unit: BTCUnit.MILLIBTC, expectedValue: 0.23, desc: " assumes converts satoshis to milli BTC properly."},
+        {amount: {value: 23000, magnetude: Magnetude.NONE}, unit: BTCUnit.BIT, expectedValue: 230, desc: " assumes converts satoshis to BIT properly."},
+        {amount: {value: 23000, magnetude: Magnetude.NONE}, unit: BTCUnit.MILLISAT, expectedValue: 23000000, desc: " assumes converts satoshis to millisatoshi properly."},
+        {amount: {value: 23000, magnetude: Magnetude.NONE}, unit: BTCUnit.NANOSAT, expectedValue: 23000000000, desc: " assumes converts satoshis to nanosatoshi properly."},
+        {amount: {value: 23000, magnetude: Magnetude.MILLI}, unit: BTCUnit.NANOSAT, expectedValue: 23000000, desc: " assumes converts satoshis to nanosatoshi properly."},
+        {amount: {value: 23000, magnetude: Magnetude.NANO}, unit: BTCUnit.MILLISAT, expectedValue: 23, desc: " assumes converts satoshis to nanosatoshi properly."}
+    ];
+
+    using(amountTestData, function(testData){
+        it("Verify that PaywallAmount.as " + testData.desc, function () {
+            expect(new PaywallAmount(testData.amount).as(testData.unit)).toBe(testData.expectedValue);
+        });
+    });
 });
 
 describe("Verify PaywallEventBus background thread transistions state properly", function() {
@@ -501,11 +768,24 @@ describe("Verify PaywallEventBus background thread transistions state properly",
         expect(listener2Calls[0].type).toBe(PaywallEventType.INVOICE);
         expect(listener2Calls[0].object).toBe(invoice1);
 
+        // Change paywall state to SETTLED
+        this.paywallHttpRequest.setPaywallSettlement(settlement1);
+        expect(this.paywallHttpRequest.paywall.getState()).toBe(PaywallState.SETTLED);
+        expect(this.eventBus.getCurrentState()).toBe(PaywallState.INVOICE);
+
+        // Let statecheck run, and verify that event is ot triggered (special case for SETTLED)
+        jasmine.clock().tick(1001);
+        expect(clearIntervalSpy).not.toHaveBeenCalled();
+        expect(this.paywallHttpRequest.paywall.getState()).toBe(PaywallState.SETTLED);
+        expect(this.eventBus.getCurrentState()).toBe(PaywallState.SETTLED);
+        expect(listener1Calls.length).toBe(1);
+        expect(listener2Calls.length).toBe(1);
+
         // Change paywall state to EXECUTED
         this.paywallHttpRequest.setPaywallSettlement(settlement1);
         this.paywallHttpRequest.setPaywallExecuted(true);
         expect(this.paywallHttpRequest.paywall.getState()).toBe(PaywallState.EXECUTED);
-        expect(this.eventBus.getCurrentState()).toBe(PaywallState.INVOICE);
+        expect(this.eventBus.getCurrentState()).toBe(PaywallState.SETTLED);
 
         // Let statecheck run, and verify that event is triggered and clearInterval was called since state is final.
         jasmine.clock().tick(1001);

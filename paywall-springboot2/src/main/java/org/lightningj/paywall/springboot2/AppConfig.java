@@ -13,8 +13,8 @@ import org.springframework.context.annotation.Configuration;
 public class AppConfig {
 
     @Bean
-    public DemoResult getGreeting(){
-        return new DemoResult(1,"asdf");
+    public PocResult getGreeting(){
+        return new PocResult(1,"asdf");
     }
 
 

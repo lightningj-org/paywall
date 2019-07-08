@@ -32,6 +32,9 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import static org.lightningj.paywall.web.HTTPConstants.HEADER_PAYWALL_MESSAGE;
+import static org.lightningj.paywall.web.HTTPConstants.HEADER_PAYWALL_MESSAGE_VALUE;
+
 /**
  * Controller for checking settlement using REST, either json or xml is
  * supported.
@@ -74,6 +77,7 @@ public class CheckSettlementController {
             }else{
                 settlementResponse = new SettlementResponse();
             }
+            response.setHeader(HEADER_PAYWALL_MESSAGE, HEADER_PAYWALL_MESSAGE_VALUE);
             response.setContentType(requestType.getContentType());
             return settlementResponse;
         }catch (Exception e){
@@ -90,6 +94,7 @@ public class CheckSettlementController {
      */
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<Object> handleException(HttpServletRequest request, HttpServletResponse response, Exception e) {
+        response.setHeader(HEADER_PAYWALL_MESSAGE, HEADER_PAYWALL_MESSAGE_VALUE);
         return paywallExceptionHandler.handleException(request,response,e);
     }
 }

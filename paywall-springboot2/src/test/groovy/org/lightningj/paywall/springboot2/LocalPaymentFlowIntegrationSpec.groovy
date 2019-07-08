@@ -35,6 +35,9 @@ import spock.lang.Stepwise
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 
+import static org.lightningj.paywall.web.HTTPConstants.HEADER_PAYWALL_MESSAGE
+import static org.lightningj.paywall.web.HTTPConstants.HEADER_PAYWALL_MESSAGE_VALUE
+
 /**
  * Functional test of PaywallInterceptor and LocalPaymentFlow. It runs
  * defined test scienarios against running web service with a mocked LightningHandler.
@@ -104,10 +107,11 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
         // have been created in database.
         println "Starting Test Setup on Port: " + randomServerPort
 
-        def resp = get(uri: '/demo' )
+        def resp = get(uri: '/poc1' )
         then:
         resp.status == 402
         resp.contentType == "application/json"
+        resp.headers[HEADER_PAYWALL_MESSAGE].value == HEADER_PAYWALL_MESSAGE_VALUE
         def invoice = resp.data
         // Check that invoice response has correct json
         verifyJsonInvoiceResponse(invoice)
@@ -121,6 +125,7 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
         then:
         resp.status == 200
         resp.contentType == "application/json"
+        resp.headers[HEADER_PAYWALL_MESSAGE].value == HEADER_PAYWALL_MESSAGE_VALUE
         verifyCheckSettlementJsonResponse(resp.data, invoice)
 
         when:
@@ -130,6 +135,7 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
         then:
         resp.status == 200
         resp.contentType == "application/json"
+
         verifyCheckSettlementJsonResponse(resp.data, invoice)
 
         when: // Verify that QR Code is successfully generated
@@ -156,31 +162,32 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
         then:
         resp.status == 200
         resp.contentType == "application/json"
+        resp.headers[HEADER_PAYWALL_MESSAGE].value == HEADER_PAYWALL_MESSAGE_VALUE
         def settlement = resp.data
         verifyCheckSettlementJsonResponse(settlement, invoice, [expectSettled: true])
 
         when:
         // Verify that with settled token it is possible to perform call.
-        resp = get(uri: '/demo', headers: [(HTTPConstants.HEADER_PAYMENT): settlement.token ])
+        resp = get(uri: '/poc1', headers: [(HTTPConstants.HEADER_PAYMENT): settlement.token ])
         then:
         resp.status == 200
         resp.data.id != null
-        resp.data.content == "DemoService, test3!"
-
+        resp.data.content == "PocService1, Poc1!"
+        resp.headers[HEADER_PAYWALL_MESSAGE] == null
         when:
         // Verify that it is possible to use the token multiple times until if not pay per request.
-        resp = get(uri: '/demo', headers: [(HTTPConstants.HEADER_PAYMENT): settlement.token ])
+        resp = get(uri: '/poc1', headers: [(HTTPConstants.HEADER_PAYMENT): settlement.token ])
         then:
         resp.status == 200
         resp.data.id != null
-        resp.data.content == "DemoService, test3!"
+        resp.data.content == "PocService1, Poc1!"
 
     }
 
     def "Verify successful local payment flow with xml"(){
         when: // First call end-point to receive invoice, and check xml response
 
-        def resp = get(uri: '/demo' , headers: ["Accept":"application/xml"])
+        def resp = get(uri: '/poc1' , headers: ["Accept":"application/xml"])
         then:
         resp.status == 402
         resp.contentType == "application/xml"
@@ -213,20 +220,20 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
 
         when:
         // Verify that with settled token it is possible to perform call.
-        resp = get(uri: '/demo', headers: [(HTTPConstants.HEADER_PAYMENT): settlement.token,
+        resp = get(uri: '/poc1', headers: [(HTTPConstants.HEADER_PAYMENT): settlement.token,
                                            "Accept":"application/xml" ])
         then:
         resp.status == 200
         resp.contentType == "application/xml"
         resp.data.id != null
-        resp.data.content == "DemoService, test3!"
+        resp.data.content == "PocService1, Poc1!"
     }
 
     def "Verify successful local payment flow with Json and pay per request set to true."(){
         when: // First call end-point to receive invoice, and check that payment object
         // have been created in database.
 
-        def resp = get(uri: '/demoPayPerRequest' )
+        def resp = get(uri: '/poc1PayPerRequest' )
         then:
         resp.status == 402
         resp.contentType == "application/json"
@@ -277,15 +284,15 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
 
         when:
         // Verify that with settled token it is possible to perform call.
-        resp = get(uri: '/demoPayPerRequest', headers: [(HTTPConstants.HEADER_PAYMENT): settlement.token ])
+        resp = get(uri: '/poc1PayPerRequest', headers: [(HTTPConstants.HEADER_PAYMENT): settlement.token ])
         then:
         resp.status == 200
         resp.data.id != null
-        resp.data.content == "DemoService, test3!"
+        resp.data.content == "PocService1, Pay Per Request!"
 
         when:
         // Verify that it is possible to use the token multiple times until if not pay per request.
-        resp = get(uri: '/demoPayPerRequest', headers: [(HTTPConstants.HEADER_PAYMENT): settlement.token ])
+        resp = get(uri: '/poc1PayPerRequest', headers: [(HTTPConstants.HEADER_PAYMENT): settlement.token ])
         then:
         resp.status == 402
         resp.contentType == "application/json"
@@ -298,10 +305,11 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
         // Set expire to -6 minutes to make sure it is expired with accepted clock skew.
         lightningHandler.invoiceValidity = Duration.of(-6, ChronoUnit.MINUTES)
         when:
-        def resp = get(uri: '/demo' )
+        def resp = get(uri: '/poc1' )
         then:
         resp.status == 402
         resp.contentType == "application/json"
+        resp.headers[HEADER_PAYWALL_MESSAGE].value == HEADER_PAYWALL_MESSAGE_VALUE
         def invoice = resp.data
         // Check that invoice response has correct json
         verifyJsonInvoiceResponse(invoice)
@@ -315,6 +323,7 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
         then:
         resp.status == 401
         resp.contentType == "application/json"
+        resp.headers[HEADER_PAYWALL_MESSAGE].value == HEADER_PAYWALL_MESSAGE_VALUE
         def error = resp.data
         error.status == "UNAUTHORIZED"
         error.message == "JWT Token Problem: JWT Token have expired."
@@ -332,7 +341,7 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
         // Set expire to -6 minutes to make sure it is expired with accepted clock skew.
         demoPaymentHandler.settlementDuration = Duration.of(-6, ChronoUnit.MINUTES)
         when:
-        def resp = get(uri: '/demo' )
+        def resp = get(uri: '/poc1' )
         then:
         resp.status == 402
         resp.contentType == "application/json"
@@ -360,7 +369,7 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
 
         when:
         // Verify that with settled token it is possible to perform call.
-        resp = get(uri: '/demo', headers: [(HTTPConstants.HEADER_PAYMENT): settlement.token ])
+        resp = get(uri: '/poc1', headers: [(HTTPConstants.HEADER_PAYMENT): settlement.token ])
 
         then:
         resp.status == 401
@@ -380,7 +389,7 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
         // have been created in database.
         println "Starting Test Setup on Port: " + randomServerPort
 
-        def resp = get(uri: '/demo' )
+        def resp = get(uri: '/poc1' )
         then:
         resp.status == 402
         resp.contentType == "application/json"
@@ -401,7 +410,7 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
 
         when:
         // Verify that altered request returns.
-        resp = get(uri: '/demo?param=value', headers: [(HTTPConstants.HEADER_PAYMENT): settlement.token ])
+        resp = get(uri: '/poc1?param=value', headers: [(HTTPConstants.HEADER_PAYMENT): settlement.token ])
         then:
         resp.status == 400
         resp.contentType == "application/json"
@@ -418,7 +427,7 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
         setup:
         lightningHandler.simulateInternalError("Some Internal Error")
         when:
-        def resp = get(uri: '/demo' )
+        def resp = get(uri: '/poc1' )
         then:
         resp.status == 500
         resp.contentType == "application/json"

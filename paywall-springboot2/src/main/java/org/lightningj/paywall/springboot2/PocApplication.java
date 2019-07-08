@@ -14,45 +14,17 @@
  *************************************************************************/
 package org.lightningj.paywall.springboot2;
 
-import javax.xml.bind.annotation.*;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-/**
- * Response object used by DemoRestController to display result in JSON or XML.
- * @author philip
- */
-@XmlRootElement(name = "DemoResult")
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SettlementResponseType", propOrder = {
-        "id",
-        "content"
-})
-public class DemoResult {
 
-    @XmlElement()
-    private long id;
-    @XmlElement()
-    private String content;
+@SpringBootApplication
+public class PocApplication {
 
-    public DemoResult(){
-    }
-    public DemoResult(long id, String content) {
-        this.id = id;
-        this.content = content;
-    }
 
-    public long getId() {
-        return id;
-    }
+	public static void main(String[] args) {
+		SpringApplication.run(PocApplication.class, args);
+	}
 
-    public String getContent() {
-        return content;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
 }
+

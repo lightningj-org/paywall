@@ -27,6 +27,9 @@ import spock.lang.Specification
 
 import java.time.Instant
 
+import static org.lightningj.paywall.web.HTTPConstants.HEADER_PAYWALL_MESSAGE
+import static org.lightningj.paywall.web.HTTPConstants.HEADER_PAYWALL_MESSAGE_VALUE
+
 /**
  * Unit test for CheckSettlementController
  */
@@ -50,6 +53,7 @@ class CheckSettlementControllerSpec extends Specification {
         then:
         !resp.settled
         response.contentType == "application/json"
+        response.getHeader(HEADER_PAYWALL_MESSAGE) == HEADER_PAYWALL_MESSAGE_VALUE
         1 * controller.paymentFlowManager.getPaymentFlowFromToken(!null, ExpectedTokenType.INVOICE_TOKEN) >> {
             paymentFlow
         }
@@ -66,6 +70,7 @@ class CheckSettlementControllerSpec extends Specification {
         resp.settled
         resp.token == "SomeToken"
         response.contentType == "application/json"
+        response.getHeader(HEADER_PAYWALL_MESSAGE) == HEADER_PAYWALL_MESSAGE_VALUE
         1 * controller.paymentFlowManager.getPaymentFlowFromToken(!null, ExpectedTokenType.INVOICE_TOKEN) >> {
             paymentFlow
         }
@@ -81,6 +86,7 @@ class CheckSettlementControllerSpec extends Specification {
         Exception e = new IOException("asdf")
         when:
         controller.handleException(request, response, e)
+        response.getHeader(HEADER_PAYWALL_MESSAGE) == HEADER_PAYWALL_MESSAGE_VALUE
         then:
         1 * controller.paywallExceptionHandler.handleException(request, response, e)
     }

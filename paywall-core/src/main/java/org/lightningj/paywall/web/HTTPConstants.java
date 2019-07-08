@@ -22,6 +22,17 @@ package org.lightningj.paywall.web;
 public class HTTPConstants {
 
     /**
+     * HTTP Header value indicating that data in response is related to Paywall API used
+     * for instance in error handling to determine if data is a paywall error or from underlying API.
+     */
+    public static final String HEADER_PAYWALL_MESSAGE = "PAYWALL_MESSAGE";
+
+    /**
+     * The default header value indicating that this is a paywall api message.
+     */
+    public static final String HEADER_PAYWALL_MESSAGE_VALUE = "TRUE";
+
+    /**
      * HTTP Header value set with a settlement JWT token sent with
      * the payment request in order to process the data.
      */

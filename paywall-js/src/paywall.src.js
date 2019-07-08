@@ -44,10 +44,6 @@
          */
         PAYWALL_ERROR: "PAYWALL_ERROR",
         /**
-         * Regular API related error occurred during processing, see apiError object for details.
-         */
-        API_ERROR: "API_ERROR",
-        /**
          * Request was aborted by the user.
          */
         ABORTED : "ABORTED"
@@ -90,10 +86,6 @@
          */
         PAYWALL_ERROR: "PAYWALL_ERROR",
         /**
-         * Regular API related error occurred during processing, see apiError object for details.
-         */
-        API_ERROR: "API_ERROR",
-        /**
          * Special value used when registering new listener that should receive notification for all events
          * related to this paywall flow.
          */
@@ -127,6 +119,36 @@
         INTERNAL_SERVER_ERROR: "INTERNAL_SERVER_ERROR"
     };
 
+
+    /**
+     * Enumeration indicating the BTC unit that should be used when displaying and invoice amount.
+     * @enum {string}
+     * @readonly
+     * @global
+     */
+    global.BTCUnit = {
+        /** BTC, i.e 100.000.000 Satoshis */
+        BTC: "BTC",
+        /** One thousand part of BTC, i.e 100.000 Satoshis */
+        MILLIBTC: "MILLIBTC",
+        /**
+         * In BIT, i.e 100 Satoshis.
+         */
+        BIT: "BIT",
+        /**
+         * In Satoshis.
+         */
+        SAT: "SAT",
+        /**
+         * In milli satoshis, 1/1000 satoshi.
+         */
+        MILLISAT: "MILLISAT",
+        /**
+         * In nano satoshis, 1/1000.000 satoshi.
+         */
+        NANOSAT: "NANOSAT"
+    };
+
     /**
      * Internal Enum of used http statuses.
      * @enum {number}
@@ -138,18 +160,76 @@
         PAYMENT_REQUIRED : 402
     };
 
+    /* test-code */
+    // Define HttpStatus as enum available to test scripts.
+    global.HttpStatus = HttpStatus;
+    /* end-test-code */
+
     /**
-     * TODO HELLO
+     * Internal Enum of used http headers.
+     * @enum {string}
+     * @readonly
+     * @global
+     */
+    var HttpHeader = {
+        /** The related payload is a paywall related message. **/
+        PAYWALL_MESSAGE : "PAYWALL_MESSAGE"
+    };
+
+    /* test-code */
+    // Define HttpHeader as enum available to test scripts.
+    global.HttpHeader = HttpHeader;
+    /* end-test-code */
+
+    /**
+     * Internal Enum of Magnetudes used in JSON Amount objects.
+     * @enum {number}
+     * @readonly
+     * @global
+     */
+    var Magnetude = {
+        /** Base unit. Satoshis for BTC. **/
+        NONE : "NONE",
+        /** One thousand part of the base unit **/
+        MILLI : "MILLI",
+        /** One millionth part of the base unit **/
+        NANO : "NANO"
+    };
+
+    /* test-code */
+    // Define Magnetude as enum available to test scripts.
+    global.Magnetude = Magnetude;
+    /* end-test-code */
+
+    /**
+     * Internal Enum of Currency Codes used in JSON Amount objects.
+     * @enum {number}
+     * @readonly
+     * @global
+     */
+    var CurrencyCode = {
+        /** Bitcoin BTC **/
+        BTC : "BTC"
+    };
+
+    /* test-code */
+    // Define CurrencyCode as enum available to test scripts.
+    global.CurrencyCode = CurrencyCode;
+    /* end-test-code */
+
+
+    /**
+     * PaywallHttpRequest is the main class in this library. It's an paywall enhanced XMLHttpRequest what
+     * wraps a standard XMLHttpRequest and checks if response is 402 (Payment Required). If that is the case
+     * a web socket is automatically open to listen for settlement and later use that settlement token to automatically
+     * perform the call again with the same parameters.
      *
-     * TODO How to close? Close websocket when recieved SETTLEMENT? And error and status =4
      * @constructor PaywallHttpRequest
      */
-    // TODO rename to PaywallHttpRequest
     global.PaywallHttpRequest = function PaywallHttpRequest() {
         var invoice;
         var settlement;
         var paywallError;
-        var apiError;
         var executed = false;
         var aborted = false;
 
@@ -164,9 +244,6 @@
 
 
         function getPaywallState() {
-            if (apiError !== undefined) {
-                return PaywallState.API_ERROR;
-            }
             if (paywallError !== undefined) {
                 return PaywallState.PAYWALL_ERROR;
             }
@@ -201,16 +278,21 @@
             }
         }
 
-
+        /**
+         * Help method to cache registered event listeners for XMLHttpRequest.
+         */
         function addEventListener(eventListenerList, type, callback, options){
             var index = findEventListenerIndex(eventListenerList, type);
             if(index === -1) {
-                listeners.push({type: type, callback: callback, options: options});
+                eventListenerList.push({type: type, callback: callback, options: options});
             }else{
-                listeners.splice(index,1,{type: type, callback: callback, options: options});
+                eventListenerList.splice(index,1,{type: type, callback: callback, options: options});
             }
         }
 
+        /**
+         * Help method to remove registered event listeners for XMLHttpRequest from cache.
+         */
         function removeEventListener(eventListenerList, type) {
             var index = findEventListenerIndex(type);
             if(index !== -1){
@@ -218,7 +300,13 @@
             }
         }
 
-
+        /**
+         * Help method to find a specific event listener by type.
+         *
+         * @param eventListenerList the cache of event listeners, download or upload listeners.
+         * @param type the type of event listener to find.
+         * @return {number} index of found event listener by type
+         */
         function findEventListenerIndex(eventListenerList,type ){
             for(var i=0; i<eventListenerList.length; i++){
                 if(eventListenerList[i].type === type){
@@ -228,13 +316,23 @@
             return -1;
         }
 
+        /**
+         * Ready State handler set in XMLHttpRequest after settlement have been done.
+         */
         function afterSettlementReadyStateHandler(){
             populateResponseAttributes();
             triggerOnReadyStateHandler();
         }
 
+        /**
+         * Paywall event listener that listens on all events for a SETTLED event and the
+         * reinitializes the wrapped XMLHttpRequest and performs the API call again automatically.
+         * @param type the type of event.
+         * @param object the related object (settlement if type is settled).
+         */
         var paywallOnReadyStateChangeListener = function (type, object) {
             if(type === PaywallEventType.SETTLED){
+                paywallWebSocketHandler.close();
                 waitingInvoice = false;
                 settlement = object;
                 xmlHttpRequest = new XMLHttpRequest();
@@ -251,72 +349,117 @@
                 setTokenHeader();
 
                 xmlHttpRequest.send(xhrSendData.body);
-            }else{
-                if(type === PaywallEventType.PAYWALL_ERROR ||
-                    type === PaywallEventType.API_ERROR ||
-                    type === PaywallEventType.INVOICE_EXPIRED ||
-                    type === PaywallEventType.SETTLEMENT_NOT_YET_VALID ||
-                    type === PaywallEventType.SETTLEMENT_EXPIRED) {
-                    // TODO check that onerror is called.
-                    dispatchEvent(new Event("error"));
-                }
             }
         };
 
-
+        /**
+         * On ready state handler for wrapped XMLHttpRequest that checks if response has PAYMENT_REQUIRED
+         * and then open up a websocket to wait for settlement.
+         */
         function onReadyStateHandler() {
             if(!waitingInvoice) {
                 if (xmlHttpRequest.readyState === XMLHttpRequest.HEADERS_RECEIVED) {
                     if (xmlHttpRequest.status === HttpStatus.PAYMENT_REQUIRED) {
                         waitingInvoice = true;
-
-
                     } else {
                         populateResponseAttributes();
+                        populateAllEventListeners();
                         triggerOnReadyStateHandler();
-                        if (xmlHttpRequest.readyState > XMLHttpRequest.HEADERS_RECEIVED) {
-                            populateBaseEventListeners();
-                        }
                     }
                 } else {
                     populateResponseAttributes();
                     triggerOnReadyStateHandler();
+                    if(hasPaywallErrorOccurred()){
+                        handlePaywallError();
+                    }
                 }
             }else{
                 if(xmlHttpRequest.readyState === XMLHttpRequest.DONE) {
-                    invoice = JSON.parse(xmlHttpRequest.responseText);
-                    paywallEventBus.triggerEventFromState();
-                    api.paywall.addEventListener("OnReadyStateListener", PaywallEventType.ALL, paywallOnReadyStateChangeListener);
-                    paywallWebSocketHandler.connect(invoice);
+                    if(!hasPaywallErrorOccurred()) {
+                        invoice = JSON.parse(xmlHttpRequest.responseText);
+                        paywallEventBus.triggerEventFromState();
+                        api.paywall.addEventListener("OnReadyStateListener", PaywallEventType.ALL, paywallOnReadyStateChangeListener);
+                        paywallWebSocketHandler.connect(invoice);
+                    }else{
+                        handlePaywallError();
+                    }
                 }
             }
         }
 
+        /**
+         * Help method that checks if ready state is DONE and related message is a paywall related
+         * error.
+         * @return {boolean} if paywall related error has occurred.
+         */
+        function hasPaywallErrorOccurred(){
+            if(xmlHttpRequest.readyState === XMLHttpRequest.DONE){
+                if(xmlHttpRequest.getResponseHeader(HttpHeader.PAYWALL_MESSAGE) === "TRUE"){
+                    var errorType = xmlHttpRequest.status / 100;
+                    if(errorType === 4 || errorType === 5 ){
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Help method that parses the related response text as a paywall error and
+         * triggers related event.
+         */
+        function handlePaywallError(){
+            paywallError = JSON.parse(xmlHttpRequest.responseText);
+            paywallEventBus.onEvent(PaywallEventType.PAYWALL_ERROR, paywallError);
+        }
+
+        /**
+         * Method that trigger ready state handler in underlying XMLHttpRequest object.
+         * It also checks if related payment is pay per request and sets the state as executed
+         * if download was successful.
+         */
         function triggerOnReadyStateHandler() {
+
             if(api.onstatechange !== undefined){
                 api.readyState = xmlHttpRequest.readyState;
                 api.onstatechange();
             }
+
+            if(xmlHttpRequest.readyState === XMLHttpRequest.DONE &&
+                settlement !== undefined && settlement.payPerRequest){
+                var status = xmlHttpRequest.status / 100;
+                if(status === 2) { // If no error occurred.
+                    executed = true;
+                    paywallEventBus.onEvent(PaywallEventType.EXECUTED, settlement);
+                }
+            }
         }
 
+        /**
+         * Help method to populate all base eventlisteners that should be populated
+         * in underlying XMLHttpRequest object from start. (Before determining if this is
+         * a paywalled request or not). The event handler populated are timeout, abort and error.
+         */
         function populateBaseEventListeners() {
+            xmlHttpRequest.ontimeout = api.ontimeout;
             xmlHttpRequest.onabort = api.onabort;
             xmlHttpRequest.onerror = api.onerror;
 
             for(var i=0; i <xhrOpenData.eventListeners.length ; i++){
                 var listener = xhrOpenData.eventListeners[i];
-                if(listener.type === "abort" || listener.type === "error" ) {
+                if(listener.type === "timeout"  || listener.type === "abort" || listener.type === "error" ) {
                     xmlHttpRequest.addEventListener(listener.type, listener.callback, listener.options);
                 }
             }
 
             if(xmlHttpRequest.upload !== undefined){
+                xmlHttpRequest.upload.ontimeout = api.upload.ontimeout;
                 xmlHttpRequest.upload.onabort = api.upload.onabort;
                 xmlHttpRequest.upload.onerror = api.upload.onerror;
 
                 for(var j=0; j <xhrOpenData.uploadEventListeners.length ; j++){
                     var listener1 = xhrOpenData.uploadEventListeners[j];
-                    if(listener1.type === "abort" || listener1.type === "error" ) {
+                    if(listener1.type === "timeout"  || listener1.type === "abort" || listener1.type === "error" ) {
                         xmlHttpRequest.upload.addEventListener(listener1.type, listener1.callback, listener1.options);
                     }
                 }
@@ -324,16 +467,10 @@
 
         }
 
-        function setTokenHeader(){
-            if(getPaywallState() === PaywallState.SETTLED){
-                xmlHttpRequest.setRequestHeader("Payment", api.paywall.getSettlement().token);
-            }
-        }
-
-
         /**
+         * Help method that populates all event handlers to the underlying XMLHttpRequest object
+         * after payment have been settled.
          *
-         * @param XMLHttpRequestEventTarget eventTarget
          */
         function populateAllEventListeners() {
             xmlHttpRequest.onloadstart = api.onloadstart;
@@ -366,7 +503,7 @@
         }
 
         /**
-         * TOOD When should this be called?
+         * Help method that populates all request attributes before performing a call to the service.
          */
         function populateRequestAttributes() {
             xmlHttpRequest.timeout = api.timeout;
@@ -374,8 +511,18 @@
         }
 
         /**
-         *
-         * @param {boolean} onlyStatus
+         * Help method that sets the settlement token in as a request header if state is SETTLED.
+         */
+        function setTokenHeader(){
+            if(getPaywallState() === PaywallState.SETTLED){
+                xmlHttpRequest.setRequestHeader("Payment", api.paywall.getSettlement().token);
+            }
+        }
+
+        /**
+         * Help method to populate response attribute from the underlying XMLHttpRequest object.
+         * @param {boolean} onlyStatus if only status related attributes should be populated and not the
+         * actual response.
          */
         function populateResponseAttributes(onlyStatus) {
             api.status = xmlHttpRequest.status;
@@ -390,12 +537,16 @@
         }
 
         var api = {
-            // XMLRequestData Request Attributes, TODO
-
-            // TODO
-            // Request attributes
             timeout : 0,
             withCredentials : false,
+
+            /**
+             * Upload Event XMLHttpRequestEventTarget containing event listeners for upload events.
+             * Only called after passing paywall.
+             *
+             * @memberof PaywallHttpRequest
+             * @namespace PaywallHttpRequest.upload
+             */
             upload: {
                 onload: undefined,
                 onloadstart: undefined,
@@ -405,20 +556,33 @@
                 onstatechange: undefined,
                 ontimeout: undefined,
 
+                /**
+                 * Method to add upload event listener. The listener is cached until
+                 * passing paywall. See standard EventTarget documentation for details.
+                 * @param type type of event.
+                 * @param callback the call back function.
+                 * @param options callback options, see EventTarget documentation.
+                 * @memberof PaywallHttpRequest.upload
+                 */
                 addEventListener : function(type, callback, options){
-                    xmlHttpRequest.upload.addEventListener(type,callback,options);
                     addEventListener(xhrOpenData.uploadEventListeners,type,callback,options);
                 },
 
+                /**
+                 * Method to remove upload event listener. The listener is cached until
+                 * passing paywall. See standard EventTarget documentation for details.
+                 * @param type type of event.
+                 * @param callback the call back function.
+                 * @param options callback options, see EventTarget documentation.
+                 * @memberof PaywallHttpRequest.upload
+                 */
                 removeEventListener : function(type, callback, options){
-                    xmlHttpRequest.upload.removeEventListener(type,callback,options);
                     removeEventListener(xhrOpenData.uploadEventListeners,type);
                 },
 
                 /**
-                 * //TODO
-                 * @param {Event} event
-                 * @return {boolean}
+                 * Method that shouldn't be called will throw error.
+                 * @memberof PaywallHttpRequest.upload
                  */
                 dispatchEvent : function(event){
                     throw("Internal dispatchEvent should never be called.");
@@ -445,23 +609,44 @@
             onstatechange: undefined,
             ontimeout: undefined,
 
-
+            /**
+             * Method to add download event listener. The listener is cached until
+             * passing paywall. See standard EventTarget documentation for details.
+             * @param type type of event.
+             * @param callback the call back function.
+             * @param options callback options, see EventTarget documentation.
+             * @memberof PaywallHttpRequest
+             */
             addEventListener : function(type, callback, options){
-                xmlHttpRequest.addEventListener(type,callback,options);
                 addEventListener(xhrOpenData.eventListeners,type,callback,options);
             },
 
+            /**
+             * Method to remove download event listener. The listener is cached until
+             * passing paywall. See standard EventTarget documentation for details.
+             * @param type type of event.
+             * @param callback the call back function.
+             * @param options callback options, see EventTarget documentation.
+             * @memberof PaywallHttpRequest
+             */
             removeEventListener : function(type, callback, options){
-                xmlHttpRequest.removeEventListener(type,callback,options);
                 removeEventListener(xhrOpenData.eventListeners,type);
             },
 
+            /**
+             * Method that shouldn't be called will throw error.
+             * @memberof PaywallHttpRequest
+             */
             dispatchEvent : function(event){
                 throw("Internal dispatchEvent should never be called.");
             },
 
 
-            // TODO
+            /**
+             * Method to abort the call and close all underlying resources such as event bus
+             * and web socket.
+             * @memberof PaywallHttpRequest
+             */
             abort : function(){
               aborted = true;
               paywallEventBus.close();
@@ -469,10 +654,30 @@
               xmlHttpRequest.abort();
             },
 
+            // HERE
+            /**
+             * Method to set the related request header in underlying XMLHttpRequest object.
+             * The value is cached so subsequent call after passing paywall it is set again
+             * automatically.
+             * @param name request header name.
+             * @param value request header value.
+             * @memberof PaywallHttpRequest
+             */
             setRequestHeader : function(name, value){
               xhrSendData.requestHeaders.push({name: name, value: value});
             },
 
+            /**
+             * Method to open a connection to given URL and initializes underlying resources
+             * for paywall handling.
+             *
+             * @param method http method to use
+             * @param url url to connecto to
+             * @param async if call should be asynchronical (default true), optional.
+             * @param username username to use with the call, optional
+             * @param password password to use with the call, optional
+             * @memberof PaywallHttpRequest
+             */
             open : function(method, url, async, username, password){
                 // Reset send data
                 xhrOpenData.method = method;
@@ -489,6 +694,13 @@
                     xmlHttpRequest.open(method, url, async, username, password);
                 }
             },
+
+            /**
+             * Method to send the request, data is cached to be sent again automatically
+             * after payment is settled.
+             * @param body optional body data to upload.
+             * @memberof PaywallHttpRequest
+             */
             send : function(body){
                 xhrSendData.body = body;
                 populateRequestAttributes();
@@ -502,23 +714,46 @@
             },
 
 
+            /**
+             * Method to fetch response header for underlying XMLHttpRequest object.
+             * @param name of resonse header.
+             * @return {string} response header value.
+             * @memberof PaywallHttpRequest
+             */
             getResponseHeader : function(name){
                 return xmlHttpRequest.getResponseHeader(name);
             },
+
+            /**
+             * Method to fetch all response headers from underlying XMLHttpRequest object.
+             * @return {string} all response headers value.
+             * @memberof PaywallHttpRequest
+             */
             getAllResponseHeaders: function(){
                 return xmlHttpRequest.getAllResponseHeaders();
 
             },
+
+            /**
+             * Method to override the default mime type sent in response.
+             * @param mime mine-type to override with.
+             * @memberof PaywallHttpRequest
+             */
             overrideMimeType : function(mime){
                 return xmlHttpRequest.overrideMimeType(mime);
             },
 
+            /**
+             * Paywall section containing paywall extensions to standard XMLHttpRequest methods.
+             * @memberof PaywallHttpRequest
+             * @namespace PaywallHttpRequest.paywall
+             */
             paywall : {
 
                 /**
                  * Method to retrieve invoice if exists in related payment flow.
                  * @returns {Object} related invoice if generated in payment flow, otherwise undefined.
-                 * @memberof Paywall
+                 * @memberof PaywallHttpRequest.paywall
                  */
                 getInvoice: function () {
                     return invoice;
@@ -526,7 +761,7 @@
                 /**
                  * Returns true if invoice exists in related payment flow.
                  * @returns {boolean} true if invoice exist
-                 * @memberof Paywall
+                 * @memberof PaywallHttpRequest.paywall
                  */
                 hasInvoice: function () {
                     return invoice !== undefined;
@@ -537,7 +772,7 @@
                  *
                  * @returns {PaywallTime} if invoice exist
                  * @throws error if no invoice currently exists in payment flow.
-                 * @memberof Paywall
+                 * @memberof PaywallHttpRequest.paywall
                  */
                 getInvoiceExpiration: function () {
                     if (invoice !== undefined) {
@@ -546,9 +781,25 @@
                     throw("Invalid state " + getPaywallState() + " when calling method getInvoiceExpiration().");
                 },
                 /**
+                 * Help method to construct to retrieve a  PaywallAmount object of invoice amount that
+                 * is easy converted by a specified unit.
+                 *
+                 * @see PaywallAmount
+                 * @returns {PaywallAmount} if invoice exist
+                 * @throws error if no invoice currently exists in payment flow.
+                 * @memberof PaywallHttpRequest.paywall
+                 */
+                getInvoiceAmount: function () {
+                    if (invoice !== undefined) {
+                        return new PaywallAmount(invoice.invoiceAmount);
+                    }
+                    throw("Invalid state " + getPaywallState() + " when calling method getInvoiceAmount().");
+                },
+
+                /**
                  * Method to retrieve settlement if exists in related payment flow.
                  * @returns {Object} related settlement if generated in payment flow, otherwise undefined.
-                 * @memberof Paywall
+                 * @memberof PaywallHttpRequest.paywall
                  */
                 getSettlement: function () {
                     return settlement;
@@ -556,7 +807,7 @@
                 /**
                  * Returns true if settlement exists in related payment flow.
                  * @returns {boolean} true if settlement exist
-                 * @memberof Paywall
+                 * @memberof PaywallHttpRequest.paywall
                  */
                 hasSettlement: function () {
                     return settlement !== undefined;
@@ -568,7 +819,7 @@
                  * @returns {PaywallTime} if settlement exist
                  * @throws error if no settlement currently exists in payment flow. It is best to check
                  * this before calling method.
-                 * @memberof Paywall
+                 * @memberof PaywallHttpRequest.paywall
                  */
                 getSettlementExpiration: function () {
                     if (settlement !== undefined) {
@@ -584,7 +835,7 @@
                  * @returns {PaywallTime} if settlement exist
                  * @throws error if no settlement currently exists in payment flow. It is best to check
                  * this before calling method.
-                 * @memberof Paywall
+                 * @memberof PaywallHttpRequest.paywall
                  */
                 getSettlementValidFrom: function () {
                     if (settlement !== undefined) {
@@ -598,18 +849,10 @@
                 /**
                  * Method to retrieve error object containing error information if paywall related error occurred during payment flow.
                  * @returns {Object} related error if generated in payment flow, otherwise undefined.
-                 * @memberof Paywall
+                 * @memberof PaywallHttpRequest.paywall
                  */
                 getPaywallError: function () {
                     return paywallError;
-                },
-                /**
-                 * Method to retrieve error object containing error information if underlying api error occurred during payment flow.
-                 * @returns {Object} related error if generated in payment flow, otherwise undefined.
-                 * @memberof Paywall
-                 */
-                getAPIError: function () {
-                    return apiError;
                 },
                 /**
                  * Method to retrieve current state of payment flow, will return one of PaywallState enums.
@@ -617,7 +860,7 @@
                  * and settlement is null, then it's the invoice that have expired.
                  *
                  * @return {string} one of PaywallState enumeration values.
-                 * @memberof Paywall
+                 * @memberof PaywallHttpRequest.paywall
                  */
                 getState: getPaywallState,
 
@@ -629,7 +872,7 @@
                  * @param {PaywallEventType} type the type of event to listen to, or special ALL that receives all events.
                  * @param {function} callback method that should be called on given event. The function should have two parameters
                  * one PaywallEventType and one object containing the object data. Type of object differs for each event.
-                 * @memberof Paywall
+                 * @memberof PaywallHttpRequest.paywall
                  */
                 addEventListener: function (name, type, callback) {
                     paywallEventBus.addListener(name, type, callback);
@@ -638,7 +881,7 @@
                 /**
                  * Method to remove listener with given name if exists.
                  * @param {string} name the name of listener to remove.
-                 * @memberof Paywall
+                 * @memberof PaywallHttpRequest.paywall
                  */
                 removeEventListener: function (name) {
                     paywallEventBus.removeListener(name);
@@ -663,9 +906,6 @@
         api.setPaywallError = function (err) {
             paywallError = err;
         };
-        api.setPaywallAPIError = function (err) {
-            apiError = err;
-        };
         api.setPaywallExecuted = function (exec) {
             executed = exec;
         };
@@ -675,14 +915,30 @@
         api.getPaywallEventBus = function (){
             return paywallEventBus;
         };
+        api.setPaywallEventBus = function (eventBus){
+            paywallEventBus = eventBus;
+        };
         api.getPaywallWebSocketHandler = function (){
             return paywallWebSocketHandler;
+        };
+        api.setPaywallWebSocketHandler = function (webSocketHandler){
+            paywallWebSocketHandler = webSocketHandler;
+        };
+        api.getXhrOpenData = function () {
+            return xhrOpenData;
+        };
+
+        api.getXhrSendData = function () {
+            return xhrSendData;
+        };
+
+        api.setXMLHttpRequest = function(mockedRequest) {
+            xmlHttpRequest = mockedRequest;
         };
         /* end-test-code */
 
         return api;
     };
-
 
     /**
      * Helper class to calculate and present remaining validity or time until valid
@@ -815,6 +1071,77 @@
         return api;
     };
 
+    /**
+     * PaywallAmount is a help class to display invoiced amount in specified unit.
+     *
+     * With this object it is possible to easy display convert invoiced amount
+     * in specified unit.
+     *
+     * @param {object} amount json object from invoice.
+     * @constructor PaywallAmount
+     */
+    global.PaywallAmount = function PaywallAmount(amount) {
+
+        function normalizeAmount(){
+            if(amount.value === undefined){
+                throw "Invalid invoice amount object in PaywallAmount.";
+            }
+            if(amount.currencyCode !== undefined && amount.currencyCode !== CurrencyCode.BTC){
+                throw "Invalid invoice currency code " + amount.currencyCode + " in PaywallAmount, currently only BTC is supported.";
+            }
+            var magnetude = Magnetude.NONE;
+            if(amount.magnetude !== undefined){
+                magnetude = amount.magnetude;
+            }
+            switch (magnetude) {
+                case Magnetude.NONE:
+                    return amount.value;
+                case Magnetude.MILLI:
+                    return amount.value / 1000;
+                case Magnetude.NANO:
+                    return amount.value / 1000000;
+            }
+            throw "Invalid magnetude from invoice " + magnetude  + " in PaywallAmount.";
+        }
+
+        var api = {
+            /**
+             * Method to retrieve the specified amount in specified unit, currently is only BTCUnit enum values specified.
+             * @see BTCUnit
+             * @param unit the unit that the amount should be displayed as. Currently is only BTCUnit defined units supported
+             * @returns {number} the amount in specified unit.
+             * @function as
+             * @memberof PaywallAmount
+             */
+            as : function (unit) {
+                var sats = normalizeAmount();
+                switch (unit) {
+                    case BTCUnit.BTC:
+                        return sats / 100000000;
+                    case BTCUnit.MILLIBTC:
+                        return sats / 100000;
+                    case BTCUnit.BIT:
+                        return sats / 100;
+                    case BTCUnit.SAT:
+                        return sats;
+                    case BTCUnit.MILLISAT:
+                        return sats * 1000;
+                    case BTCUnit.NANOSAT:
+                        return sats * 1000000;
+                    default:
+                        throw "Unsupported unit " + unit + " used with PaywallAmount, only BTCUnit enumerated values are supported";
+                }
+            }
+        };
+
+        /* test-code */
+        // Help code to access private fields during unit tests.
+
+        /* end-test-code */
+
+        return api;
+    };
+
 
     /**
      * Private class in charge of maintaining all listeners for a in a payment flow.
@@ -832,12 +1159,14 @@
 
         function checkStateTransition(){
             var newState = paywallHttpRequest.paywall.getState();
-            if(currentState !== newState && newState !== PaywallState.SETTLED){
+            if(currentState !== newState){
                 currentState = newState;
-                if(isFinalState(newState)){
-                    clearInterval(stateChecker);
+                if(newState !== PaywallState.SETTLED) {
+                    if (isFinalState(newState)) {
+                        clearInterval(stateChecker);
+                    }
+                    onEvent(getRelatedType(newState), getRelatedObject(newState));
                 }
-                onEvent(getRelatedType(newState), getRelatedObject(newState));
             }
         }
 
@@ -987,8 +1316,6 @@
                     return paywallHttpRequest.paywall.getSettlement();
                 case PaywallState.PAYWALL_ERROR:
                     return paywallHttpRequest.paywall.getPaywallError();
-                case PaywallState.API_ERROR:
-                    return paywallHttpRequest.paywall.getAPIError();
             }
             throw "Invalid state sent to Paywall EventBus: " + state;
         }
@@ -1102,7 +1429,8 @@
         var close = function(){
             if(stompSocket !== undefined){
                 console.debug("Paywall WebSocket, closing connection.");
-                stompSocket.close();
+                stompSocket.disconnect();
+                socket.close();
             }
         };
         this.close = close;

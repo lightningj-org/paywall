@@ -7,23 +7,12 @@
     <script src="../js/stomp.js"></script>
     <script src="../js/paywall.js"></script>
     <script type="text/javascript">
-        function addEvent(eventtype, message) {
-            var tableRef = document.getElementById('eventable');
-            var newRow = tableRef.insertRow();
-            var newCell1 = newRow.insertCell(0);
-            newCell1.setAttribute("class",eventtype)
-            var eventText = document.createTextNode(eventtype + ": " );
-
-            newCell1.appendChild(eventText);
-        }
-
         var paywallReq;
 
         function payInvoice() {
             var req = new XMLHttpRequest()
             req.onload = function(){
-                var invoicepanel = document.getElementById('invoicepanel');
-                invoicepanel.style.display = "none";
+                showInvoicePanel(false);
                 requestButtonsDisabled(false);
 
             };
@@ -32,75 +21,261 @@
             
         }
         
-        function makePaywallRequest1() {
+        function makePaywallRequest1(reuse) {
             requestButtonsDisabled(true);
-            paywallReq = new PaywallHttpRequest();
-            setupPaywallReq(paywallReq);
-            paywallReq.open("GET","/demo");
-            paywallReq.send();
-
-        }
-
-        function setupPaywallReq(paywallReq){
-            paywallReq.paywall.addEventListener("InvoiceListener", PaywallEventType.INVOICE, function (type, object) {
-                var invoice = object;
-                var invoicepanel = document.getElementById('invoicepanel');
-                invoicepanel.style.display = "block";
-                var invoicedesc = document.getElementById("invoicetext");
-                invoicedesc.innerText = invoice.description;
-                var invoiceqr = document.getElementById('invoiceqr');
-                invoiceqr.src = window.location.origin + invoice.qrLink;
-                var invoiceamount = document.getElementById('invoiceamount');
-                invoiceamount.innerText = invoice.invoiceAmount.value;
-                var invoicebolt11 = document.getElementById('invoicebolt11');
-                invoicebolt11.innerText = invoice.bolt11Invoice;
-                var invoiceNodeInfo = document.getElementById('invoiceNodeInfo');
-                invoiceNodeInfo.innerText = invoice.nodeInfo.connectString;
-
-            });
-            paywallReq.paywall.addEventListener("AllEventListnener", PaywallEventType.ALL, function (type, object) {
-                var tableRef = document.getElementById('eventable');
-                var newRow = tableRef.insertRow();
-                var newCell1 = newRow.insertCell(0);
-                newCell1.setAttribute("class","PAYWALL_" + type);
-                var eventText = document.createTextNode(type);
-
-                newCell1.appendChild(eventText);
-            });
-            paywallReq.onload = function () {
-                var tableRef = document.getElementById('eventable');
-                var newRow = tableRef.insertRow();
-                var newCell1 = newRow.insertCell(0);
-                newCell1.setAttribute("class","SUCCESS");
-                var eventText = document.createTextNode("SUCCESS");
-                newCell1.appendChild(eventText);
-                var newCell2 = newRow.insertCell(1);
-                var eventText2 = document.createTextNode(paywallReq.responseText);
-                newCell2.appendChild(eventText2);
+            if(reuse !== true) {
+                paywallReq = new PaywallHttpRequest();
+                setupPaywallReq(paywallReq);
             }
+            paywallReq.open("GET","/poc1");
+            paywallReq.send();
         }
 
         function makePaywallRequest2() {
             requestButtonsDisabled(true);
             paywallReq = new PaywallHttpRequest();
             setupPaywallReq(paywallReq);
-            paywallReq.open("GET","/demoPayPerRequest");
-            paywallReq.send();
+            paywallReq.open("POST","/poc1PayPerRequest");
+            paywallReq.send("{'data':'value'}");
+        }
 
+        function makePaywallRequest3(reuse) {
+            requestButtonsDisabled(true);
+            if(reuse !== true) {
+                paywallReq = new PaywallHttpRequest();
+                setupPaywallReq(paywallReq);
+            }
+            paywallReq.open("GET","/poc2_1");
+            paywallReq.send();
+        }
+
+        function makePaywallRequest4(reuse) {
+            requestButtonsDisabled(true);
+            if(reuse !== true) {
+                paywallReq = new PaywallHttpRequest();
+                setupPaywallReq(paywallReq);
+            }
+            paywallReq.open("GET","/poc2_2");
+            paywallReq.send();
+        }
+
+        function makeNonPaymentRequest() {
+            paywallReq = new PaywallHttpRequest();
+            setupPaywallReq(paywallReq);
+            paywallReq.open("POST","/poc1NoPaymentRequired");
+            paywallReq.send("{'data':'value'}");
+        }
+
+        function makeApiErrorRequest() {
+            paywallReq = new PaywallHttpRequest();
+            setupPaywallReq(paywallReq);
+            paywallReq.open("POST","/poc1ApiError");
+            paywallReq.send("{'data':'value'}");
+        }
+
+        function makeApiErrorNoPaywallRequest() {
+            paywallReq = new PaywallHttpRequest();
+            setupPaywallReq(paywallReq);
+            paywallReq.open("POST","/poc1ApiErrorNoPaywall");
+            paywallReq.send("{'data':'value'}");
+        }
+
+        function makeTimeoutRequest() {
+            requestButtonsDisabled(false);
+            paywallReq = new PaywallHttpRequest();
+            paywallReq.timeout = 1;
+            setupPaywallReq(paywallReq);
+            paywallReq.open("POST","/poc1");
+            paywallReq.send();
+        }
+        function makeAbortRequest() {
+            requestButtonsDisabled(false);
+            paywallReq = new PaywallHttpRequest();
+            setupPaywallReq(paywallReq);
+            paywallReq.open("POST","/poc1");
+            paywallReq.send();
+            paywallReq.abort();
+        }
+
+        function makeErrorRequest() {
+            requestButtonsDisabled(false);
+            paywallReq = new PaywallHttpRequest();
+            setupPaywallReq(paywallReq);
+            paywallReq.open("POST","http://noexist/noexisting");
+            paywallReq.send();
+        }
+
+        function setupPaywallReq(paywallReq){
+            paywallReq.paywall.addEventListener("InvoiceListener", PaywallEventType.INVOICE, function (type, object) {
+                var invoice = object;
+                showInvoicePanel(true);
+                var invoicedesc = document.getElementById("invoicetext");
+                invoicedesc.innerText = invoice.description;
+                var invoiceqr = document.getElementById('invoiceqr');
+                invoiceqr.src = window.location.origin + invoice.qrLink;
+                var invoiceamount = document.getElementById('invoiceamount');
+                invoiceamount.innerText = paywallReq.paywall.getInvoiceAmount().as(BTCUnit.BIT);
+                var invoicebolt11 = document.getElementById('invoicebolt11');
+                invoicebolt11.innerText = invoice.bolt11Invoice;
+                var invoiceNodeInfo = document.getElementById('invoiceNodeInfo');
+                invoiceNodeInfo.innerText = invoice.nodeInfo.connectString;
+
+            });
+            paywallReq.paywall.addEventListener("AllEventListener", PaywallEventType.ALL, function (type, object) {
+                addEventRow("PAYWALL_" + type,type, JSON.stringify(object));
+            });
+            paywallReq.addEventListener("load", function() {
+                addEventRow("MAIN_ONLOAD","ONLOAD", paywallReq.responseText);
+            });
+            paywallReq.onloadstart = function () {
+                addEventRow("MAIN_ONLOADSTART","ONLOADSTART", paywallReq.responseText);
+            };
+            paywallReq.onloadend = function () {
+                addEventRow("MAIN_ONLOADEND","ONLOADEND", paywallReq.responseText);
+            };
+            paywallReq.onerror = function () {
+                addEventRow("MAIN_ONERROR","ONERROR", paywallReq.responseText);
+            };
+            paywallReq.onprogress = function () {
+                addEventRow("MAIN_PROGRESS","ONPROGRESS", paywallReq.responseText);
+            };
+            paywallReq.onstatechange = function () {
+                addEventRow("MAIN_ONSTATECHANGE","ONSTATECHANGE", paywallReq.readyState);
+            };
+            paywallReq.ontimeout = function () {
+                addEventRow("MAIN_TIMEOUT","TIMEOUT", paywallReq.readyState);
+            };
+            paywallReq.onabort = function () {
+                addEventRow("MAIN_ABORT","ABORT", paywallReq.readyState);
+            };
+            paywallReq.upload.addEventListener("load", function(evt) {
+                addEventRow("MAIN_UPLOAD_ONLOAD","UPLOAD_ONLOAD", JSON.stringify(evt));
+            });
+            paywallReq.upload.onloadstart = function (evt) {
+                addEventRow("MAIN_UPLOAD_ONLOADSTART","UPLOAD_ONLOADSTART", JSON.stringify(evt));
+            };
+            paywallReq.upload.onloadend = function (evt) {
+                addEventRow("MAIN_UPLOAD_ONLOADEND","UPLOAD_ONLOADEND", JSON.stringify(evt));
+            };
+            paywallReq.upload.onerror = function (evt) {
+                addEventRow("MAIN_UPLOAD_ONERROR","UPLOAD_ONERROR", JSON.stringify(evt));
+            };
+            paywallReq.upload.onprogress = function (evt) {
+                addEventRow("MAIN_UPLOAD_PROGRESS","UPLOAD_ONPROGRESS", JSON.stringify(evt));
+            };
+            paywallReq.upload.ontimeout = function (evt) {
+                addEventRow("MAIN_UPLOAD_TIMEOUT","UPLOAD_TIMEOUT", JSON.stringify(evt));
+            };
+            paywallReq.upload.onabort = function (evt) {
+                addEventRow("MAIN_UPLOAD_ABORT","UPLOAD_ABORT", JSON.stringify(evt));
+            };
+        }
+
+        function addEventRow(eventClass, eventName, eventDesc){
+            var tableRef = document.getElementById('eventable');
+            var newRow = tableRef.insertRow();
+            var newCell1 = newRow.insertCell(0);
+            newCell1.setAttribute("class",eventClass);
+            var eventText = document.createTextNode(eventName);
+            newCell1.appendChild(eventText);
+            if(eventDesc !== undefined) {
+                var newCell2 = newRow.insertCell(1);
+                var eventText2 = document.createTextNode(eventDesc);
+                newCell2.appendChild(eventText2);
+            }
+        }
+
+
+        function showInvoicePanel(show) {
+            var invoicepanel = document.getElementById('invoicepanel');
+            if(show){
+                invoicepanel.style.display = "block";
+            }else {
+                invoicepanel.style.display = "none";
+            }
         }
 
         function requestButtonsDisabled(disabled){
-            var button1 = document.getElementById('makePaywallRequest1');
-            button1.disabled = disabled;
-            var button2 = document.getElementById('makePaywallRequest2');
-            button2.disabled = disabled;
+            document.getElementById('makePaywallRequest1').disabled = disabled;
+            document.getElementById('makePaywallRequest2').disabled = disabled;
+            document.getElementById('makePaywallRequest3').disabled = disabled;
+            document.getElementById('makePaywallRequest4').disabled = disabled;
+            document.getElementById('makeNonPaymentRequest').disabled = disabled;
+            document.getElementById('makeTimeoutRequest').disabled = disabled;
+            document.getElementById('makeAbortRequest').disabled = disabled;
+            document.getElementById('makeErrorRequest').disabled = disabled;
+            document.getElementById('makeAPIErrorRequest').disabled = disabled;
+            document.getElementById('makeAPIErrorNoPaywallRequest').disabled = disabled;
         }
+
+        function clearAll(){
+            paywallReq = undefined;
+            requestButtonsDisabled(false);
+            showTimeRemainingPanel("none");
+            showInvoicePanel(false);
+            var tableRef = document.getElementById('eventable');
+            for(var i = tableRef.rows.length - 1; i > 0; i--)
+            {
+                tableRef.deleteRow(i);
+            }
+        }
+
+        function setTimeRemaining(){
+            if(paywallReq !== undefined){
+                if(paywallReq.paywall.getState() === PaywallState.INVOICE){
+                    showTimeRemainingPanel("showInvoiceTimeRemaining")
+                    var invoiceTimeSpan = document.getElementById('invoiceTimeRemaining');
+                    invoiceTimeSpan.innerText = formatTimeRemaining(paywallReq.paywall.getInvoiceExpiration().remaining());
+                }
+                if(paywallReq.paywall.getState() === PaywallState.SETTLED){
+                    showTimeRemainingPanel("showSettlementTimeRemaining")
+                    var settlementTimeSpan = document.getElementById('settlementTimeRemaining');
+                    settlementTimeSpan.innerText = formatTimeRemaining(paywallReq.paywall.getSettlementExpiration().remaining());
+                }
+            }
+        }
+
+        function showTimeRemainingPanel(panel) {
+            var invoiceTimePanel = document.getElementById('showInvoiceTimeRemaining');
+            var settlementTimePanel = document.getElementById('showSettlementTimeRemaining');
+            if(panel == "showInvoiceTimeRemaining"){
+                invoiceTimePanel.hidden = false;
+                settlementTimePanel.hidden = true;
+
+            }else {
+                if (panel == "showSettlementTimeRemaining") {
+                    invoiceTimePanel.hidden = true;
+                    settlementTimePanel.hidden = false;
+                }else{
+                    invoiceTimePanel.hidden = true;
+                    settlementTimePanel.hidden = true;
+                }
+            }
+        }
+
+        function formatTimeRemaining(timeRemaining){
+            var remainingMinutes = timeRemaining.minutes();
+            var remainingSeconds = timeRemaining.seconds();
+            return remainingMinutes + ":" + remainingSeconds;
+        }
+
+        setInterval(setTimeRemaining, 1000);
+
+
     </script>
 </head>
 <body>
 <p>
-<button id="makePaywallRequest1" onclick="makePaywallRequest1()" >Make Call</button>
+    <button id="makePaywallRequest1" onclick="makePaywallRequest1()" >Make Call</button>
     <button id="makePaywallRequest2" onclick="makePaywallRequest2()" >Make PerRequest Call</button>
+    <button id="makePaywallRequest3" onclick="makePaywallRequest3()" >Make Class Defined Call 1</button>
+    <button id="makePaywallRequest4" onclick="makePaywallRequest4()" >Make Class Defined Call 2</button>
+    <button id="makeNonPaymentRequest" onclick="makeNonPaymentRequest()" >Make Non Payment Call</button>
+    <button id="makeTimeoutRequest" onclick="makeTimeoutRequest()" >Make Timeout Call</button>
+    <button id="makeAbortRequest" onclick="makeAbortRequest()" >Make Aborted Call</button>
+    <button id="makeErrorRequest" onclick="makeErrorRequest()" >Make Error Call</button>
+    <button id="makeAPIErrorRequest" onclick="makeApiErrorRequest()" >Make API Error Call</button>
+    <button id="makeAPIErrorNoPaywallRequest" onclick="makeApiErrorNoPaywallRequest()" >Make API Error Call No Paywall</button>
 </p>
 <div id="invoicepanel" style="display: none">
     <p>Invoice</p>
@@ -108,17 +283,25 @@
     <p>Amount: <span id="invoiceamount"></span></p>
     <p>Invoice: <span id="invoicebolt11"></span></p>
     <p>NodeInfo: <span id="invoiceNodeInfo"></span></p>
+    <p id="showInvoiceTimeRemaining">Time Remaining (Invoice): <span id="invoiceTimeRemaining"></span></p>
     <img id="invoiceqr"/>
     <p>
     <button id="payinvoice" onclick="payInvoice()">Simulate Pay Invoice</button>
     </p>
 </div>
+    <div id="showSettlementTimeRemaining" hidden>
+      <p>Time Remaining (Settlement): <span id="settlementTimeRemaining"></span></p>
+      <button id="reUsePaywallReq1" onclick="makePaywallRequest1(true)" >Make Call</button>
+    </div>
 <table id="eventable">
     <tr>
         <td>Event</td>
         <td>Message</td>
     </tr>
 </table>
+<p>
+    <button id="clearAll" onclick="clearAll()">Clear Data</button>
+</p>
 
 </body>
 </html>

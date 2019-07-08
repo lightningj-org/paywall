@@ -22,7 +22,7 @@ import java.util.Map;
 public class MockedLightningHandler implements LightningHandler {
 
     Clock clock = Clock.systemDefaultZone();
-    Duration invoiceValidity = Duration.of(1, ChronoUnit.HOURS);
+    Duration invoiceValidity = Duration.of(30, ChronoUnit.MINUTES);
     List<LightningEventListener> lightningEventListeners = new ArrayList<>();
     Map<String,Invoice> invoiceMap = new HashMap<>();
     String internalErrorMessage = null;

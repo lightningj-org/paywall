@@ -117,12 +117,20 @@ class LocalWebSocketIntegrationSpec extends Specification {
             articleData.price = 10
             articleDataRepository.save(articleData)
         }
+        if (articleDataRepository.findByArticleId("abc456") == null) {
+            ArticleData articleData = new ArticleData()
+            articleData.articleId = "abc456"
+            articleData.price = 20
+            articleDataRepository.save(articleData)
+        }
         if (articleDataRepository.findByArticleId("abcPayPerRequest") == null) {
             ArticleData articleData = new ArticleData()
             articleData.articleId = "abcPayPerRequest"
             articleData.price = 15
             articleDataRepository.save(articleData)
         }
+
+        demoPaymentHandler.settlementDuration = Duration.ofMinutes(5)
 
         baseurl = "ws://localhost:${randomServerPort}"
     }
@@ -135,7 +143,7 @@ class LocalWebSocketIntegrationSpec extends Specification {
         println "Starting Test Setup on Port: " + randomServerPort
 
         Thread.sleep(30 * 60 * 1000) // TODO
-        def resp = get(uri: '/demo' )
+        def resp = get(uri: '/poc1' )
         then:
         resp.status == 402
         resp.contentType == "application/json"
@@ -165,19 +173,19 @@ class LocalWebSocketIntegrationSpec extends Specification {
 
         when:
         // Verify that with settled token it is possible to perform call.
-        resp = get(uri: '/demo', headers: [(HTTPConstants.HEADER_PAYMENT): settlement.token ])
+        resp = get(uri: '/poc1', headers: [(HTTPConstants.HEADER_PAYMENT): settlement.token ])
         then:
         resp.status == 200
         resp.data.id != null
-        resp.data.content == "DemoService, test3!"
+        resp.data.content == "PocService1, Poc1!"
 
         when:
         // Verify that it is possible to use the token multiple times until if not pay per request.
-        resp = get(uri: '/demo', headers: [(HTTPConstants.HEADER_PAYMENT): settlement.token ])
+        resp = get(uri: '/poc1', headers: [(HTTPConstants.HEADER_PAYMENT): settlement.token ])
         then:
         resp.status == 200
         resp.data.id != null
-        resp.data.content == "DemoService, test3!"
+        resp.data.content == "PocService1, Poc1!"
 
         when:
         // Verify that disconnect, releases related resources
@@ -194,7 +202,7 @@ class LocalWebSocketIntegrationSpec extends Specification {
         // have been created in database.
         println "Starting Test Setup on Port: " + randomServerPort
 
-        def resp = get(uri: '/demo' )
+        def resp = get(uri: '/poc1' )
         then:
         resp.status == 402
         resp.contentType == "application/json"
@@ -220,11 +228,11 @@ class LocalWebSocketIntegrationSpec extends Specification {
 
         when:
         // Verify that with settled token it is possible to perform call.
-        resp = get(uri: '/demo', headers: [(HTTPConstants.HEADER_PAYMENT): settlement.token ])
+        resp = get(uri: '/poc1', headers: [(HTTPConstants.HEADER_PAYMENT): settlement.token ])
         then:
         resp.status == 200
         resp.data.id != null
-        resp.data.content == "DemoService, test3!"
+        resp.data.content == "PocService1, Poc1!"
 
     }
 
@@ -235,7 +243,7 @@ class LocalWebSocketIntegrationSpec extends Specification {
         // have been created in database.
         println "Starting Test Setup on Port: " + randomServerPort
 
-        def resp = get(uri: '/demo' )
+        def resp = get(uri: '/poc1' )
         then:
         resp.status == 402
         resp.contentType == "application/json"
@@ -268,7 +276,7 @@ class LocalWebSocketIntegrationSpec extends Specification {
         // have been created in database.
         println "Starting Test Setup on Port: " + randomServerPort
 
-        def resp = get(uri: '/demo' )
+        def resp = get(uri: '/poc1' )
         then:
         resp.status == 402
         resp.contentType == "application/json"
@@ -305,11 +313,11 @@ class LocalWebSocketIntegrationSpec extends Specification {
 
         when:
         // Verify that with settled token it is possible to perform call.
-        resp = get(uri: '/demo', headers: [(HTTPConstants.HEADER_PAYMENT): settlement.token ])
+        resp = get(uri: '/poc1', headers: [(HTTPConstants.HEADER_PAYMENT): settlement.token ])
         then:
         resp.status == 200
         resp.data.id != null
-        resp.data.content == "DemoService, test3!"
+        resp.data.content == "PocService1, Poc1!"
 
     }
 
@@ -345,7 +353,7 @@ class LocalWebSocketIntegrationSpec extends Specification {
         when:
         for(int i=1;i<1000;i++){
             def handler = new CheckSettlementStompFrameHandler()
-            def resp = get(uri: '/demo' )
+            def resp = get(uri: '/poc1' )
             assert resp.status == 402
             def invoice = resp.data
 
@@ -528,7 +536,7 @@ class LocalWebSocketIntegrationSpec extends Specification {
             println "Starting thread: " + threadNumber
             for(int i=1;i<100;i++){
                 def handler = new CheckSettlementStompFrameHandler()
-                def resp = get(uri: '/demo' )
+                def resp = get(uri: '/poc1' )
                 assert resp.status == 402
                 def invoice = resp.data
 
@@ -549,7 +557,7 @@ class LocalWebSocketIntegrationSpec extends Specification {
                 def settlement = waitForMessage(handler,500, TimeUnit.MILLISECONDS)
                 stompSession.disconnect()
 
-                resp = get(uri: '/demo', headers: [(HTTPConstants.HEADER_PAYMENT): settlement.token ])
+                resp = get(uri: '/poc1', headers: [(HTTPConstants.HEADER_PAYMENT): settlement.token ])
                 assert resp.status == 200
 
                 Thread.sleep(random.nextInt(100))

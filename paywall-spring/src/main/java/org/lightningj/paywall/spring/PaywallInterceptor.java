@@ -53,6 +53,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static org.lightningj.paywall.web.HTTPConstants.HEADER_PAYWALL_MESSAGE;
+import static org.lightningj.paywall.web.HTTPConstants.HEADER_PAYWALL_MESSAGE_VALUE;
+
 /**
  * The main interceptor catching calls finding end points with a @PaymentRequired and
  * starting the related payment flow.
@@ -275,6 +278,7 @@ public class PaywallInterceptor implements HandlerInterceptor {
     private void generatePaymentRequiredResponse(RequestHelper.RequestType requestType, InvoiceResponse invoiceResponse, HttpServletResponse response) throws InternalErrorException, IOException {
         response.setStatus(HttpServletResponse.SC_PAYMENT_REQUIRED);
         response.setContentType(requestType.getContentType());
+        response.setHeader(HEADER_PAYWALL_MESSAGE, HEADER_PAYWALL_MESSAGE_VALUE);
         HttpMessageConverter converter = getHttpMessageConverter(requestType);
         ServletServerHttpResponse servletServerHttpResponse = new ServletServerHttpResponse(response);
         converter.write(invoiceResponse, requestType.getMediaType(), servletServerHttpResponse);
@@ -295,6 +299,7 @@ public class PaywallInterceptor implements HandlerInterceptor {
     private void generateExceptionResponse(RequestHelper.RequestType requestType, ResponseEntity<Object> responseEntity, HttpServletResponse response) throws InternalErrorException, IOException {
         response.setStatus(responseEntity.getStatusCodeValue());
         response.setContentType(requestType.getContentType());
+        response.setHeader(HEADER_PAYWALL_MESSAGE, HEADER_PAYWALL_MESSAGE_VALUE);
         HttpMessageConverter converter = getHttpMessageConverter(requestType);
         ServletServerHttpResponse servletServerHttpResponse = new ServletServerHttpResponse(response);
         converter.write(responseEntity.getBody(), requestType.getMediaType(), servletServerHttpResponse);

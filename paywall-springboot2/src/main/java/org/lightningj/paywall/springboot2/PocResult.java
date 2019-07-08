@@ -14,20 +14,46 @@
  *************************************************************************/
 package org.lightningj.paywall.springboot2;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import javax.xml.bind.annotation.*;
 
+/**
+ * Response object used by Poc1RestController and Poc2RestController to display result in JSON or XML.
+ *
+ * @author philip
+ */
+@XmlRootElement(name = "DemoResult")
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "SettlementResponseType", propOrder = {
+        "id",
+        "content"
+})
+public class PocResult {
 
-@SpringBootApplication
-public class DemoApplication {
+    @XmlElement()
+    private long id;
+    @XmlElement()
+    private String content;
 
+    public PocResult(){
+    }
+    public PocResult(long id, String content) {
+        this.id = id;
+        this.content = content;
+    }
 
-	public static void main(String[] args) {
-		SpringApplication.run(DemoApplication.class, args);
-	}
+    public long getId() {
+        return id;
+    }
 
+    public String getContent() {
+        return content;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
 }
-
