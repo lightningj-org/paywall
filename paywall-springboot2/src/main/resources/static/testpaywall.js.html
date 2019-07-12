@@ -172,7 +172,7 @@
         }
 
         function addEventRow(eventClass, eventName, eventDesc){
-            var tableRef = document.getElementById('eventable');
+            var tableRef = document.getElementById('eventtable');
             var newRow = tableRef.insertRow();
             var newCell1 = newRow.insertCell(0);
             newCell1.setAttribute("class",eventClass);
@@ -213,7 +213,7 @@
             requestButtonsDisabled(false);
             showTimeRemainingPanel("none");
             showInvoicePanel(false);
-            var tableRef = document.getElementById('eventable');
+            var tableRef = document.getElementById('eventtable');
             for(var i = tableRef.rows.length - 1; i > 0; i--)
             {
                 tableRef.deleteRow(i);
@@ -239,16 +239,13 @@
             var invoiceTimePanel = document.getElementById('showInvoiceTimeRemaining');
             var settlementTimePanel = document.getElementById('showSettlementTimeRemaining');
             if(panel == "showInvoiceTimeRemaining"){
-                invoiceTimePanel.hidden = false;
-                settlementTimePanel.hidden = true;
+                settlementTimePanel.style.display = "none";
 
             }else {
                 if (panel == "showSettlementTimeRemaining") {
-                    invoiceTimePanel.hidden = true;
-                    settlementTimePanel.hidden = false;
+                    settlementTimePanel.style.display = "block";
                 }else{
-                    invoiceTimePanel.hidden = true;
-                    settlementTimePanel.hidden = true;
+                    settlementTimePanel.style.display = "none";
                 }
             }
         }
@@ -259,7 +256,7 @@
             return remainingMinutes + ":" + remainingSeconds;
         }
 
-        setInterval(setTimeRemaining, 1000);
+        setInterval(setTimeRemaining, 100);
 
 
     </script>
@@ -289,19 +286,18 @@
     <button id="payinvoice" onclick="payInvoice()">Simulate Pay Invoice</button>
     </p>
 </div>
-    <div id="showSettlementTimeRemaining" hidden>
+    <div id="showSettlementTimeRemaining" style="display: none">
       <p>Time Remaining (Settlement): <span id="settlementTimeRemaining"></span></p>
       <button id="reUsePaywallReq1" onclick="makePaywallRequest1(true)" >Make Call</button>
     </div>
-<table id="eventable">
+<p>
+    <button id="clearAll" onclick="clearAll()">Clear Data</button>
+</p>
+<table id="eventtable">
     <tr>
         <td>Event</td>
         <td>Message</td>
     </tr>
 </table>
-<p>
-    <button id="clearAll" onclick="clearAll()">Clear Data</button>
-</p>
-
 </body>
 </html>

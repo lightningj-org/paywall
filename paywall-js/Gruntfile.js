@@ -76,15 +76,13 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.registerTask('test', ['jshint', 'jasmine']);
 
-    // TODO figure out how gradle and grunt works together, jasmine should be possible from gradle and added to test
-    grunt.registerTask('default', ['test']);
-
 
     grunt.registerTask("deploy", [
         "strip_code",
-        //"jshint",
         "uglify",
         "copy"
     ]);
+
+    grunt.registerTask('default', ['test','deploy']);
 
 };

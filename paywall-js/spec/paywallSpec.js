@@ -163,7 +163,7 @@ describe("Verify that PaywallHttpRequest base methods methods returns expected r
         var xmlHttpRequestGetResponseHeader = spyOn(xmlHttpRequest, "getResponseHeader");
         paywallHttpRequest.setXMLHttpRequest(xmlHttpRequest);
 
-        paywallHttpRequest.getResponseHeader("SomeHeader")
+        paywallHttpRequest.getResponseHeader("SomeHeader");
         expect(xmlHttpRequestGetResponseHeader).toHaveBeenCalledWith("SomeHeader");
     });
 

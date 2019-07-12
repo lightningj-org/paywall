@@ -64,7 +64,8 @@ import static org.lightningj.paywall.spring.websocket.PaywallWebSocketConfig.CHE
  *
  */
 @Stepwise
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+//@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("/test_application.properties")
 class LocalWebSocketIntegrationSpec extends Specification {
 
@@ -142,7 +143,6 @@ class LocalWebSocketIntegrationSpec extends Specification {
         // have been created in database.
         println "Starting Test Setup on Port: " + randomServerPort
 
-        Thread.sleep(30 * 60 * 1000) // TODO
         def resp = get(uri: '/poc1' )
         then:
         resp.status == 402
