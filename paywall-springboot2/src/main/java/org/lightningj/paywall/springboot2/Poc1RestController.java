@@ -69,6 +69,7 @@ public class Poc1RestController {
     /**
      * REST Endpoint that generates an IOException, behind a paywall
      * @return json object with spring standard JSON Error
+     * @throws IOException on each call to test internal problems
      */
     @PaymentRequired(articleId = "abcPayPerRequest", payPerRequest = true)
     @RequestMapping("/poc1ApiError")
@@ -79,6 +80,7 @@ public class Poc1RestController {
     /**
      * REST Endpoint that generates an IOException, without paywall
      * @return json object with spring standard JSON Error
+     * @throws IOException on each call to test internal problems
      */
     @RequestMapping("/poc1ApiErrorNoPaywall")
     public PocResult poc1APIErrorNoPaywall() throws IOException{
