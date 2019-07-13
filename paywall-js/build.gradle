@@ -11,19 +11,11 @@ node {
     download = true
 }
 
-// TODO Remove
-task helloWorld( type: GruntTask, dependsOn: installGrunt ) {}
+task buildJS( type: GruntTask, dependsOn: installGrunt ) {}
 
 test.dependsOn grunt_jasmine
 
-// TODO JsDoc
-// TODO hint?
-// TODO Minify
-// Then what, copy in spring-boot?
-// 
-
-// TODO Remove
-build.dependsOn('helloWorld')
+build.dependsOn('buildJS')
 
 
 
