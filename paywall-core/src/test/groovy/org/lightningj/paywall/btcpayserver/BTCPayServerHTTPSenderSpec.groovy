@@ -71,6 +71,7 @@ class BTCPayServerHTTPSenderSpec extends Specification {
         setup:
         TestWebServer webServer = new TestWebServer(port,handler)
         webServer.startup()
+        Thread.sleep(500)
         when: // Test sending signed messages is correct
         handler.init(HttpResponseStatus.OK,"""{"test1":"value1"}""","application/json")
         byte[] response = sender.send(POST,"/someendpoint","""{"requestdata1":"value1"}""".getBytes("UTF-8"),

@@ -55,7 +55,7 @@ class TestWebServer {
 
     void startup(){
 
-        eventLoopGroup = new NioEventLoopGroup();
+        eventLoopGroup = new NioEventLoopGroup()
 
             ServerBootstrap b = new ServerBootstrap()
                     b.group(eventLoopGroup)
