@@ -13,7 +13,9 @@ node {
 
 task buildJS( type: GruntTask, dependsOn: installGrunt ) {}
 
-test.dependsOn installGrunt, grunt_jasmine
+assemble.dependsOn('installGrunt')
+
+test.dependsOn(['installGrunt', 'grunt_jasmine'])
 
 build.dependsOn('buildJS')
 
