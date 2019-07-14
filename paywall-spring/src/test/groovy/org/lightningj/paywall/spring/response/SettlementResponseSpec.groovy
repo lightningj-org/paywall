@@ -14,6 +14,7 @@
  *************************************************************************/
 package org.lightningj.paywall.spring.response
 
+import org.lightningj.paywall.JSONParsable
 import org.lightningj.paywall.paymentflow.SettlementResult
 import org.lightningj.paywall.vo.Settlement
 import spock.lang.Shared
@@ -30,11 +31,15 @@ class SettlementResponseSpec extends Specification {
     SettlementResult settlementResult
 
     @Shared def currentTimeZone
+    @Shared def currentDateFormatTimeZone
     @Shared def currentLocale
 
     def setupSpec(){
+        def timeZone = TimeZone.getTimeZone("Europe/Stockholm")
+        currentDateFormatTimeZone = JSONParsable.dateFormat.getTimeZone()
         currentTimeZone = TimeZone.getDefault()
-        TimeZone.setDefault(TimeZone.getTimeZone("Europe/Stockholm"))
+        TimeZone.setDefault(timeZone)
+        JSONParsable.dateFormat.setTimeZone(timeZone)
         currentLocale = Locale.getDefault()
         Locale.setDefault(new Locale("sv","SE"))
     }
@@ -47,6 +52,7 @@ class SettlementResponseSpec extends Specification {
     def cleanupSpec(){
         TimeZone.setDefault(currentTimeZone)
         Locale.setDefault(currentLocale)
+        JSONParsable.dateFormat.setTimeZone(currentDateFormatTimeZone)
     }
 
     def "Verify constructors and getter and setters"() {
