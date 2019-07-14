@@ -37,10 +37,10 @@ subprojects{
   test{
     systemProperty "java.net.preferIPv4Stack", "true"
     systemProperty "crypto.policy", "unlimited"
-    testLogging {
-      events "passed", "skipped", "failed"
-      exceptionFormat "full"
-    }
+//    testLogging { // Uncomment to get more descriptive error messages in travis CI.
+//      events "passed", "skipped", "failed"
+//      exceptionFormat "full"
+//    }
   }
 
   task javadocJar(type: Jar) {
