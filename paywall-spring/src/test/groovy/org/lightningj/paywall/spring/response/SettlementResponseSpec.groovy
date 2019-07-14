@@ -30,10 +30,13 @@ class SettlementResponseSpec extends Specification {
     SettlementResult settlementResult
 
     @Shared def currentTimeZone
+    @Shared def currentLocale
 
     def setupSpec(){
         currentTimeZone = TimeZone.getDefault()
         TimeZone.setDefault(TimeZone.getTimeZone("Europe/Stockholm"))
+        currentLocale = Locale.getDefault()
+        Locale.setDefault(new Locale("sv","SE"))
     }
 
     def setup() {
@@ -43,6 +46,7 @@ class SettlementResponseSpec extends Specification {
 
     def cleanupSpec(){
         TimeZone.setDefault(currentTimeZone)
+        Locale.setDefault(currentLocale)
     }
 
     def "Verify constructors and getter and setters"() {
@@ -88,7 +92,7 @@ class SettlementResponseSpec extends Specification {
 }"""
     }
 
-    def "Verify json convertion works."(){
+    def "Verify json conversion works."(){
         when:
         SettlementResponse r = new SettlementResponse(settlementResult)
         def json1 = r.toJsonAsString(true)
