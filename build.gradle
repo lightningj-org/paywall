@@ -35,7 +35,11 @@ subprojects{
   }
   
   test{
-     systemProperty "crypto.policy", "unlimited"
+    systemProperty "crypto.policy", "unlimited"
+    testLogging {
+      events "passed", "skipped", "failed"
+      exceptionFormat "full"
+    }
   }
 
   task javadocJar(type: Jar) {
