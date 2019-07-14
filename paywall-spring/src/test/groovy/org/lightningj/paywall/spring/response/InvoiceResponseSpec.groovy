@@ -18,6 +18,7 @@ import org.lightningj.paywall.paymentflow.InvoiceResult
 import org.lightningj.paywall.requestpolicy.RequestPolicyType
 import org.lightningj.paywall.vo.Invoice
 import org.lightningj.paywall.vo.amount.BTC
+import spock.lang.Shared
 import spock.lang.Specification
 
 import javax.json.JsonException
@@ -32,9 +33,20 @@ class InvoiceResponseSpec extends Specification {
 
     InvoiceResult invoiceResult
 
+    @Shared def currentTimeZone
+
+    def setupSpec(){
+        currentTimeZone = TimeZone.getDefault()
+        TimeZone.setDefault(TimeZone.getTimeZone("Europe/Stockholm"))
+    }
+
     def setup() {
         Invoice invoice = new Invoice("123".getBytes(), "fksjeoskajduakdfhaskdismensuduajseusdke+=", "test desc", new BTC(123), new org.lightningj.paywall.vo.NodeInfo("12312312@10.10.01.1"), Instant.ofEpochMilli(12345L), Instant.ofEpochMilli(2345L))
         invoiceResult = new InvoiceResult(invoice, "SomeToken+=")
+    }
+
+    def cleanupSpec(){
+        TimeZone.setDefault(currentTimeZone)
     }
 
     def "Verify constructors and getter and setters"() {

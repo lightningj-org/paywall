@@ -16,6 +16,7 @@ package org.lightningj.paywall.spring.response
 
 import org.lightningj.paywall.paymentflow.SettlementResult
 import org.lightningj.paywall.vo.Settlement
+import spock.lang.Shared
 import spock.lang.Specification
 
 import javax.json.Json
@@ -28,9 +29,20 @@ class SettlementResponseSpec extends Specification {
 
     SettlementResult settlementResult
 
+    @Shared def currentTimeZone
+
+    def setupSpec(){
+        currentTimeZone = TimeZone.getDefault()
+        TimeZone.setDefault(TimeZone.getTimeZone("Europe/Stockholm"))
+    }
+
     def setup() {
         Settlement settlement = new Settlement("abc".getBytes(), null, Instant.ofEpochMilli(10000), Instant.ofEpochMilli(5000), true)
         settlementResult = new SettlementResult(settlement, "SomeToken")
+    }
+
+    def cleanupSpec(){
+        TimeZone.setDefault(currentTimeZone)
     }
 
     def "Verify constructors and getter and setters"() {
