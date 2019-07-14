@@ -33,8 +33,9 @@ subprojects{
   javadoc {
     failOnError= false
   }
-  
+
   test{
+    systemProperty "java.net.preferIPv4Stack", "true"
     systemProperty "crypto.policy", "unlimited"
     testLogging {
       events "passed", "skipped", "failed"
