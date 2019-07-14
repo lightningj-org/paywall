@@ -96,8 +96,12 @@ passphrase and logs a warning if no pass phrase have been configured"""(){
         def path = km.getDirectory("Some Type","testdir")
 
         File pathDir = new File(path)
+        String tmpDir = System.getProperty("java.io.tmpdir")
+        if(!tmpDir.endsWith("/")){
+            tmpDir += "/"
+        }
         then:
-        path == System.getProperty("java.io.tmpdir") + "testdir"
+        path == tmpDir + "testdir"
         pathDir.exists()
         pathDir.isDirectory()
         1 * FileKeyManager.log.warning({ it =~"No Some Type configured, using temporary directory"})
