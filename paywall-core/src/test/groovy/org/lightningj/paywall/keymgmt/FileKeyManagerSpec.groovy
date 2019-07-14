@@ -100,7 +100,7 @@ passphrase and logs a warning if no pass phrase have been configured"""(){
         path == System.getProperty("java.io.tmpdir") + "testdir"
         pathDir.exists()
         pathDir.isDirectory()
-        1 * FileKeyManager.log.warning("No Some Type configured, using temporary directory /var/folders/91/lcc2y45902b9z_9qqmkrmplm0000gn/T/. THIS SHOULD NOT BE USED IN TEST ENVIRONMENTS.")
+        1 * FileKeyManager.log.warning({ it =~"No Some Type configured, using temporary directory"})
 
         when:
         km = km = new TestDefaultFileKeyManager(" ", " ", "")
@@ -111,6 +111,6 @@ passphrase and logs a warning if no pass phrase have been configured"""(){
         path == System.getProperty("java.io.tmpdir") + "testdir"
         pathDir.exists()
         pathDir.isDirectory()
-        1 * FileKeyManager.log.warning("No Some Type configured, using temporary directory /var/folders/91/lcc2y45902b9z_9qqmkrmplm0000gn/T/. THIS SHOULD NOT BE USED IN TEST ENVIRONMENTS.")
+        1 * FileKeyManager.log.warning({ it =~"No Some Type configured, using temporary directory"})
     }
 }
