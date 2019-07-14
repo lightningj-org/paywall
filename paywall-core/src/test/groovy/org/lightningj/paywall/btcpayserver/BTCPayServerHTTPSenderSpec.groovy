@@ -55,20 +55,21 @@ class BTCPayServerHTTPSenderSpec extends Specification {
     BTCPayServerHTTPSender sender
     TestHandler handler = new TestHandler()
 
-    private static final int PORT = 39823
+    @Shared int port
 
     def setupSpec(){
         BCUtils.installBCProvider()
         keyManager =  DummyKeyManagerInstance.commonInstance
+        port = findFreePort()
     }
 
     def setup(){
-        sender = new BTCPayServerHTTPSender("http://localhost:${PORT}",keyManager)
+        sender = new BTCPayServerHTTPSender("http://localhost:${port}",keyManager)
     }
 
     def "Verify that sending contains the correct headers"(){
         setup:
-        TestWebServer webServer = new TestWebServer(PORT,handler)
+        TestWebServer webServer = new TestWebServer(port,handler)
         webServer.startup()
         when: // Test sending signed messages is correct
         handler.init(HttpResponseStatus.OK,"""{"test1":"value1"}""","application/json")
@@ -190,5 +191,24 @@ class BTCPayServerHTTPSenderSpec extends Specification {
         void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
             ctx.flush()
         }
+    }
+
+    static int findFreePort() {
+        ServerSocket socket = null
+        try {
+            socket = new ServerSocket(0)
+            socket.setReuseAddress(true)
+            int port = socket.getLocalPort()
+            return port
+        } catch (IOException e) {
+        } finally {
+            if (socket != null) {
+                try {
+                    socket.close()
+                } catch (IOException e) {
+                }
+            }
+        }
+        throw new IllegalStateException("Could not find a free TCP/IP port for unit test.")
     }
 }
