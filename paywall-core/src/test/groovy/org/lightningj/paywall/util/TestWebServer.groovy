@@ -14,25 +14,15 @@
  *************************************************************************/
 package org.lightningj.paywall.util
 
-import io.netty.bootstrap.ServerBootstrap
-import io.netty.channel.ChannelFuture
-import io.netty.channel.ChannelInboundHandlerAdapter
-import io.netty.channel.ChannelInitializer
-import io.netty.channel.ChannelOption
-import io.netty.channel.ChannelPipeline
-import io.netty.channel.EventLoopGroup
-import io.netty.channel.nio.NioEventLoopGroup
-import io.netty.channel.socket.SocketChannel
-import io.netty.channel.socket.nio.NioServerSocketChannel
-import io.netty.handler.codec.http.FullHttpResponse
-import io.netty.handler.codec.http.HttpClientCodec
-import io.netty.handler.codec.http.HttpObjectAggregator
-import io.netty.handler.codec.http.HttpResponseEncoder
-import io.netty.handler.codec.http.HttpServerCodec
-import io.netty.handler.logging.LogLevel
-import io.netty.handler.logging.LoggingHandler
-
-
+import io.grpc.netty.shaded.io.netty.bootstrap.ServerBootstrap
+import io.grpc.netty.shaded.io.netty.channel.*
+import io.grpc.netty.shaded.io.netty.channel.nio.NioEventLoopGroup
+import io.grpc.netty.shaded.io.netty.channel.socket.SocketChannel
+import io.grpc.netty.shaded.io.netty.channel.socket.nio.NioServerSocketChannel
+import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpObjectAggregator
+import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpServerCodec
+import io.grpc.netty.shaded.io.netty.handler.logging.LogLevel
+import io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler
 
 /**
  * Help class that sets up a test web server on a specified port with a given handler.

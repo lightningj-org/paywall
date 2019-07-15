@@ -47,6 +47,9 @@ dependencies {
 	testCompile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
+	// Force use of guava during spring boot2 tests due to dependency in functional tests.
+	// Conflicting guava between selenium and netty (from lightningJ) dependencies.
+	testCompile "com.google.guava:guava:25.0-jre"
 	testCompile "org.gebish:geb-spock:$gebVersion"
 	// Drivers
 	testCompile "org.seleniumhq.selenium:selenium-chrome-driver:$seleniumVersion"

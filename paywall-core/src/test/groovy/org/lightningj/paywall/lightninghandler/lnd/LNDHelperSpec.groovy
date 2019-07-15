@@ -207,84 +207,108 @@ class LNDHelperSpec extends Specification {
     }
 
     def infoResponse = """{
-    "identity_pubkey": "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa",
-    "alias": "TomSelleck",
-    "num_pending_channels": 0,
-    "num_active_channels": 16,
-    "num_peers": 11,
-    "block_height": 1445377,
-    "block_hash": "0000000000000114087b92159db020478e094e1e693d63a462e3e73f45481d69",
-    "synced_to_chain": true,
-    "testnet": true,
-    "chains": [
-        "bitcoin"
-    ],
-    "uris": [
-        "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa@82.196.97.86:9735"
-    ],
-    "best_header_timestamp": 1543258388,
-    "version": "0.5.0-beta commit=3b2c807288b1b7f40d609533c1e96a510ac5fa6d"
-}"""
+                "version": "0.7.0-beta commit=v0.7.0-beta",
+                "identity_pubkey": "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa",
+                "alias": "TomSelleck",
+                "color": "#009900",
+                "num_pending_channels": 0,
+                "num_active_channels": 25,
+                "num_inactive_channels": 27,
+                "num_peers": 13,
+                "block_height": 1569045,
+                "block_hash": "000000006dbf2d8ba73bc8bcea75fa151cf1c7f3974128151faadfd521441c01",
+                "best_header_timestamp": 1563170668,
+                "synced_to_chain": true,
+                "testnet": true,
+                "chains": [
+                    {
+                        "chain": "bitcoin",
+                        "network": "testnet"
+                    }
+            ],
+                "uris": [
+                    "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa@82.196.97.86:9735"
+            ]
+            }"""
 
-    def infoResponseWithDualChain1 = """{
-    "identity_pubkey": "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa",
-    "alias": "TomSelleck",
-    "num_pending_channels": 0,
-    "num_active_channels": 16,
-    "num_peers": 11,
-    "block_height": 1445377,
-    "block_hash": "0000000000000114087b92159db020478e094e1e693d63a462e3e73f45481d69",
-    "synced_to_chain": true,
-    "testnet": true,
-    "chains": [
-        "invalid",
-        "bitcoin"
-    ],
-    "uris": [
-        "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa@82.196.97.86:9735"
-    ],
-    "best_header_timestamp": 1543258388,
-    "version": "0.5.0-beta commit=3b2c807288b1b7f40d609533c1e96a510ac5fa6d"
-}"""
+    def infoResponseWithDualChain1 = """
+{
+                "version": "0.7.0-beta commit=v0.7.0-beta",
+                "identity_pubkey": "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa",
+                "alias": "TomSelleck",
+                "color": "#009900",
+                "num_pending_channels": 0,
+                "num_active_channels": 25,
+                "num_inactive_channels": 27,
+                "num_peers": 13,
+                "block_height": 1569045,
+                "block_hash": "000000006dbf2d8ba73bc8bcea75fa151cf1c7f3974128151faadfd521441c01",
+                "best_header_timestamp": 1563170668,
+                "synced_to_chain": true,
+                "testnet": true,
+                "chains": [
+                    {
+                        "chain": "invalid",
+                        "network": "somenetwork"
+                    },
+                    {
+                        "chain": "bitcoin",
+                        "network": "testnet"
+                    }
+            ],
+                "uris": [
+                    "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa@82.196.97.86:9735"
+            ]
+            }"""
     def infoResponseWithDualChain2 = """{
-    "identity_pubkey": "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa",
-    "alias": "TomSelleck",
-    "num_pending_channels": 0,
-    "num_active_channels": 16,
-    "num_peers": 11,
-    "block_height": 1445377,
-    "block_hash": "0000000000000114087b92159db020478e094e1e693d63a462e3e73f45481d69",
-    "synced_to_chain": true,
-    "testnet": true,
-    "chains": [
-        "litecoin",
-        "bitcoin"
-    ],
-    "uris": [
-        "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa@82.196.97.86:9735"
-    ],
-    "best_header_timestamp": 1543258388,
-    "version": "0.5.0-beta commit=3b2c807288b1b7f40d609533c1e96a510ac5fa6d"
-}"""
+                "version": "0.7.0-beta commit=v0.7.0-beta",
+                "identity_pubkey": "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa",
+                "alias": "TomSelleck",
+                "color": "#009900",
+                "num_pending_channels": 0,
+                "num_active_channels": 25,
+                "num_inactive_channels": 27,
+                "num_peers": 13,
+                "block_height": 1569045,
+                "block_hash": "000000006dbf2d8ba73bc8bcea75fa151cf1c7f3974128151faadfd521441c01",
+                "best_header_timestamp": 1563170668,
+                "synced_to_chain": true,
+                "testnet": true,
+                "chains": [
+                    {
+                        "chain": "litecoin",
+                        "network": "testnet"
+                    },
+                    {
+                        "chain": "bitcoin",
+                        "network": "testnet"
+                    }
+            ],
+                "uris": [
+                    "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa@82.196.97.86:9735"
+            ]
+            }"""
 
     def infoResponseWithNoChain1 = """{
-    "identity_pubkey": "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa",
-    "alias": "TomSelleck",
-    "num_pending_channels": 0,
-    "num_active_channels": 16,
-    "num_peers": 11,
-    "block_height": 1445377,
-    "block_hash": "0000000000000114087b92159db020478e094e1e693d63a462e3e73f45481d69",
-    "synced_to_chain": true,
-    "testnet": true,
-    "chains": [
-    ],
-    "uris": [
-        "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa@82.196.97.86:9735"
-    ],
-    "best_header_timestamp": 1543258388,
-    "version": "0.5.0-beta commit=3b2c807288b1b7f40d609533c1e96a510ac5fa6d"
-}"""
+                "version": "0.7.0-beta commit=v0.7.0-beta",
+                "identity_pubkey": "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa",
+                "alias": "TomSelleck",
+                "color": "#009900",
+                "num_pending_channels": 0,
+                "num_active_channels": 25,
+                "num_inactive_channels": 27,
+                "num_peers": 13,
+                "block_height": 1569045,
+                "block_hash": "000000006dbf2d8ba73bc8bcea75fa151cf1c7f3974128151faadfd521441c01",
+                "best_header_timestamp": 1563170668,
+                "synced_to_chain": true,
+                "testnet": true,
+                "chains": [
+            ],
+                "uris": [
+                    "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa@82.196.97.86:9735"
+            ]
+            }"""
 
     def infoResponseWithNoChain2 = """{
     "identity_pubkey": "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa",
@@ -304,83 +328,103 @@ class LNDHelperSpec extends Specification {
 }"""
 
     def infoResponseWithNoValidChain = """{
-    "identity_pubkey": "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa",
-    "alias": "TomSelleck",
-    "num_pending_channels": 0,
-    "num_active_channels": 16,
-    "num_peers": 11,
-    "block_height": 1445377,
-    "block_hash": "0000000000000114087b92159db020478e094e1e693d63a462e3e73f45481d69",
-    "synced_to_chain": true,
-    "testnet": true,
-    "chains": [
-        "invalid"
-    ],
-    "uris": [
-        "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa@82.196.97.86:9735"
-    ],
-    "best_header_timestamp": 1543258388,
-    "version": "0.5.0-beta commit=3b2c807288b1b7f40d609533c1e96a510ac5fa6d"
-}"""
+                "version": "0.7.0-beta commit=v0.7.0-beta",
+                "identity_pubkey": "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa",
+                "alias": "TomSelleck",
+                "color": "#009900",
+                "num_pending_channels": 0,
+                "num_active_channels": 25,
+                "num_inactive_channels": 27,
+                "num_peers": 13,
+                "block_height": 1569045,
+                "block_hash": "000000006dbf2d8ba73bc8bcea75fa151cf1c7f3974128151faadfd521441c01",
+                "best_header_timestamp": 1563170668,
+                "synced_to_chain": true,
+                "testnet": true,
+                "chains": [
+                    {
+                        "chain": "invalid",
+                        "network": "testnet"
+                    }
+            ],
+                "uris": [
+                    "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa@82.196.97.86:9735"
+            ]
+            }"""
 
     def infoResponseDualURIs = """{
-    "identity_pubkey": "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa",
-    "alias": "TomSelleck",
-    "num_pending_channels": 0,
-    "num_active_channels": 16,
-    "num_peers": 11,
-    "block_height": 1445377,
-    "block_hash": "0000000000000114087b92159db020478e094e1e693d63a462e3e73f45481d69",
-    "synced_to_chain": true,
-    "testnet": true,
-    "chains": [
-        "bitcoin"
-    ],
-    "uris": [
-        "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa@82.196.97.86:9735",
-        "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa@82.196.97.86:9736"
-    ],
-    "best_header_timestamp": 1543258388,
-    "version": "0.5.0-beta commit=3b2c807288b1b7f40d609533c1e96a510ac5fa6d"
-}"""
+                "version": "0.7.0-beta commit=v0.7.0-beta",
+                "identity_pubkey": "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa",
+                "alias": "TomSelleck",
+                "color": "#009900",
+                "num_pending_channels": 0,
+                "num_active_channels": 25,
+                "num_inactive_channels": 27,
+                "num_peers": 13,
+                "block_height": 1569045,
+                "block_hash": "000000006dbf2d8ba73bc8bcea75fa151cf1c7f3974128151faadfd521441c01",
+                "best_header_timestamp": 1563170668,
+                "synced_to_chain": true,
+                "testnet": true,
+                "chains": [
+                    {
+                        "chain": "bitcoin",
+                        "network": "testnet"
+                    }
+            ],
+                "uris": [
+                    "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa@82.196.97.86:9735",
+                    "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa@82.196.97.86:9736"
+            ]
+            }"""
     def infoResponseMainNet = """{
-    "identity_pubkey": "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa",
-    "alias": "TomSelleck",
-    "num_pending_channels": 0,
-    "num_active_channels": 16,
-    "num_peers": 11,
-    "block_height": 1445377,
-    "block_hash": "0000000000000114087b92159db020478e094e1e693d63a462e3e73f45481d69",
-    "synced_to_chain": true,
-    "testnet": false,
-    "chains": [
-        "bitcoin"
-    ],
-    "uris": [
-        "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa@82.196.97.86:9735"
-    ],
-    "best_header_timestamp": 1543258388,
-    "version": "0.5.0-beta commit=3b2c807288b1b7f40d609533c1e96a510ac5fa6d"
-}"""
+                "version": "0.7.0-beta commit=v0.7.0-beta",
+                "identity_pubkey": "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa",
+                "alias": "TomSelleck",
+                "color": "#009900",
+                "num_pending_channels": 0,
+                "num_active_channels": 25,
+                "num_inactive_channels": 27,
+                "num_peers": 13,
+                "block_height": 1569045,
+                "block_hash": "000000006dbf2d8ba73bc8bcea75fa151cf1c7f3974128151faadfd521441c01",
+                "best_header_timestamp": 1563170668,
+                "synced_to_chain": true,
+                "testnet": false,
+                "chains": [
+                    {
+                        "chain": "bitcoin",
+                        "network": "testnet"
+                    }
+            ],
+                "uris": [
+                    "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa@82.196.97.86:9735"
+            ]
+            }"""
     def infoResponseInvalidURI = """{
-    "identity_pubkey": "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa",
-    "alias": "TomSelleck",
-    "num_pending_channels": 0,
-    "num_active_channels": 16,
-    "num_peers": 11,
-    "block_height": 1445377,
-    "block_hash": "0000000000000114087b92159db020478e094e1e693d63a462e3e73f45481d69",
-    "synced_to_chain": true,
-    "testnet": false,
-    "chains": [
-        "bitcoin"
-    ],
-    "uris": [
-        "invalid"
-    ],
-    "best_header_timestamp": 1543258388,
-    "version": "0.5.0-beta commit=3b2c807288b1b7f40d609533c1e96a510ac5fa6d"
-}"""
+                "version": "0.7.0-beta commit=v0.7.0-beta",
+                "identity_pubkey": "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa",
+                "alias": "TomSelleck",
+                "color": "#009900",
+                "num_pending_channels": 0,
+                "num_active_channels": 25,
+                "num_inactive_channels": 27,
+                "num_peers": 13,
+                "block_height": 1569045,
+                "block_hash": "000000006dbf2d8ba73bc8bcea75fa151cf1c7f3974128151faadfd521441c01",
+                "best_header_timestamp": 1563170668,
+                "synced_to_chain": true,
+                "testnet": true,
+                "chains": [
+                    {
+                        "chain": "bitcoin",
+                        "network": "testnet"
+                    }
+            ],
+                "uris": [
+                    "invalid"
+            ]
+            }"""
 
     def unsettledInvoice = """{
     "memo": "",

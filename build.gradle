@@ -4,6 +4,7 @@ allprojects{
   repositories {
     mavenCentral()
   }
+
 }
 
 subprojects{
@@ -15,6 +16,7 @@ subprojects{
   apply plugin: 'maven'
   apply plugin: "groovy"
   apply plugin: 'idea'
+  apply plugin: 'project-report'
   sourceCompatibility = 1.8
 
   dependencies{
@@ -26,6 +28,11 @@ subprojects{
     testRuntime "net.bytebuddy:byte-buddy:1.9.7"          // allows mocking of classes (in addition to interfaces)
     testRuntime "org.objenesis:objenesis:2.5.1"    // allows mocking of classes without default constructor (together with CGLIB)
   }
+
+  /**
+   * Test to be run prior to release to run all test suites. Needs a configured LND node for integration test.
+   */
+  task preReleaseTest(dependsOn: ["check",":paywall-core:integrationTest",":paywall-springboot2:functionalTest"], group: "verification"){}
 
   /*
   Adds generated source directories to be included in javadoc generation.
@@ -57,3 +64,4 @@ subprojects{
     archives javadocJar, sourcesJar
   }
 }
+
