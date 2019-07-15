@@ -15,6 +15,7 @@
 package org.lightningj.paywall.lightninghandler.lnd;
 
 import org.lightningj.lnd.wrapper.ClientSideException;
+import org.lightningj.lnd.wrapper.message.Chain;
 import org.lightningj.lnd.wrapper.message.GetInfoResponse;
 import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.vo.*;
@@ -53,8 +54,8 @@ public class LNDHelper {
      */
     public LNDHelper(GetInfoResponse infoResponse) throws InternalErrorException{
         try{
-            for(String chain : infoResponse.getChains()){
-                String currencyCode = CHAIN_VALUE_TO_CURRENCY_CODE.get(chain);
+            for(Chain chain : infoResponse.getChains()){
+                String currencyCode = CHAIN_VALUE_TO_CURRENCY_CODE.get(chain.getChain());
                 if(currencyCode != null){
                     supportedCurrency = currencyCode;
                     break;
