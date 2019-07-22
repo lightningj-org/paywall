@@ -1,5 +1,4 @@
-Some API Documentation
+Javascript API Generated Documentation
 =====================
 
-Some text, TODO some basic info and reference
-to documentation.
+Javascript API documentation, see [JavaScript API Doc](../index.html#javascriptapi) for details and examples.

@@ -1,0 +1,593 @@
+[[javascriptapi]]
+== Javascript API
+
+The paywall project has a Javascript library, made to simply preforming AJAX request to
+a paywalled service.
+
+The library's main class is PaywallHttpRequest which wraps the standard XMLHttpRequest with
+paywall functionality by triggering events such as when invoice was received and when it was
+settled. The PaywallHttpRequest automatically calls the underlying service again after settlement.
+
+The library also contains help methods for retrieving remaining time on invoice or settlement
+before it expires and which units to display invoice amount in.
+
+=== Prerequisites
+
+In order to use the Javascript API you need to import the script paywall.js
+into your web page. paywall.js has two dependency libraries, sockjs.js and stomp.js
+used to open up web sockets.
+
+Add the following to your web page, given that you placed the java script files in 'js' sub directory.
+
+[source, html]
+-------------------------------------
+    <script src="js/sockjs.js"></script>
+    <script src="js/stomp.js"></script>
+    <script src="js/paywall.js"></script>
+-------------------------------------
+
+The required javascript files can be downloaded here:
+
+|===
+| Debug Version | Minified Version
+
+| link:dist/stomp.js[stomp.js]
+| link:dist/stomp.min.js[stomp.min.js]
+
+| link:dist/sockjs.js[sockjs.js]
+| link:dist/sockjs.min.js[sockjs.min.js]
+
+| link:dist/paywall.js[paywall.js]
+| link:dist/paywall.min.js[paywall.min.js]
+
+|===
+
+
+=== The PaywallHttpRequest Class
+
+To create a request to a paywalled server is very similar to a regular XMLHttpRequest but
+using the PaywallHttpRequest class instead.
+
+In more details the PaywallHttpRequest works in the following way:
+
+ * It wraps one XMLHttpRequest instance and opens a connection to the service.
+ * As soon as the header have been downloaded, it is inspected
+   for 402 (Payment Required).
+ * If found is payment flow started, invoice is downloaded and a WebSocket channel
+   is opened to the server.
+ * As soon as a settlement is sent through the WebSocket, a new XMLHttpRequest is created towards the service,
+ with all original request parameters set once more and the settlements JWT token in the request header
+ * The new call should be accepted by the service and an onload event is triggered when download is complete.
+
+The PaywallHttpRequest can also be used towards non-paywalled services and will then
+function as a regular XMLHttpRequest with the exception that onloadstart event is never triggered.
+
+==== Example Usages
+
+Plain Javascript is used in the examples but it should relative easy to adopt the code
+to the Javascript framework of choice.
+
+===== A Simple Paywall Call
+
+Below is a simple example of calling a paywalled service. In addition to a normal
+XMLHttpRequest there are two event listeners created. One when invoice have been created
+and should be displayed to the end user. And one when payment have been settled and invoice panel
+should be removed from the web page.
+
+[source, javascript]
+-------------------------------------
+// Create a PaywallHttpRequest instance
+var paywallHttpRequest = new PaywallHttpRequest();
+
+// First set up event listeners
+
+paywallHttpRequest.paywall.addEventListener("InvoiceListener", PaywallEventType.INVOICE, function (type, invoice) {
+  // Add a Paywall Invoice event Listener that displays the invoice for the user.
+  showInvoicePanel(invoice);
+});
+
+paywallHttpRequest.paywall.addEventListener("SettledListener", PaywallEventType.SETTLED, function (type, settlement) {
+  // Hide the invoice panel as soon as the invoice have been payed.
+  hideInvoicePanel();
+});
+
+paywallHttpRequest.onload = function(){
+  // Process the service response as would be done with a regular XMLHttpRequest
+  processServiceResponse(paywallHttpRequest.responseText);
+}
+
+// Open up a connection to the paywalled service.
+paywallHttpRequest.open("POST","/someRestService");
+// Send the data to the service that will trigger the payment flow if required.
+paywallHttpRequest.send("{'data':'value'}");
+
+-------------------------------------
+
+===== Displaying Invoice
+
+The example below show Javascript to populate a panel in pure Javascript. This
+could be done in a much more elegant way in a modern framework such as Angular or React.
+
+[source, javascript]
+-------------------------------------
+
+function showInvoicePanel(invoice){
+  // The invoice contains a number of fields that might be displayable.
+  document.getElementById("invoicetext").innerText = invoice.description;
+  document.getElementById('invoicebolt11').innerText = invoice.bolt11Invoice;
+
+  // To display a QR Code, There is a QR generator link inside the paywallHttpRequest object
+  // constructing a full URL to the QR Generation endpoint.
+  // Just have a img tag and set the src attribute to:
+  var invoiceQRImg = document.getElementById('invoiceqr');
+  invoiceQRImg.src = paywallHttpRequest.paywall.genQRLink();
+
+  // Amount field have a special help function to display amount in a specified unit.
+  // In this example we display the amount in BIT.
+  document.getElementById('invoiceamount').innerText = paywallHttpRequest.paywall.getInvoiceAmount().as(BTCUnit.BIT);
+
+  // If node info exists on server it is also possible to display connection
+  // information
+  document.getElementById('invoiceNodeInfo').innerText = invoice.nodeInfo.connectString;
+
+ }
+-------------------------------------
+
+==== Displaying Remaining Times
+
+There also exists help methods to display a count down counter of remaining validity of
+invoice and settlement as well as a count down until a settlement is valid if settlment validity is set in future.
+
+The methods are paywallHttpRequest.paywall.getInvoiceExpiration(), paywallHttpRequest.paywall.getSettlementExpiration()
+and paywallHttpRequest.paywall.getSettlementValidFrom(). The method returns a PaywallTime object that have
+help methods to retrieve the number of hours, minutes and seconds left in order to create a hh:mm:ss counter. The
+counter never gets to negative but stops as 00:00:00.
+
+Example code to create a count down counter displaying mm:ss left on an invoice validity:
+
+[source, javascript]
+-------------------------------------
+
+function updateInvoiceRemainingTime(){
+  var remainingTime = paywallHttpRequest.paywall.getInvoiceExpiration().remaining();
+  document.getElementById('invoiceTimeRemaining').innerText = timeRemaining.minutes() + ":" + timeRemaining.seconds();
+}
+
+setInterval(updateInvoiceRemainingTime, 1000);
+
+-------------------------------------
+
+See classes PaywallTime and PaywallTimeUnit in Javascript API documentation for more details.
+
+==== Displaying Amount with a Given Unit
+
+The Invoice JSON always returns amount in a base unit (i.e satoshi) with a given magnetude of none, milli or nano.
+
+To display amount in other units such as BTC, micro BTC or BIT etc. There exists a help method to convert invoice amount
+into a specified unit. There are two ways of doing this:
+
+[source, javascript]
+-------------------------------------
+// One way is to call paywallHttpRequest object
+var amountInBit = paywallHttpRequest.paywall.getInvoiceAmount().as(BTCUnit.BIT);
+
+// The other if you have access to invoice object is to create a PaywallAmount object and
+// pass the invoice.invoiceAmount.
+var amountInBit2 = new PaywallAmount(invoice.invoiceAmount).as(BTCUnit.BIT);
+
+-------------------------------------
+
+Available BTC Units are:
+
+.Table Available BTCUnit Values
+|===
+| Unit | Description
+
+| BTC
+| BTC, i.e 100.000.000 Satoshis.
+
+| MILLIBTC
+| One thousand part of BTC, i.e 100.000 Satoshis.
+
+| BIT
+| In BIT, i.e 100 Satoshis.
+
+| SAT
+| In Satoshis.
+
+| MILLISAT
+| In milli satoshis, 1/1000 satoshi.
+
+| NANOSAT
+| In nano satoshis, 1/1000.000 satoshi.
+
+|===
+
+==== Reusing Settlement for Multiple Calls
+
+If the payment flow is not per-request is is possible to reuse
+the paywallHttpRequest as long as it has the state SETTLED. To do this
+just perform a recall of first open() then send() methods. As long as the data
+in open and send calls fulfils the defined request policy the calls will succeed.
+
+==== Calling Non-Paywalled Services
+
+It is possible to use PaywallHttpRequest as a regular XMLHttpRequest to non-paywalled services
+and it will work in the same way with the only difference that onloadstart event is not triggered.
+
+==== Handling Links from the Invoice JSON Object
+
+The links in Invoice JSON can be both relative or full URLs depending on server side configuration.
+There exists help methods in PaywallHttpRequest that always constructs the full URLs.
+
+These help methods are: paywallHttpRequest.paywall.genQRLink(), paywallHttpRequest.paywall.genCheckSettlementLink(),
+paywallHttpRequest.paywall.genCheckSettlementWebSocketLink().
+
+==== Error Handling
+
+There are three types of error that can occur, either it is a XMLHttpRequest error, API error or Paywall related error.
+
+To handle a XMLHttpRequest error (that is triggered when connection related issues occurs) is 'onerror' event handler called
+in same way as XMLHttpRequest.
+
+To handle API errors from the underlying service is done in the same way as would have been done in a regular
+XMLHttpRequest after load is status code and response text examined for error message.
+
+If paywall error occurs is a PAYWALL_ERROR event triggered and the payment flow state is set to PAYWALL_ERROR.
+The error message can be retrieved with paywallHttpRequest.paywall.getPaywallError(). See table 'Paywall Error JSON Object Properties'
+for details about the generated error messages.
+
+==== Available PaywallHttpRequest States
+
+A PaywallHttpRequest has a state that can be fetched by the paywallHttpRequest.paywall.getState() that
+returns one of the values of the PaywallState enumeration defined in table below.
+
+.Table Available Paywall States
+|===
+| State | Description
+
+| NEW
+| Payment flow is new and no invoice have yet been generated.
+
+| INVOICE
+| Invoice have been generated and is waiting to be settled.
+
+| INVOICE_EXPIRED
+| Generated invoice have expired and a new payment flow have to be generated.
+
+| SETTLED
+| Payment have been settled and the payment flow should be ready to perform the call.
+  If multiple calls is possible is up to the settlement type.
+
+| EXECUTED
+| Payment type is of type pay per request and request have been processed successfully.
+  Never set if related payment flow is not pay-per-request. Then it will be SETTLED until
+  SETTLEMENT expires.
+
+| SETTLEMENT_NOT_YET_VALID
+| Generated settlement is not yet valid and need to wait until call can be performed.
+
+| SETTLEMENT_EXPIRED
+| Generated settlement have expired and new payment flow have to be generated.
+
+| PAYWALL_ERROR
+| Paywall API related error occurred during processing of payment flow, see paywallError object for details.
+
+| ABORTED
+| Request was aborted by the user by calling the abort() method.
+
+|===
+
+==== Available Events Generated by PaywallHttpRequest
+
+
+===== Wrapped XMLHttpRequest Events
+
+During POST of data the following upload events are also triggered, see XMLHttpRequest standard for details.
+
+One exception is when calling unpaywalled services with PaywallHttpRequest, in that case is
+'onloadstart' event never triggered since it was captured when parsing headers for '402 Payment Required' header.
+
+
+===== Paywall Specific Events
+
+There are a number of paywall related events extending the regular XMLHttpRequest
+events in order to handle displaying of invoice and hiding invoice upon settlement.
+
+To register a listener use the method paywallHttpRequest.paywall.addEventListener(name, type, callback), where
+the name parameter should be a unique name for the listener within the PaywallHttpRequest object, type is
+one of defined event types in table below, with the special type 'ALL' matching all paywall
+related events.
+
+To remove a listener from a PaywallHttpRequest use paywallHttpRequest.paywall.removeEventListener(name)
+
+.Table Paywall Specific Event Types
+|===
+| Event Type | Description | Object Type
+
+| INVOICE
+| Invoice have been generated and is waiting to be settled. Time remaining of invoice can
+  be fetched with the paywallHttpRequest.paywall.getInvoiceExpiration() method.
+| Invoice JSON Object
+
+| INVOICE_EXPIRED
+| Generated invoice have expired and a new payment flow have to be generated.
+| Invoice JSON Object
+
+| SETTLED
+| Payment have been settled and the payment flow should be ready to perform the call.
+  If multiple calls is possible is up to the settlement type.
+| Settlement JSON Object
+
+| EXECUTED
+| Payment type is of type pay per request and request have been processed successfully.
+| Settlement JSON Object
+
+| SETTLEMENT_NOT_YET_VALID
+| Generated settlement is not yet valid and need to wait until call can be performed.
+  Time remaining until settlement is valid can be fetched with the paywallHttpRequest.paywall.getSettlementValidFrom()
+  method.
+| Settlement JSON Object
+
+| SETTLEMENT_EXPIRED
+| Generated settlement have expired and new payment flow have to be generated.
+  Time remaining until settlement is expired can be fetched with the paywallHttpRequest.paywall.getSettlementExpiration()
+  method.
+| Settlement JSON Object
+
+| PAYWALL_ERROR
+| Paywall API related error occurred during processing of payment flow, see paywallError object for details.
+| Paywall Error Object
+
+| ALL
+| Special value used when registering new listener that should receive notification for all events
+  related to this paywall flow.
+| N/A
+|===
+
+=== Defined JSON Data structures
+
+This section defines all JSON Data Structures used in the underlying API. When using the PaywallHttpRequest the
+structures are usually sent when event is triggered.
+
+All structures can also be retrieved as XML by setting the 'Accept' header to content type 'application/xml' or
+appending '.xml' to the request service url.
+
+==== Invoice JSON Object
+
+An invoice JSON Object is returned whenever a service with @PaymentRequired annotation determines that a new
+payment flow is required. The service will the return HTTP Status PAYMENT_REQUIRED (402) and
+the Invoice Json Object as data.
+
+.Table Invoice JSON Object Properties
+|===
+| Property | Type | Description
+
+| status
+| String
+| The status of the response, should always be 'OK'. Used to indicate if this JSON Object is not an error message.
+
+| type
+| String
+| The type of JSON Object, always the value 'invoice'.
+
+| preImageHash
+| String
+| The generated preImageHash from PreImageData which acts as an unique id for the payment flow. The string
+  is base58 encoded.
+
+| bolt11Invoice
+| String
+| The bolt11 invoice to display for the requester.
+
+| description
+| String
+| Description to display in the invoice. (Optional).
+
+| invoiceAmount
+| Amount Json Object
+| The amount in the invoice. (Optional)
+
+| nodeInfo
+| Node Info Json Object
+| Information about the related lightning node. (Optional)
+
+| token
+| String
+| The generated JWT invoice token used to track the payment when checking settlement. This is sent
+  in the header of websocket connections or calls the checkSettlement service.
+
+| invoiceDate
+| String
+| The time this invoice was created.
+
+| invoiceExpireDate
+| String
+| The time the invoice will expire.
+
+| payPerRequest
+| boolean
+| If payment is for this api is for one time only or usage is for a given period of time.
+
+| requestPolicyType
+| String
+| Specifying type of policy used for aggregating significant request data. See section defining RequestPolicyType values
+  in @PaymentRequired annotation for description.
+
+| checkSettlementLink
+| String
+| Link to settlement controller for checking payment state. Used if it's not possible to use WebSockets.
+
+| qrLink
+| String
+| Link to QR Code generator service. This is the full link that can be set in src attribute if <img> tags in order to
+  display the QR Code.
+
+| checkSettlementWebSocketEndpoint
+| String
+| URL to the WebSocket CheckSettlement EndPoint. This connection is done automatically by PaywallHttpRequest.
+
+| checkSettlementWebSocketQueue
+| String
+| The preImageHash unique (payment flow) web socket queue to subscribe to.
+
+|===
+
+===== Crypto Amount JSON Object
+
+Crypt Amount JSON is a sub object inside the Invoice JSON Object and specifies the amount
+to pay.
+
+.Table Crypto Amount JSON Object Properties
+|===
+| Property | Type | Description
+
+| value
+| Number
+| The crypto amount value. For BTC it is based on satoshis with given magnetude.
+
+| currencyCode
+| String
+| Specification of type of crypto currency. Currently is only 'BTC' supported.
+
+| magnetude
+| String
+| The magnetude of specified base unit, either 'NONE', 'MILLI' or 'NANO'. If not specified
+  is 'NONE' (full satoshis) assumed.
+
+|===
+
+===== Node Info JSON Object
+
+Node Info is an optional sub object to Invoice JSON specifying how to connect to the service
+lightning node. It is configured on server side if this should be populated or not.
+
+.Table Node Info JSON Object Properties
+|===
+| Property | Type | Description
+
+| publicKeyInfo
+| String
+| The underlying lightning node's public Key information.
+
+| nodeAddress
+| String
+| The underlying lightning the node's address.
+
+| nodePort
+| Number
+| The underlying lightning the node's port.
+
+| mainNet
+| Boolean
+| If the node is connected to testnet or real production network.
+
+| connectString
+| String
+| The complete connect string to the lightning node.
+
+|===
+
+==== Settlement JSON Object
+
+The settlement JSON Object is sent through the web socket as soon as settlement was
+detected or as a response to the checkSettlement endpoint. I contains the JWT token that
+can be used towards the paywalled API as a proof of payment.
+
+.Table Node Info JSON Object Properties
+|===
+| Property | Type | Description
+
+| status
+| String
+| The status of the response, should always be 'OK'. Used to indicate if this JSON Object is not an error message.
+
+| type
+| String
+| The type of JSON Object, always the value 'settlement'.
+
+| preImageHash
+| String
+| The generated preImageHash from PreImageData which acts as an unique id for the payment flow. The string
+  is base58 encoded. (Optional, always set if settled)
+
+| token
+| String
+| The generated settlement JWT Token that should be set as header value in regular API call in order
+  for the @PaymentRequired annotation to accept it. This is done automatically by PaywallHttpRequest class.
+  (Optional, always set if settled)
+
+| settlementValidUntil
+| String
+| The date and time the settlement is valid until. (Optional, always set if settled)
+
+| settlementValidFrom
+| String
+| The date and time the settlement is valid from (Optional).
+
+| payPerRequest
+| Boolean
+| If related payment is for one request only or if multiple requests can be done that fits the request policy.
+  (Optional, always set if settled)
+
+| settled
+| Boolean
+| If related payment have been settled.
+
+|===
+
+==== Paywall Error JSON Object
+
+The paywall error JSON is created if error occurred in the paywall related components.
+The error object if occurred can be fetched with paywallHttpRequest.paywall.getPaywallError().
+Regular errors from the underlying API is handled in the same way as if XMLHttpRequest would be used.
+
+.Table Paywall Error JSON Object Properties
+|===
+| Property | Type | Description
+
+| status
+| String
+| The name of the related the HTTP status code, for example 'UNAUTHORIZED'. The used HTTP status code to exception mapping is
+  described in table below.
+
+| message
+| String
+| A descriptive error message associated with exception.
+
+| errors
+| String
+| A list of more detailed error messages of problems that occurred. (Optional)
+
+| reason
+| String
+| If error is related to JWT token, otherwise null. Available values are EXPIRED, NOT_YET_VALID, NOT_FOUND, INVALID. (Optional)
+
+|===
+
+There are a defined service side exception to http status mapping for all defined services such
+as the payment required filter, QR code generator end point and checkSettlement end point.
+
+.Table Map of Server Side Exception to HTTP Status Code.
+|===
+| Http Status Code | Mapped Exception
+
+| BAD_REQUEST (400)
+| IllegalArgumentException
+
+| UNAUTHORIZED (401)
+| IllegalArgumentException
+
+| SERVICE_UNAVAILABLE (504)
+| IOException
+
+| INTERNAL_SERVER_ERROR (500)
+| All other exceptions
+
+|===
+
+
+=== Javascript Doc
+
+Latest Javascript API documentation describing all API calls for the PaywallHttpRequest can be found link:jsdoc/index.html[here].
+

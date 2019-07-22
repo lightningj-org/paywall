@@ -123,7 +123,7 @@ public class NodeInfo {
 
     /**
      *
-     * @param mainNet the node's port
+     * @param mainNet if the node is following the main chain.
      */
     public void setMainNet(Boolean mainNet) {
         this.mainNet = mainNet;

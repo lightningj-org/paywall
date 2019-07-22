@@ -142,7 +142,7 @@ class LocalWebSocketIntegrationSpec extends Specification {
         when: // First call end-point to receive invoice, and check that payment object
         // have been created in database.
         println "Starting Test Setup on Port: " + randomServerPort
-
+       // Thread.sleep(60*60*1000)
         def resp = get(uri: '/poc1' )
         then:
         resp.status == 402

@@ -100,7 +100,7 @@ public class SettlementResponse extends Response {
 
     /**
      *
-     * @return related pre image hash hex encoded
+     * @return related pre image hash base58 encoded
      */
     public String getPreImageHash() {
         return preImageHash;
@@ -108,7 +108,7 @@ public class SettlementResponse extends Response {
 
     /**
      *
-     * @param preImageHash related pre image hash hex encoded
+     * @param preImageHash related pre image hash base58 encoded
      */
     public void setPreImageHash(String preImageHash) {
         this.preImageHash = preImageHash;

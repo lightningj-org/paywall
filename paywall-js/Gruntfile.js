@@ -11,7 +11,10 @@ module.exports = function(grunt) {
                 vendor: [
                       "node_modules/stompjs/lib/stomp.js",
                       "node_modules/sockjs-client/dist/sockjs.js"
-                    ]
+                    ],
+                junit: {
+                    path: 'build/test-results/test/'
+                }
             }
         },
         jshint: {
@@ -28,7 +31,7 @@ module.exports = function(grunt) {
             dist : {
                 src: ['src/*.js', 'README.md'],
                 options: {
-                    destination: 'build/doc'
+                    destination: 'build/jsdoc'
                 }
             }
         },

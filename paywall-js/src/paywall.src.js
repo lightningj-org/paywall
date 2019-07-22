@@ -19,7 +19,7 @@
         /** Invoice have been generated and is waiting to be settled. */
         INVOICE: "INVOICE",
         /**
-         * Generated invoice have expired and new payment flow have to be generated.
+         * Generated invoice have expired and a new payment flow have to be generated.
          */
         INVOICE_EXPIRED: "INVOICE_EXPIRED",
         /**
@@ -61,7 +61,7 @@
         /** Invoice have been generated and is waiting to be settled. */
         INVOICE: "INVOICE",
         /**
-         * Generated invoice have expired and new payment flow have to be generated.
+         * Generated invoice have expired and a new payment flow have to be generated.
          */
         INVOICE_EXPIRED: "INVOICE_EXPIRED",
         /**
@@ -276,6 +276,19 @@
                 }
                 return PaywallState.SETTLED;
             }
+        }
+
+        /**
+         * Method to construct a full URL from a url value from invoice. It checks if url start with 'http', if not
+         * it adds the window.location.origin before the given url value.
+         * @param {String} url the url from invoice object, to QR, checkSettlement or WebSocket.
+         * @return {String} the full url to the given end point.
+         */
+        function constructFullURL(url){
+            if(url.startsWith("http")){
+                return url;
+            }
+            return window.location.origin + url;
         }
 
         /**
@@ -847,6 +860,42 @@
                     throw("Invalid state " + getPaywallState() + " or when calling method getSettlementValidFrom().");
                 },
                 /**
+                 * Help method returning the full URL to the QR Code generation link. The invoice object can return
+                 * a relative url and this help method always ensures a full URL is returned.
+                 *
+                 * @return {String} full URL to the QR Code generation link.
+                 */
+                genQRLink: function(){
+                    if(invoice !== undefined){
+                        return constructFullURL(invoice.qrLink);
+                    }
+                    throw("Invalid state " + getPaywallState() + " or when calling method genQRLink().");
+                },
+                /**
+                 * Help method returning the full URL to the Check Settlement Endpoint link. The invoice object can return
+                 * a relative url and this help method always ensures a full URL is returned.
+                 *
+                 * @return {String} full URL to the Check Settlement Endpoint link.
+                 */
+                genCheckSettlementLink: function(){
+                    if(invoice !== undefined){
+                        return constructFullURL(invoice.checkSettlementLink);
+                    }
+                    throw("Invalid state " + getPaywallState() + " or when calling method genCheckSettlementLink().");
+                },
+                /**
+                 * Help method returning the full URL to the Check Settlement WebSocket Endpoint link. The invoice
+                 * object can return a relative url and this help method always ensures a full URL is returned.
+                 *
+                 * @return {String} full URL to the Check Settlement WebSocket Endpoint link.
+                 */
+                genCheckSettlementWebSocketLink: function(){
+                    if(invoice !== undefined){
+                        return constructFullURL(invoice.checkSettlementWebSocketEndpoint);
+                    }
+                    throw("Invalid state " + getPaywallState() + " or when calling method genCheckSettlementWebSocketLink().");
+                },
+                /**
                  * Method to retrieve error object containing error information if paywall related error occurred during payment flow.
                  * @returns {Object} related error if generated in payment flow, otherwise undefined.
                  * @memberof PaywallHttpRequest.paywall
@@ -1412,7 +1461,7 @@
          * @memberof PaywallWebSocket
          */
         var connect = function(invoice){
-            socket = new SockJS(window.location.origin +invoice.checkSettlementWebSocketEndpoint);
+            socket = new SockJS(paywall.paywall.genCheckSettlementWebSocketLink());
             stompSocket = Stomp.over(socket);
 
             var headers = {"token": invoice.token};

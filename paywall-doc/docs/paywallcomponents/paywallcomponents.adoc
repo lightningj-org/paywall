@@ -1,0 +1,12 @@
+== Paywall Components
+
+TODO paywallcomponents
+
+
+CheckSettlement
+
+QR Code
+
+
+TODO
+

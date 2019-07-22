@@ -65,3 +65,19 @@ subprojects{
   }
 }
 
+task aggregatedJavadoc(type: Javadoc) {
+  source subprojects.collect { project ->
+    project.sourceSets.main.allJava
+  }
+  destinationDir = new File(buildDir, 'docs/javadoc')
+  classpath = files(subprojects.collect { project ->
+    project.sourceSets.main.compileClasspath
+  })
+}
+
+task aggregatedTestReport(type: TestReport) {
+  destinationDir = file("$buildDir/reports/allTests")
+  // Include the results from the `test` task in all subprojects
+  reportOn subprojects*.test
+}
+

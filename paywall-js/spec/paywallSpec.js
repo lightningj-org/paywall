@@ -287,6 +287,57 @@ describe("Verify that PaywallHttpRequest paywall methods returns expected result
         expect(paywallHttpRequest.getPaywallEventBus().getListeners().length).toBe(0);
     });
 
+    it("Verify that genQRLink returns constructed full URL from relative URL in invoice", function () {
+         var paywallHttpRequest = new PaywallHttpRequest();
+         paywallHttpRequest.setPaywallInvoice(invoice1);
+         expect(paywallHttpRequest.paywall.genQRLink()).toMatch("(http|file)");
+    });
+
+    it("Verify that genQRLink returns full URL from full URL in invoice", function () {
+        var paywallHttpRequest = new PaywallHttpRequest();
+        paywallHttpRequest.setPaywallInvoice(invoice2);
+        expect(paywallHttpRequest.paywall.genQRLink()).toBe("https://somelocation.com/paywall/genqrcode?d=lntb10u1pwt6nk9pp59rulenhfxs7qcq867kfs3mx3pyehp5egjwa8zggaymp56kxr2hrsdqqcqzpgsn2swaz4q47u0dee8fsezqnarwlcjdhvdcdnv6avecqjldqx75yya7z8lw45qzh7jd9vgkwu38xeec620g4lsd6vstw8yrtkya96prsqru5vqa");
+    });
+
+    it("Verify that genQRLink throws error if no invoice is set", function () {
+        var paywallHttpRequest = new PaywallHttpRequest();
+        expect(function(){paywallHttpRequest.paywall.genQRLink();}).toThrow("Invalid state NEW or when calling method genQRLink().");
+    });
+
+    it("Verify that genCheckSettlementLink returns constructed full URL from relative URL in invoice", function () {
+        var paywallHttpRequest = new PaywallHttpRequest();
+        paywallHttpRequest.setPaywallInvoice(invoice1);
+        expect(paywallHttpRequest.paywall.genCheckSettlementLink()).toMatch("(http|file)");
+    });
+
+    it("Verify that genCheckSettlementLink returns full URL from full URL in invoice", function () {
+        var paywallHttpRequest = new PaywallHttpRequest();
+        paywallHttpRequest.setPaywallInvoice(invoice2);
+        expect(paywallHttpRequest.paywall.genCheckSettlementLink()).toBe("http://somelocation.com/paywall/api/checkSettlement?pwir=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..uFgH4Ct_GYGwMnsTj4HxJQ.xUAaFyy2OAjsuoedgsOfRsWnUfUV9KBERWpBtFBvKpD1d5O3z5NNrrudtjAKIMDjdkP9WfFAOlT8bV_vOHLHhtbHfRmD882yOtZ4rZHzZHFNcJKprdnFW0pCB4j7wlZaNXkxJnY8yHPWvYZqohMeWZ2C_62fJEUvRK7zNeoGfjruEEUkw6lD_XenOmEJ1upu6TUHQEFQ9F3qO4RtKsyClGacJGlvbhNoV8Hjlr0DxL86KIoK7SOKlvWtGy6wEnoLXU3bONKFeci1BMYY33ZT1Qv_BV9f41oN8JYC3cuwFODzbwQqNPHVmoNzD4ZanH2n1FP9wLDdeCQGxiT37jUF8C_yVDyBMIIXhjfNPAtaVlMdiNbQZOyQFIhpDkZrETQv8beUKJCr3V0gOrUoXHnfmUq5do1FC6VkYMSBnfv7Fvqu8KAlHj7-y7EIIlgzlva-pqP4Uzj4motSXnF6tUgj6tBMmFnbdgWV2EmLCejrcNM.mcC0vaFNSsY6cj8FUi-6ww");
+    });
+
+    it("Verify that genCheckSettlementLink throws error if no invoice is set", function () {
+        var paywallHttpRequest = new PaywallHttpRequest();
+        expect(function(){paywallHttpRequest.paywall.genCheckSettlementLink();}).toThrow("Invalid state NEW or when calling method genCheckSettlementLink().");
+    });
+
+    it("Verify that genCheckSettlementWebSocketLink returns constructed full URL from relative URL in invoice", function () {
+        var paywallHttpRequest = new PaywallHttpRequest();
+        paywallHttpRequest.setPaywallInvoice(invoice1);
+        expect(paywallHttpRequest.paywall.genCheckSettlementWebSocketLink()).toMatch("(http|file)");
+    });
+
+    it("Verify that genCheckSettlementWebSocketLink returns full URL from full URL in invoice", function () {
+        var paywallHttpRequest = new PaywallHttpRequest();
+        paywallHttpRequest.setPaywallInvoice(invoice2);
+        expect(paywallHttpRequest.paywall.genCheckSettlementWebSocketLink()).toBe("http://somelocation.com/paywall/api/websocket/checksettlement");
+    });
+
+    it("Verify that genCheckSettlementWebSocketLink throws error if no invoice is set", function () {
+        var paywallHttpRequest = new PaywallHttpRequest();
+        expect(function(){paywallHttpRequest.paywall.genCheckSettlementWebSocketLink();}).toThrow("Invalid state NEW or when calling method genCheckSettlementWebSocketLink().");
+    });
+
     afterEach(function (){
         jasmine.clock().uninstall();
     });

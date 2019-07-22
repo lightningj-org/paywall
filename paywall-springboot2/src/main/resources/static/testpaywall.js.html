@@ -112,7 +112,7 @@
                 var invoicedesc = document.getElementById("invoicetext");
                 invoicedesc.innerText = invoice.description;
                 var invoiceqr = document.getElementById('invoiceqr');
-                invoiceqr.src = window.location.origin + invoice.qrLink;
+                invoiceqr.src = paywallReq.paywall.genQRLink();
                 var invoiceamount = document.getElementById('invoiceamount');
                 invoiceamount.innerText = paywallReq.paywall.getInvoiceAmount().as(BTCUnit.BIT);
                 var invoicebolt11 = document.getElementById('invoicebolt11');

@@ -1,0 +1,25 @@
+== Introduction
+
+TODO Description
+
+More information and source code can be found on the link:https://github.com/lightningj-org/lightningj[Github site].
+There it is possible to report issues and contribute code.
+
+If you want updates on this project, follow https://twitter.com/LightningJ_org on twitter.
+
+_Important_: This API is still in beta and API methods might change before real production release. +
+*All use of this library is on your own risk.*
+
+
+=== License
+
+This library is Open Source and released under the LGPL v3 License. A link
+to the license agreement can be found link:LICENSE.txt[here].
+
+=== Whats New
+
+TODO
+
+=== Roadmap
+
+TODO

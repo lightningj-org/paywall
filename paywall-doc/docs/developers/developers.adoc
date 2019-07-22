@@ -1,0 +1,32 @@
+== For Paywall Developers
+
+TODO developers
+
+LightningJ is a Java project built using Gradle. Unit tests is written
+using Groovy and Spock Framework.
+
+To build the project use:
+
+    ./gradlew build
+
+The build jar file is located in _build/libs_.
+
+To generate documentation use:
+
+    ./gradlew build doc
+
+This will generate documentation in _build/docs/html5_.
+
+To clean the project use:
+
+    ./gradlew build doc
+
+=== GPG Sign Releases using SmartCard
+
+To GPG Sign generated archives before publishing them to central repository using GPG Smartcard make
+sure to configure the
+following in ~/.gradle/gradle.properties
+
+    signing.gnupg.executable=gpg2
+    signing.gnupg.useLegacyGpg=false
+    signing.gnupg.keyName=<your key id>
