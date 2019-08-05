@@ -140,7 +140,7 @@ public class PaywallProperties {
 
     /**
      * The path to the LND tls certificate to trust, securing the communication to the LND node.
-     * Should point to an file readable by the current user..
+     * Should point to an file readable by the current user.
      *
      * @return the path to the tls cert path.
      */
@@ -188,10 +188,10 @@ public class PaywallProperties {
     }
 
     /**
-     * @return the time i seconds for the not before field in generated
+     * @return the time in seconds for the not before field in generated
      * JWT tokens. This can be positive if it should be valid in the future, or negative
-     * to support skewed clocked between systems. If unset no not before date is
-     * set in generated JWT tokens.
+     * to support skewed clocked between systems. If unset is no not before date
+     * set in the generated JWT tokens.
      */
     public String getJwtTokenNotBefore() {
         // Return null for empty strings
@@ -202,8 +202,8 @@ public class PaywallProperties {
     }
 
     /**
-     * @return true if settled invoices are presented before any order is created should
-     * be registered as new payments automatically when register them as settled.
+     * @return true If settled invoice are received before any order have been created it should
+     * registered as new payments automatically before marking them as settled.
      */
     public String getInvoiceRegisterNew() {
         return invoiceRegisterNew;

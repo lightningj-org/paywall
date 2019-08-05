@@ -20,7 +20,7 @@ import org.lightningj.paywall.vo.OrderRequest;
 import org.lightningj.paywall.web.CachableHttpServletRequest;
 
 /**
- * Interface calculating the number of units that should be debited
+ * Interface calculating the type or order request that should be debited
  * for each call having the PaymentRequired annotation.
  *
  * Created by philip on 2018-10-29.

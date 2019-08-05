@@ -1,3 +1,473 @@
 == Spring and SpringBoot API
 
-TODO springboot
+Currently is the LightningJ Paywall target to SpringBoot applications but other Java platforms might be implemented
+in the future. This chapter describes all Spring specific parts of the framework in detail.
+
+The framework is not specifically target for SpringBoot, all components in written for the more general Spring
+version 5.1.4 and up. But test have mainly be done with Spring Boot 2.1.3.
+
+The following Spring modules are required:
+
+* spring-context
+* spring-core
+* spring-web
+* spring-webmvc
+* spring-websocket
+* spring-messaging
+
+=== Available Profiles
+
+The Paywall Spring module is configured using profiles and currently only one profile exists,
+_paywall_local_, that enables all the local payment flow's default beans.
+
+==== Local Payment Flow Profile
+
+The local payment flow is a basic setup where the same node hosts all the required functionality
+to service payment flows. I.e the node have access to a Lightning Node and hosts services for
+for QR Code and Check Settlement. It also uses symmetric keys to sign and encrypt JWT tokens since
+there are no requirements for intra-system trust.
+
+To activate the local payment flow add the value _paywall_local_ to the setting _spring.profiles.active_
+in _application.properties_. See below for an example:
+
+------------------------------------
+spring.profiles.active=paywall_local
+------------------------------------
+
+The profile registers the following beans by default using class _org.lightningj.paywall.spring.local.LocalProfileBeanConfiguration_:
+
+.Table Available Paywall States
+|===
+| Bean | Type | Registered Implementation | Description
+
+| currencyConverter
+| org.lightningj.paywall.currencyconverter.CurrencyConverter
+| org.lightningj.paywall.currencyconverter.SameCryptoCurrencyConverter
+| Implementation that expects payment handler to generate a CryptoAmount and does no convertion.
+
+| paywallExceptionHandler
+| org.lightningj.paywall.spring.PaywallExceptionHandler
+| org.lightningj.paywall.spring.SpringPaywallExceptionHandler
+| Bean that converts exceptions to returned error message data. This implementation converts exception
+according to <<exceptiontostatusmapping,Server Side Exception to HTTP Status Code>>.
+
+| lightningHandler
+| org.lightningj.paywall.lightninghandler.LightningHandler
+| org.lightningj.paywall.spring.SpringLNDLightningHandler
+| A LND implementation requiring direct access to a LND node to create invoices and subscribe to
+  settlements.
+
+| keyManager
+| org.lightningj.paywall.keymgmt.KeyManager
+| org.lightningj.paywall.spring.SpringDefaultFileKeyManager
+| Keymanager that generates symmetric key and stores them on the local file system encrypted with a passphrase.
+
+| qrCodeGenerator
+| org.lightningj.paywall.qrcode.QRCodeGenerator
+| org.lightningj.paywall.qrcode.DefaultQRCodeGenerator
+| Default implementation of QRCodeGenerator that generates PNG images of specified size.
+
+| tokenGenerator
+| org.lightningj.paywall.tokengenerator.TokenGenerator
+| org.lightningj.paywall.tokengenerator.SymmetricKeyTokenGenerator
+| JWT Token Generator using symmetric key to sign and encrypt the token.
+
+| orderRequestGeneratorFactory
+| org.lightningj.paywall.orderrequestgenerator.OrderRequestGeneratorFactory
+| org.lightningj.paywall.orderrequestgenerator.OrderRequestGeneratorFactory
+| This class should generally not be overloaded, instead use customized OrderRequestGenerator
+  configured in the @PaymentRequired annotation.
+
+| requestPolicyFactory
+| org.lightningj.paywall.requestpolicy.RequestPolicyFactory
+| org.lightningj.paywall.requestpolicy.RequestPolicyFactory
+| This class should generally not be overloaded, instead use customized RequestPolicy
+  configured in the @PaymentRequired annotation.
+
+| paymentFlowManager
+| org.lightningj.paywall.paymentflow.PaymentFlowManager
+| org.lightningj.paywall.spring.local.SpringLocalPaymentFlowManager
+| Local payment flow manager that expects all functionality to be in the same system.
+
+| webSocketSettledPaymentHandler
+| org.lightningj.paywall.spring.websocket.WebSocketSettledPaymentHandler
+| org.lightningj.paywall.spring.websocket.WebSocketSettledPaymentHandler
+| A WebSocket specific implementation when listing of settled payment handler.
+
+|===
+
+==== Customizing Bean Configuration
+
+It is possible to customize beans that is registered for a given profile. In order to do this
+add the setting _paywall.custombeans.enable_:
+
+------------------------------------
+spring.profiles.active=<your_profile>
+------------------------------------
+
+Then create a custom _Configuration_ implementation that extends the default one. Below is an example configuration
+overriding the default CurrencyConverter with a custom implementation:
+
+[source, java]
+------------------------------------
+@Configuration
+public class CustomLocalProfileBeanConfiguration extends LocalProfileBeanConfiguration {
+
+    @Bean({"currencyConverter"})
+    @Override
+    public CurrencyConverter getCurrencyConverter() {
+        return new CustomCurrencyConverter();
+    }
+}
+------------------------------------
+
+=== The Paywall Interceptor (Filter)
+
+The main component in the Paywall Spring framework is the Paywall Interceptor which filter all requests
+and checks if target controller is annotated with @RESTController and @PaymentRequired and in that case
+starts a payment flow if a settlement JWT token isn't included in the header with name _Payment_.
+
+If the filter determines that payment is required it initiates a payment flow according to the configured profile
+and returns status code 401 (PAYMENT_REQUIRED) with a newly generated Invoice according to schema specified in
+section <<invoicejson,Invoice JSON Data>>.
+
+Currently are only @RestController annotated services supported but other types of controllers will be supported
+in the future.
+
+==== Interceptor Error Handling
+
+If payment related error occurred in the Paywall Interceptor is an error message returned with JSON (or XML)
+according to <<paywallerrorjson,Paywall Error JSON Data>> and http status code is mapped to the generated exception
+according to table <<exceptiontostatusmapping,Server Side Exception to HTTP Status Code>>.
+
+==== Paywall Data as XML Response instead of JSON
+
+The response is by default a JSON response with content type _application/json_ but if header
+_Accept_ is set to _application/xml_ or appending _.xml_ to URL a XML variant of all paywall related responses will be
+returned. The XML will be structured according to the following link:paywallspring_v1.xsd[XSD schema]
+
+=== Available Spring Configuration Properties
+
+Paywall-Spring contains a configuration bean PaywallProperties that contains different
+settings to set in the applicaton's _application.properties_ file.
+
+Minimal configuration is:
+------------------------------------
+spring.profiles.active=paywall_local
+
+paywall.lnd.hostname=somehost.org
+paywall.lnd.port=10009
+paywall.lnd.tlscertpath=/home/lnd/.lnd/tls.cert
+paywall.lnd.macaroonpath=/home/lnd/.lnd/data/chain/bitcoin/testnet/invoice.macaroon
+------------------------------------
+
+But settings _paywall.keys.keystorepath_ and _paywall.keys.password_ are also
+recommended for production systems.
+
+[[paywallproperties]]
+.Table Available Paywall States
+|===
+| Property | Required | Default Value | Description
+
+| LND Properties:
+|
+|
+| Settings related to connecting to used LND Node.
+
+| paywall.lnd.hostname
+| true
+| n/a
+| The hostname of IP address of the LND node to connect to. Required if running local payment flow.
+
+| paywall.lnd.port
+| true
+| n/a
+| The port number of the LND node to connect to. Required if running local payment flow.
+
+| paywall.lnd.tlscertpath
+| true
+| n/a
+| The path to the LND tls certificate to trust, securing the communication to the LND node.
+  Should point to an file readable by the current user. Required if running local payment flow.
+
+| paywall.lnd.macaroonpath
+| true
+| n/a
+| The path to the macaroon file that is used to authenticate to the LND node. The macaroon
+  should have invoice creation rights. Required if running local payment flow.
+
+| Key Management Settings:
+|
+|
+| Settings used for managing cryptographic keys for signing and encrypting the JWT Token.
+
+| paywall.keys.password
+| false
+| n/a
+| The path of directory where key files are stored. Recommended to set in a production environment. If not
+set is a temporary directory used. Keys are created automatically in the directory if not exist.
+
+| paywall.keys.keystorepath
+| false
+| n/a
+| The configured pass phrase used to protect generated keys. Recommended to set a good password in a production
+  environment. If not set is no password protection used to encrypt the keys.
+
+| paywall.keys.truststorepath
+| false
+| n/a
+| The path of directory where trusted public key files are stored. For future use in a distributed setup.
+  When using local payment flow symmetric keys are used and this settings is not needed.
+
+| Java Web Token (JWT) Settings:
+|
+|
+| Settings used to configure the generation of JWT Tokens.
+
+| paywall.jwt.notbefore
+| false
+| n/a
+| The time in seconds for the not before field in generated
+  JWT tokens. This can be positive if it should be valid in the future, or negative
+  to support skewed clocked between systems. If unset is no not before date
+  set in the generated JWT tokens. (Optional)
+
+| Generated Invoice and Settlement Settings:
+|
+|
+| Settings used to configure the generation of Invoices and Settings.
+
+| paywall.invoice.defaultvalidity
+| false
+| 3600 (1 hour)
+| The default validity for generated invoices if no expire date have
+  been set explicit in PaymentData.
+
+| paywall.invoice.includenodeinfo
+| false
+| true
+| If node connection information should be included in generated invoices.
+
+
+| paywall.invoice.registernew
+| false
+| false
+| If settled invoice are received before any order have been created it should
+  registered as new payments automatically before marking them as settled. For future use
+  in a distributed setup. Not used in local payment flow mode.
+
+| paywall.settlement.defaultvalidity
+| false
+| 24 * 60 * 60 (24 hours)
+| The default validity for generated settlements if no valid until date have
+  been set explicit in PaymentData.
+
+| QR Code Generation End-Point Settings:
+|
+|
+| Settings used to configure the QR Code Image Generation.
+
+| paywall.qrcode.width.default
+| false
+| 300
+| The default QR Code width if no width parameter is specified in QR Code generation request.
+
+| paywall.qrcode.height.default
+| false
+| 300
+| The default QR Code height if no height parameter is specified in QR Code generation request.
+
+| paywall.qrcode.url
+| false
+| /paywall/genqrcode
+| The URL to controller that generates QR code images.
+
+| Check Settlement End-Point Settings:
+|
+|
+| Settings used to configure the Check Settlement End Point.
+
+| paywall.settlement.url
+| false
+| /paywall/api/checkSettlement
+| The URL to the check settlement controller.
+
+| Settlement WebSocket End-Point Settings:
+|
+|
+| Settings used to configure the Settlement WebSocket End Point.
+
+| paywall.websocket.enable
+| false
+| true
+| if WebSocket functionality should be enabled.
+
+| paywall.websocket.settlement.url
+| false
+| /paywall/api/websocket/checksettlement
+| URL of the end point where check settlement Web Socket is listening.
+
+|===
+
+=== Available Supporting Services End-Points
+
+The Spring Component in LightningJ Paywall provides a set of supporting end-points
+for handling payment flows. One is for generating QR Codes, and one REST interface for
+checking settlements using polling and one WebSocket end-point to set up a channel to
+receive settlement as fast as possible.
+
+==== QR Code Generator End-Point
+
+Running in local payment flow mode there is a QR Code generation service used to
+generate QR images for invoices. By default it is located at path '/paywall/genqrcode'
+but can be modified to a custom location with setting _paywall.qrcode.url_ in
+_application.properties_.
+
+The service is quite simple supports the following parameters and the GET HTTP Method:
+
+.Table Available Query Parameters
+|===
+| Parameter | Required | Description
+
+| d
+| true
+| The data used to generate QR code for, I.e. bolt11 invoice. This parameter
+  is set automatically in the qrLink field in the invoice json structure.
+
+| w
+| false
+| The width of the generated image. If not set is default width set by
+  _paywall.qrcode.width.default_ in _application.properties_.
+
+| h
+| false
+| The height of the generated image. If not set is default height set by
+  _paywall.qrcode.height.default_ in _application.properties_.
+
+|===
+
+The service will return image data with content type _image/png_ and content length set.
+The constructed URL can be used directly as _src_ attribute in an image html tag.
+
+==== Check Settlement End-Point
+
+In local payment flow mode there is a REST Service automatically created that can be used
+to check if a given invoice have been settled.
+
+To call the service to a GET HTTP request to _/paywall/api/checkSettlement_ (the end-point path is
+configurable with setting _paywall.settlement.url_ in _application.properties_) with the
+query parameter 'pwir' set to a URL encoded invoice JWT token.
+
+The field _checkSettlementLink_ in Invoice JSON Object contains the URL pre-populated with the
+parameter set.
+
+The service supports handling XML responses in the same way as the PaywallInterceptor and using the
+same XSD schema. Just as PaywallInterceptor the service sets the HTTP header value: _PAYWALL_MESSAGE:TRUE_
+to indicate this is a Paywall Related message.
+
+For an unsettled payment will the following response be sent:
+
+[source, json]
+----------------------------
+{
+    "status": "OK",
+    "type": "settlement",
+    "preImageHash": null,
+    "token": null,
+    "settlementValidUntil": null,
+    "settlementValidFrom": null,
+    "payPerRequest": null,
+    "settled": false
+}
+----------------------------
+
+A settled payment will return the following:
+
+[source, json]
+----------------------------
+{
+    "status": "OK",
+    "type": "settlement",
+    "preImageHash": "CP6p6AqgD7yL7QinVZDfkptiatr1ZkWN2MWVQ2WuSMg3",
+    "token": "eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..c2g7sb8Rqz-fsoItbrnJ3g.l_c4MzlyTItGp_hbl2tyTSHXBq_8-P0Eds1d09CKiEV-RjqLyD0msk3-gn_DLpz-v-Eke2EHZa4J0vWVwzcxM06eu8tgBX4jIg7SIMD4Lr79PB4v6vPwyf3MnZsnBYGTUNP86CAjVRa-0mF1SuTBtjU05YsPGqEmqiPThpXyG3lRxarQzGJEMA4jUaivTdGGChBFWRJsEsZHOs1fm2EJZ3YNtL55V91GFAyE-diGj_tvhHqFIbjl_VvDJza96B0NZrxDFQbUrXWU9WFubSJq4zV9m7mHiJ5wTr-Jf7nSpUIUFXb-oH9OYjQF0Dk9zPCSz6r3JGk9vnUmhyR5WvAl9Rw3qm-rYg-BOVD9tEKl2K-U6ZKuLK2Q-EDta6hVDHHnl39iCIQMzFdB3cVMSHId0yZw1Va_5metok4TqRKFUvLsTNR93oeesew2NxqfKETUBoA4AoLs2THkEKFLXtPjYyD2rf7V7TCZkudUlZ0aSa8JCZZUaJSW4kTCNmZLo5zVtdrwsaGeJcdaAOtce-s0oT0rpTymCYU3KSl9_EgXiPvjS0sLrTfR7WaxHQJyfcRV.36IeZ1Nl8yiGD-Q2USzbog",
+    "settlementValidUntil": "2019-06-02T07:10:29.354+0000",
+    "settlementValidFrom": null,
+    "payPerRequest": false,
+    "settled": true
+}
+----------------------------
+
+For more details see the <<settlementjson,Settlement JSON Data>> description.
+
+
+==== Check Settlement WebSocket End-Point
+
+It is possible to subscribe to settlement tokens using a WebSocket connection. The websocket
+is using Stomp protocol over SockJS in order to have a fallback to older browsers not supporting
+WebSocket.
+
+To subscribe to a payment flows settlement connect to the URL set in the _checkSettlementWebSocketEndpoint_ field of the
+invoice JSON and subscribe to the unique channel from the field _checkSettlementWebSocketQueue_.
+
+Example code to connect to WebSocket using Javascript and set the required invoice JWT token in the
+header, asserting ownership of the payment flow. (The example requires stomp.js and sockjs.js libraries, see
+Javascript section for details):
+
+[source, javascript]
+-------------------------------------
+
+        function processWebSocketMessage(message){
+            if(message.body){
+                var settlement = JSON.parse(message.body);
+                if(settlement.status === PaywallResponseStatus.OK){
+                   // Process Settlement
+                }else{
+                    // error occurred
+                }
+            }else{
+                console.debug("Paywall WebSocket, received empty message, ignoring.");
+            }
+        }
+
+        function processWebSocketError(error){
+            var errorObject;
+            if(error.headers !== undefined){
+                errorObject = {status: PaywallResponseStatus.SERVICE_UNAVAILABLE,
+                    message: error.headers.message,
+                    errors: [error.headers.message]
+                };
+            }else{
+                errorObject = {status: PaywallResponseStatus.SERVICE_UNAVAILABLE,
+                    message: error,
+                    errors: [error  ]
+                };
+            }
+        }
+
+        var socket;
+        var stompSocket;
+        // Function that takes the invoice JSON Object and sets the invoice token in the
+        // Stomp connect header
+        function connect(invoice){
+            socket = new SockJS(paywall.paywall.genCheckSettlementWebSocketLink());
+            stompSocket = Stomp.over(socket);
+
+            var headers = {"token": invoice.token};
+            stompSocket.connect({}, function(frame) {
+                stompSocket.subscribe(invoice.checkSettlementWebSocketQueue, processWebSocketMessage, headers);
+            }, processWebSocketError);
+        };
+
+        function close(){
+            if(stompSocket !== undefined){
+                stompSocket.disconnect();
+                socket.close();
+            }
+        };
+
+-------------------------------------
+
+It is possible to override the default endpoint location of _/paywall/api/websocket/checksettlement_ with
+the setting _paywall.websocket.settlement.url_ in application properties. It is also possible to
+disable the web socket functionality with _paywall.websocket.enable_ (enabled by default).
+

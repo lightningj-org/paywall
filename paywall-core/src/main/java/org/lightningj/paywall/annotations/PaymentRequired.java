@@ -83,7 +83,7 @@ public @interface PaymentRequired {
 
     /**
      * @see RequestPolicy
-     * @return if the redefined request policy types isn't applicable and a custom implementation is necessary.
+     * @return custom class if none of the predefined request policy types isn't applicable and a custom implementation is necessary.
      */
     Class<? extends RequestPolicy> customPolicy() default NoCustomRequestPolicy.class;
 

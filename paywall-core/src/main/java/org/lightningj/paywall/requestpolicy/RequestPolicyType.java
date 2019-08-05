@@ -22,7 +22,7 @@ package org.lightningj.paywall.requestpolicy;
  */
 public enum RequestPolicyType {
     /**
-     * Policy that checks the URL and Method of a request
+     * Policy that checks the URL and Method of a request.
      */
     URL_AND_METHOD,
     /**

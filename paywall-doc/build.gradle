@@ -19,6 +19,7 @@ buildscript {
         // Documentation generation
         classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.7'
         classpath 'org.ajoberstar:gradle-git-publish:0.4.1'
+        classpath 'org.asciidoctor:asciidoctorj-pdf:1.5.0-beta.2'
     }
 }
 
@@ -28,31 +29,12 @@ asciidoctor {
     attributes= [stylesheet: "$projectDir/docs/stylesheets/colony.css",
                  toc: 'left', 'toc-title': 'Table of Contents'
     ]
+    backends = ["html5"]
 }
 
 // TODO Make this work, with reports and javadoc
 //task ('doc',type: Copy,dependsOn: [javadoc, asciidoctor, htmlDependencyReport]){
-task ('doc',type: Copy,dependsOn: [asciidoctor, ":paywall-js:grunt_jsdoc"]){
-    from('../paywall-js/build/'){
-        include('jsdoc/**')
-        include('dist/**')
-    }
-//    from('build/docs/'){
-//        include('javadoc/**')
-//    }
-//    from('build/reports/tests'){
-//        include('test/**')
-//    }
-    from('../LICENSE.txt'){
-    }
-    from('docs'){
-        include('CNAME')
-    }
-    from('docs'){
-        include('lightningj-release-pubkey.asc')
-    }
-    into('build/docs/html5')
-}
+
 
 
 // TODO git publish, signing etc.

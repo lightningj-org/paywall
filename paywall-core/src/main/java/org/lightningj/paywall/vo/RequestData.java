@@ -21,6 +21,7 @@ import org.lightningj.paywall.util.Base58;
 import javax.json.JsonException;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Arrays;
 
@@ -33,6 +34,7 @@ import java.util.Arrays;
  */
 public class RequestData extends JWTClaim {
 
+    protected Clock clock = Clock.systemDefaultZone();
     public static final String CLAIM_NAME = "request";
 
     protected byte[] significantData;
@@ -52,6 +54,16 @@ public class RequestData extends JWTClaim {
     public RequestData(byte[] significantData, Instant requestDate) {
         this.significantData = significantData;
         this.requestDate = requestDate;
+    }
+
+    /**
+     * Constructor setting request data to current instant.
+     * @param significantData significant request data, which is a hash of the parts of a request that makes it uniquely
+     * identifiable.
+     */
+    public RequestData(byte[] significantData) {
+        this.significantData = significantData;
+        this.requestDate = clock.instant();
     }
 
     /**

@@ -81,3 +81,28 @@ task aggregatedTestReport(type: TestReport) {
   reportOn subprojects*.test
 }
 
+task ('doc',type: Copy,dependsOn: [":paywall-doc:asciidoctor", ":paywall-js:grunt_jsdoc", aggregatedJavadoc, aggregatedTestReport]){
+  from('paywall-js/build/'){
+    include('jsdoc/**')
+    include('dist/**')
+  }
+  from('paywall-spring/build/resources/main'){
+    include('**.xsd')
+  }
+  from('build/docs/'){
+    include('javadoc/**')
+  }
+  from('build/reports/'){
+    include('allTests/**')
+  }
+  from('LICENSE.txt'){
+  }
+  from('paywall-doc/docs'){
+    include('CNAME')
+  }
+  from('paywall-doc/docs'){
+    include('lightningj-release-pubkey.asc')
+  }
+  into('paywall-doc/build/docs/html5')
+}
+

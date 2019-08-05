@@ -359,6 +359,7 @@ An invoice JSON Object is returned whenever a service with @PaymentRequired anno
 payment flow is required. The service will the return HTTP Status PAYMENT_REQUIRED (402) and
 the Invoice Json Object as data.
 
+[[invoicejson]]
 .Table Invoice JSON Object Properties
 |===
 | Property | Type | Description
@@ -494,6 +495,7 @@ The settlement JSON Object is sent through the web socket as soon as settlement 
 detected or as a response to the checkSettlement endpoint. I contains the JWT token that
 can be used towards the paywalled API as a proof of payment.
 
+[[settlementjson]]
 .Table Node Info JSON Object Properties
 |===
 | Property | Type | Description
@@ -542,6 +544,7 @@ The paywall error JSON is created if error occurred in the paywall related compo
 The error object if occurred can be fetched with paywallHttpRequest.paywall.getPaywallError().
 Regular errors from the underlying API is handled in the same way as if XMLHttpRequest would be used.
 
+[[paywallerrorjson]]
 .Table Paywall Error JSON Object Properties
 |===
 | Property | Type | Description
@@ -568,6 +571,7 @@ Regular errors from the underlying API is handled in the same way as if XMLHttpR
 There are a defined service side exception to http status mapping for all defined services such
 as the payment required filter, QR code generator end point and checkSettlement end point.
 
+[[exceptiontostatusmapping]]
 .Table Map of Server Side Exception to HTTP Status Code.
 |===
 | Http Status Code | Mapped Exception

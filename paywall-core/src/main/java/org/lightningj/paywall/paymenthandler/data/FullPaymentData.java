@@ -62,7 +62,7 @@ public interface FullPaymentData extends StandardPaymentData, PerRequestPaymentD
 
     /**
      * The settlement expire date sets the timestamp when a generated settlement token should expire. If
-     * not set will a settlementDuration be used, and if that is also null will default duration be set. In FullPaymentData it is also possible
+     * not set will a settlementDuration be used, and if that is also null will default duration be set.
      * This field is useful if a settlement should be valid the entire day or month.
      * <p>
      * If settlement expire date is set it has precedence over settlementDuration.

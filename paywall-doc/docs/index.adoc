@@ -8,6 +8,7 @@
 _LightningJ - Paywall, Enabling Micropayments for Microservices._
 V {project-version}, {localdate}
 
+:sectnums:
 
 include::introduction/introduction.adoc[]
 
@@ -18,8 +19,6 @@ include::paywallcomponents/paywallcomponents.adoc[]
 include::springboot/springboot.adoc[]
 
 include::javascriptapi/javascriptapi.adoc[]
-
-include::websocket/websocket.adoc[]
 
 include::developers/developers.adoc[]
 

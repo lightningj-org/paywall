@@ -103,7 +103,7 @@ public abstract class DefaultFileKeyManager extends FileKeyManager implements As
     }
 
     /**
-     * Method retrieve a list of trusted public keys used to verify signatures..
+     * Method retrieve a list of trusted public keys used to verify signatures.
      *
      * @param context related context.
      * @return A map of keyId of trusted public keys.

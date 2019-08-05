@@ -19,6 +19,7 @@ import org.lightningj.paywall.paymentflow.PaymentFlow;
 import org.lightningj.paywall.paymentflow.PaymentFlowManager;
 import org.lightningj.paywall.paymentflow.SettlementResult;
 import org.lightningj.paywall.spring.PaywallExceptionHandler;
+import org.lightningj.paywall.spring.PaywallProperties;
 import org.lightningj.paywall.spring.response.SettlementResponse;
 import org.lightningj.paywall.spring.util.PaywallRuntimeException;
 import org.lightningj.paywall.spring.util.RequestHelper;
@@ -61,7 +62,7 @@ public class CheckSettlementController {
      * @param response the related http response.
      * @return a settlement response containing either settled=false of a settlement token with meta data.
      */
-    @RequestMapping("/paywall/api/checkSettlement")
+    @RequestMapping(value = "${" + PaywallProperties.CHECK_SETTLEMENT_URL +  ":" + PaywallProperties.DEFAULT_CHECK_SETTLEMENT_URL + "}")
     public SettlementResponse checkSettlement(HttpServletRequest request, HttpServletResponse response) {
 
         RequestHelper.RequestType requestType = requestHelper.getRequestType(request, RequestHelper.RequestType.JSON);

@@ -48,7 +48,7 @@ public interface PerRequestPaymentData extends MinimalPaymentData{
     /**
      *
      * @return true if related request have been executed, is set after successful processing
-     * if a payed call and used to indicate that it cannot be processed again.
+     * of a request and used to indicate that it cannot be processed again.
      */
     boolean isExecuted();
 

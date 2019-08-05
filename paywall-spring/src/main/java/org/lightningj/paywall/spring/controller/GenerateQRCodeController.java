@@ -67,7 +67,7 @@ public class GenerateQRCodeController {
      * @param response the related http response.
      * @throws Exception if problems occurred, handled by handleException method.
      */
-    @GetMapping("/paywall/genqrcode")
+    @GetMapping(value = "${" + PaywallProperties.QR_CODE_DEFAULT_URL +  ":" + PaywallProperties.DEFAULT_QR_CODE_URL + "}")
     public void generateQRCode(HttpServletRequest request, HttpServletResponse response) throws Exception{
         // Parse parameters
         String data = getData(request);

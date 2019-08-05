@@ -44,10 +44,16 @@ class RequestDataSpec extends Specification {
         rd1.getRequestDate().toEpochMilli() == 12345L
 
         when:
-        def sd2 = new RequestData("123".getBytes(),Instant.ofEpochMilli(12345L))
+        def rd2 = new RequestData("123".getBytes(),Instant.ofEpochMilli(12345L))
         then:
-        sd2.getSignificantData() == "123".getBytes()
-        rd1.getRequestDate().toEpochMilli() == 12345L
+        rd2.getSignificantData() == "123".getBytes()
+        rd2.getRequestDate().toEpochMilli() == 12345L
+
+        when:
+        def rd3 = new RequestData("123".getBytes())
+        then:
+        rd3.getSignificantData() == "123".getBytes()
+        rd3.getRequestDate().toEpochMilli() != 0
     }
 
     // JWTClaims constructor tested in BaseTokenGeneratorSpec
