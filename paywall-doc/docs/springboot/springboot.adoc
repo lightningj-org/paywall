@@ -34,9 +34,10 @@ in _application.properties_. See below for an example:
 spring.profiles.active=paywall_local
 ------------------------------------
 
-The profile registers the following beans by default using class _org.lightningj.paywall.spring.local.LocalProfileBeanConfiguration_:
+The profile registers the following beans by default using class
+_org.lightningj.paywall.spring.local.LocalProfileBeanConfiguration_:
 
-.Table Available Paywall States
+.Table Registered Beans for _paywall_local_ profile.
 |===
 | Bean | Type | Registered Implementation | Description
 
@@ -165,7 +166,7 @@ But settings _paywall.keys.keystorepath_ and _paywall.keys.password_ are also
 recommended for production systems.
 
 [[paywallproperties]]
-.Table Available Paywall States
+.Table Available Paywall Spring Configuration Properties.
 |===
 | Property | Required | Default Value | Description
 

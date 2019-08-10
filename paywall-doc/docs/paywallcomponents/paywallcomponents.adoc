@@ -1,18 +1,72 @@
-== Paywall Components
+== Paywall Core Components
 
-TODO paywallcomponents
+The Paywall framework is built up of a set of core components controlling the payment flow and
+most of them are customizable. This chapter goes through the core parts of these components that are not
+directly Spring Framework specific.
 
+First are the most basic concepts in Paywall Framework, and that are required when using the framework are:
+
+* _PaymentHandler_, that creates, updates and persist _PaymentData_.
+* _PaymentData_, value object of a given payment state.
+* _@PaymentRequired_, annotation that is set on API services that should trigger a payment flow.
+
+Then are the concept _PaymentFlow_ described, that is in charge of directing the flow between
+the different components.
+
+Finally are other core components discussed, such as _LightningHandler_ used to communicate with the lightning node, and
+_CurrencyConverter_ that is in charge of converting between FIAT and Crypto currency if needed.
 
 [[paymenthandler]]
 === Payment Handler
 
-TODO Here
+A PaymentHandler manages Orders, Invoices and Settlements in a payment flow and every application using Paywall
+framework is required to implement one. The class is responsible to create and persist a value object of type
+PaymentData.
+
+A PaymentData that can be of different types depending on the level of control of the actual payment flow wanted or
+the what types of payment related data that needs to be persisted.
 
 ==== Implementing a Payment Handler using Spring Framework
 
-TODO, Describe payment handler and payment data
+Using the Spring Framework, the easiest way to implement the payment handler is to create a class extending
+_org.lightningj.paywall.spring.SpringPaymentHandler_ and implement the following three methods:
 
-Create a class extending _org.lightningj.paywall.spring.SpringPaymentHandler_ and implement the following three methods:
+newPaymentData:: Method that should generate a new PaymentData. The method receives a newly generated preImageHash, used
+to uniquely identify the payment flow, and an OrderRequest, containing data from PaymentRequired annotation. This is the
+first call in a payment flow and the implementation should for example look up the order amount from the article id,
+units and other options in the order request. The generated PaymentData should be at least MinimalPaymentData with
+preImageHash and orderedAmount set. It is recommended that the PaymentData is persisted in this call but could
+be skipped for performance in certain payment flows.
+
+findPaymentData:: Method used by the paywall framework to lookup a PaymentData from a preImageHash.
+
+updatePaymentData:: Method called on update events about a given payment data. This could be when the payment is added
+as invoice in LND and contains complementary data or when the invoice was settled and has the _settled_ flag set along
+with the settled amount (depending on the type of PaymentData used in PaymentHandler). The implementing method should at
+least persist the updated payment data. See table <<paymenteventtypes, Available Payment Event Types>> for list of
+different _PaymentEventType_ that might occur.
+
+
+.Table Available Payment Event Types
+|===
+| Type | Description
+
+| ORDER_CREATED
+| Event signaling a order was created. This event is never sent to updatePaymentData.
+
+| INVOICE_CREATED
+| Event signaling that a payments invoice have been created by lightning handler.
+
+| INVOICE_SETTLED
+| Event signaling that a invoice have been settled.
+
+| REQUEST_EXECUTED
+| Event signaling that a payed request has been executed. Only used for payment
+  flows with payPerRequest flag set.
+
+|===
+
+Below is an excerpts of the required methods to implement:
 
 [source, java]
 -----------------------------
@@ -71,10 +125,10 @@ Create a class extending _org.lightningj.paywall.spring.SpringPaymentHandler_ an
 
 -----------------------------
 
-An example implementation, that assumes you have Spring Data Repository for a FullPaymentData implementation
-(see <<paymentdata,PaymentData section>> ), with support for pay per request annotated services. It also
-assumes there exists a Spring Data Repository for Article Ids specified in @PaymentRequired annotation to look up
-price for specified Article Id.
+Below is an example implementation for Spring Framework, that assumes you have Spring Data Repository for a
+FullPaymentData implementation (see <<paymentdata,PaymentData section>> ), and that supports _payPerRequest_ annotated
+services. It also assumes there exists a Spring Data Repository for the Article Ids specified in @PaymentRequired
+annotation to look up price for specified Article Id.
 
 Using Spring it is important to add the class as a component with name _paymentHandler_ using the
 @Component("paymentHandler") annotation on the class level.
@@ -195,11 +249,17 @@ public class DemoPaymentHandler extends SpringPaymentHandler {
 [[paymentdata]]
 ==== Payment Data
 
-Bla Minimal and PayPerRequest
+PaymentData is a value object, usually stored in a database, that the _PaymentHandler_ manages. There exists
+several interfaces to choose from depending on required functionality. The simplest interface is MinimalPaymentData
+and it contains the absolute minimal fields necessary to be able to complete a payment flow. And FullPaymentData where
+it is possible for the PaymentHandler implementation to control many aspects of the payment flow such as invoice
+validity, settlement validity.
+
+Each sub-section describes the different types of PaymentData available.
 
 ===== MinimalPaymentData
 
-Contains the minimum fields needed in order to support a payment flow.
+Contains the minimum fields needed in order to support a payment flow, without possibility to host _payPerRequest_ calls.
 
 .Table Fields in MinimalPaymentData
 |===
@@ -218,7 +278,7 @@ generated by TokenGenerator when creating an order and not set manually.
 
 | settled
 | boolean
-| if related invoice have been settled in full.
+| If related invoice have been settled in full.
 
 |===
 
@@ -226,8 +286,9 @@ For more details see link:javadoc/org/lightningj/paywall/paymenthandler/data/Min
 
 ===== StandardPaymentData
 
-TODO BlaBla extends minimal
-dynamically control invoice and settlement times.
+The StandardPaymentData extends MinimalPaymentData and adds more information about the invoice and the ability
+for the PaymentHandler to control invoice validity and settlement validity.
+
 
 .Table Fields in StandardPaymentData
 |===
@@ -280,7 +341,12 @@ For more details see link:javadoc/org/lightningj/paywall/paymenthandler/data/Sta
 
 ===== PerRequestPaymentData
 
-TODO, not an complete interface
+PerRequestPaymentData is a special interface required when pay per request functionality is used. It adds two flags
+that indicate that this payment is payPerRequest and whether the settled call have been executed and cannot be requested
+again.
+
+*Important*: The PerRequestPaymentData interface is in itself not enough to support a payment flow. The implementing
+class must at least implement MinimalPaymentData with PerRequestPaymentData as an extension.
 
 .Table Fields in StandardPaymentData
 |===
@@ -303,9 +369,12 @@ For more details see link:javadoc/org/lightningj/paywall/paymenthandler/data/Per
 
 ===== FullPaymentData
 
-TODO blabla extends both standard and payperrequest
+The FullPaymentData extends both StandardPaymentData and PerRequestPaymentData and adds fields to store
+the actual bolt11Invoice and possiblity to specify exact dates for settlement validity, for use cases when
+paying for instance for a monthly subscription for a service and want the settlement token to be valid for exactly
+those dates.
 
-.Table Fields in StandardPaymentData
+.Table Fields in FullPaymentData
 |===
 | Field | Type | Description
 
