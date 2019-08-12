@@ -1,32 +1,109 @@
 == For Paywall Developers
 
-TODO developers
-
-LightningJ is a Java project built using Gradle. Unit tests is written
+LightningJ Paywall is a Java project built using Gradle. Tests is written
 using Groovy and Spock Framework.
+
+=== Building
 
 To build the project use:
 
     ./gradlew build
 
-The build jar file is located in _build/libs_.
+=== Testing the framework
+
+The framework have multiple test suites:
+
+* Java Unit tests using Spock
+* Javascript Unit tests using Jasmine
+* Java Integration tests connecting to LND node.
+* Java Functional tests that tests a Spring Boot application and Javascript library in Chrome
+and Firefox.
+
+==== Unit Tests
+
+To run the unit tests run the command:
+
+    ./gradlew check
+
+This will run both Java and Javascript unit tests at once. To only run jasmine test it is possible
+by issuing:
+
+    ./gradlew grunt_jasmine
+
+==== Integration Tests
+
+There exists a test suite that run LND connection specific tests. To run these you need access to a LND
+node and configure the following properties in your ~/.gradle/gradle.properties.
+
+    paywall.integration.test.lnd.host=<SET THIS>
+    paywall.integration.test.lnd.port=<SET THIS>
+    paywall.integration.test.lnd.tlscertpath=<SET PATH>/tls.cert
+    paywall.integration.test.lnd.macaroonpath=<SET PATH>/admin.macaroon
+
+Then run the tests with the command:
+
+    ./gradlew integrationTest
+
+==== Functional Tests
+
+The Javascript API and overall Spring Boot functionality it tested with functional tests. There exists
+functional tests for Chrome and Firefox browser and requires that you have these browsers installed
+in you development environment. Sometimes the version of the browser must match the version of the selenium version
+in paywall-springboot2/build.gradle in order for the test to run properly.
+
+To run the functional test suite run:
+
+    ./gradlew functionalTest
+
+To only run a specific browser it is possible to instead use the tasks _chromeTest_ or _firefoxTest_.
+
+==== Pre-Release Tests
+
+Before release is should unit, integration and functional tests be verified with the command.
+
+    ./gradlew preReleaseTest
+
+This requires that integration and functional test suites are set up.
+
+=== Generating a Release
+
+==== GPG Sign Releases using SmartCard
+
+To GPG Sign generated archives before publishing them to central repository using GPG Smartcard make
+sure to configure the following in ~/.gradle/gradle.properties
+
+    signing.gnupg.executable=gpg2
+    signing.gnupg.useLegacyGpg=false
+    signing.gnupg.keyName=<your key id>
+
+==== Uploading Archives to Maven Central
+
+The signed releases should be uploaded to maven central. In order to do this there is needed an account
+in oss.sonatype.org with access rights to manage lightningj projects.
+
+Before uploading set the following to settings in ~/.gradle/gradle.properties
+
+    ossrhUsername=
+    ossrhPassword=
+
+Then to build, sign and upload archives to Maven Central run the command
+(first make sure to update the version):
+
+    ./gradlew uploadArchives
+
+The release is placed in _Staging Repositories_ section. Select latest ‘open’ and press ‘close’
+Enter a comment and wait for verification to complete (Press Refresh). Then press ‘Release’ to release
+the version. The release will be at Maven Central within a couple of hours.
+
+==== Updating the Website
 
 To generate documentation use:
 
     ./gradlew build doc
 
-This will generate documentation in _build/docs/html5_.
+The generated documentation will be placed in _build/docs/html5_. After verifying it is correct
+it is possible to publish the web site to github using the command:
 
-To clean the project use:
+    ./gradlew gitPublishPush
 
-    ./gradlew build doc
-
-=== GPG Sign Releases using SmartCard
-
-To GPG Sign generated archives before publishing them to central repository using GPG Smartcard make
-sure to configure the
-following in ~/.gradle/gradle.properties
-
-    signing.gnupg.executable=gpg2
-    signing.gnupg.useLegacyGpg=false
-    signing.gnupg.keyName=<your key id>
+Enter your Github credentials in the GUI and the website will be updated.
