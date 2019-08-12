@@ -17,6 +17,7 @@ sourceSets{
 
         compileClasspath += project.sourceSets.main.output
         runtimeClasspath += project.sourceSets.main.output
+        
     }
 }
 

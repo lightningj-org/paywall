@@ -150,7 +150,7 @@ class SettlementSpec extends Specification {
         new Settlement(toJsonObject("""{"preImageHash":"HXRC","invoice":"invalidinvoice","validUntil":"abc"}"""))
         then:
         e = thrown(JsonException)
-        e.message == "Error parsing json object invoice, message: org.glassfish.json.JsonStringImpl cannot be cast to javax.json.JsonObject"
+        e.message =~ "Error parsing json object invoice, message:"
     }
 
     def "Verify getClaimName() returns correct value"(){

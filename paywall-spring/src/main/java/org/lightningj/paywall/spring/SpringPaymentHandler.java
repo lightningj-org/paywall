@@ -17,9 +17,9 @@ package org.lightningj.paywall.spring;
 import org.lightningj.paywall.InternalErrorException;
 import org.lightningj.paywall.lightninghandler.LightningHandler;
 import org.lightningj.paywall.paymenthandler.BasePaymentHandler;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.util.logging.Logger;
 
@@ -31,7 +31,7 @@ import static org.lightningj.paywall.util.SettingUtils.checkLongWithDefault;
  *
  * @author philip 2019-02-09
  */
-public abstract class SpringPaymentHandler extends BasePaymentHandler {
+public abstract class SpringPaymentHandler extends BasePaymentHandler implements InitializingBean {
 
     static Logger log = Logger.getLogger(SpringPaymentHandler.class.getName());
 
@@ -41,10 +41,18 @@ public abstract class SpringPaymentHandler extends BasePaymentHandler {
     @Autowired
     PaywallProperties paywallProperties;
 
-    @PostConstruct
+    /**
+     * Invoked by the containing {@code BeanFactory} after it has set all bean properties
+     * and satisfied {@link org.springframework.beans.factory.BeanFactoryAware}, {@code ApplicationContextAware} etc.
+     * <p>This method allows the bean instance to perform validation of its overall
+     * configuration and final initialization when all bean properties have been set.
+     *
+     * @throws Exception in the event of misconfiguration (such as failure to set an
+     *                   essential property) or if initialization fails for any other reason
+     */
     @Override
-    public void init() throws InternalErrorException {
-        super.init();
+    public void afterPropertiesSet() throws Exception {
+        init();
     }
 
     /**

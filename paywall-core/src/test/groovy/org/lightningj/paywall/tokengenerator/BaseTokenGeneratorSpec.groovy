@@ -214,15 +214,15 @@ class BaseTokenGeneratorSpec extends Specification {
         then:
         def pd2 = new Order(claims)
         def rd2 = new RequestData(claims)
-        pd2.expireDate == expireDate
-        rd2.requestDate == requestDate
+        pd2.expireDate.toEpochMilli()  == expireDate.toEpochMilli()
+        rd2.requestDate.toEpochMilli()  == requestDate.toEpochMilli()
 
         when:
         token = baseTokenGenerator.generatePaymentToken(orderRequest,paymentData,null,expireDate,null,null)
         claims = baseTokenGenerator.parseToken(TokenContext.CONTEXT_PAYMENT_TOKEN_TYPE,token)
         then:
         def pd3 = new Order(claims)
-        pd3.expireDate == expireDate
+        pd3.expireDate.toEpochMilli()  == expireDate.toEpochMilli()
         def or1 = new OrderRequest(claims)
         or1.articleId == "1234"
 
@@ -242,15 +242,15 @@ class BaseTokenGeneratorSpec extends Specification {
         def rd2 = new RequestData(claims)
         def or2 = new OrderRequest(claims)
         or2.articleId == "1234"
-        id2.expireDate == expireDate
-        rd2.requestDate == requestDate
+        id2.expireDate.toEpochMilli() == expireDate.toEpochMilli()
+        rd2.requestDate.toEpochMilli()  == requestDate.toEpochMilli()
 
         when:
         token = baseTokenGenerator.generateInvoiceToken(null,invoiceData,null,expireDate,null,null)
         claims = baseTokenGenerator.parseToken(TokenContext.CONTEXT_INVOICE_TOKEN_TYPE,token)
         then:
         def id3 = new Invoice(claims)
-        id3.expireDate == expireDate
+        id3.expireDate.toEpochMilli()  == expireDate.toEpochMilli()
     }
 
     def "Verify that generateSettlementToken generates a valid invoice token"(){
@@ -267,15 +267,15 @@ class BaseTokenGeneratorSpec extends Specification {
         def rd2 = new RequestData(claims)
         def or2 = new OrderRequest(claims)
         or2.articleId == "1234"
-        sd2.validUntil == expireDate
-        rd2.requestDate == requestDate
+        sd2.validUntil.toEpochMilli()  == expireDate.toEpochMilli()
+        rd2.requestDate.toEpochMilli()  == requestDate.toEpochMilli()
 
         when:
         token = baseTokenGenerator.generateSettlementToken(null,settlementData,null,expireDate,null,null)
         claims = baseTokenGenerator.parseToken(TokenContext.CONTEXT_INVOICE_TOKEN_TYPE,token)
         then:
         def sd3 = new Settlement(claims)
-        sd3.validUntil == expireDate
+        sd3.validUntil.toEpochMilli()  == expireDate.toEpochMilli()
     }
 
 

@@ -17,6 +17,12 @@ dependencies {
     compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
     testCompile 'javax.servlet:javax.servlet-api:4.0.1'
 
+    // JAX-B dependencies for JDK 9+
+    compile "javax.xml.bind:jaxb-api:2.2.11"
+    compile "com.sun.xml.bind:jaxb-core:2.2.11"
+    compile "com.sun.xml.bind:jaxb-impl:2.2.11"
+    compile "javax.activation:activation:1.1.1"
+
 }
 
 // Add integration test task, with source sets etc.

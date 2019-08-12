@@ -205,7 +205,7 @@ class InvoiceSpec extends Specification {
         new Invoice(toJsonObject("""{"preImageHash":"HXRC","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345,"invoiceDate":2345, "settled": false, "settledAmount": "123"}"""))
         then:
         e = thrown(JsonException)
-        e.message == "Error parsing json object settledAmount, message: org.glassfish.json.JsonStringImpl cannot be cast to javax.json.JsonObject"
+        e.message =~ "Error parsing json object settledAmount, message:"
 
         when:
         new Invoice(toJsonObject("""{"preImageHash":"HXRC","bolt11Invoice":"fksjeoskajduakdfhaskdismensuduajseusdke","expireDate":12345,"invoiceDate":2345, "settled": false, "settlementDate": "abc"}"""))
