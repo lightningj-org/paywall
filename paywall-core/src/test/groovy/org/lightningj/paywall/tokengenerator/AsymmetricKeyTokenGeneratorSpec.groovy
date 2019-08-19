@@ -184,6 +184,8 @@ class AsymmetricKeyTokenGeneratorSpec extends Specification {
         String token = tokenGenerator.generateToken(ctx_type,expireDate,notBefore,true,recipientKeyId,paymentData)
         char[] tokenChars = token.toCharArray()
         tokenChars[100] = 'a'
+        tokenChars[101] = 'b'
+        tokenChars[102] = 'c'
         String modifiedToken = new String(tokenChars)
         when:
         tokenGenerator.parseToken(ctx_type,modifiedToken)
