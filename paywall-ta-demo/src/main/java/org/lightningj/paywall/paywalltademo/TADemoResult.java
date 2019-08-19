@@ -12,30 +12,46 @@
  *  See terms of license at gnu.org.                                     *
  *                                                                       *
  *************************************************************************/
-package org.lightningj.paywall.spring.util;
+package org.lightningj.paywall.paywalltademo;
 
 /**
- * Special RuntimeException used in Spring controllers and filters to
- * return correct response data.
+ * Response object used by TADemoRestController to generate JSON Data.
  *
- * @author philip 2019-02-14
+ * @author Philip Vendil
  */
-public class PaywallRuntimeException extends RuntimeException{
+public class TADemoResult {
 
-    /**
-     * Constructs a new runtime exception with the specified cause and a
-     * detail message of <i>(cause==null ? null : cause.toString())</i>
-     * (which typically contains the class and detail message of
-     * <i>cause</i>).  This constructor is useful for runtime exceptions
-     * that are little more than wrappers for other throwables.
-     *
-     * @param cause the cause (which is saved for later retrieval by the
-     *              {@link #getCause()} method).  (A <i>null</i> value is
-     *              permitted, and indicates that the cause is nonexistent or
-     *              unknown.)
-     * @since 1.4
-     */
-    public PaywallRuntimeException(Throwable cause) {
-        super(cause);
+    private long id;
+    private String prediction;
+    private boolean goingUp;
+
+    public TADemoResult(long id, String prediction, boolean goingUp) {
+        this.id = id;
+        this.prediction = prediction;
+        this.goingUp = goingUp;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public String getPrediction() {
+        return prediction;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public void setPrediction(String prediction) {
+        this.prediction = prediction;
+    }
+
+    public boolean isGoingUp() {
+        return goingUp;
+    }
+
+    public void setGoingUp(boolean goingUp) {
+        this.goingUp = goingUp;
     }
 }

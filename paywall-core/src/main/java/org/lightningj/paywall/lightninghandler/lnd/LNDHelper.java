@@ -112,7 +112,9 @@ public class LNDHelper {
         retval.setRHash(preImageData.getPreImageHash());
         // Only Magnitude NONE is supported, so no check is necessary.
         retval.setValue(paymentData.getConvertedAmount().getValue());
-        retval.setMemo(paymentData.getDescription());
+        if(paymentData.getDescription() != null) {
+            retval.setMemo(paymentData.getDescription());
+        }
         // Expire time is number of seconds the invoice should be valid.
         retval.setExpiry(paymentData.getExpireDate().getEpochSecond() - clock.instant().getEpochSecond());
 

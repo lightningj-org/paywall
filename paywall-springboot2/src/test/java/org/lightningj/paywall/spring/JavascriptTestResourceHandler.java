@@ -9,15 +9,17 @@ import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 /**
- * TODO
+ * Special ResourceHandler handler reading files direcly from disk instead
+ * of cached static content.
  */
 @Configuration
 public class JavascriptTestResourceHandler implements WebMvcConfigurer {
 
     /**
-     * TODO
+     * Method that adds resource handlers for reloading of directories
+     * ../paywall-js/build/dist/ and src/main/resources/static/.
      *
-     * @param registry
+     * @param registry the resource handler registry to add to.
      */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {

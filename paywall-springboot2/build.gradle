@@ -19,8 +19,6 @@ apply plugin: 'io.spring.dependency-management'
 apply plugin: "com.energizedwork.webdriver-binaries"
 
 
-group = 'org.lightningj'
-
 ext {
 	// The drivers we want to use
 	drivers = ["firefox", "chrome", "chromeHeadless"]
@@ -60,8 +58,6 @@ webdriverBinaries {
 	chromedriver chromeDriverVersion
 	geckodriver geckoDriverVersion
 }
-
-// TODO Have include and exclude filters
 
 drivers.each { driver ->
 	task "${driver}Test"(type: Test, dependsOn : [':paywall-js:build']) {

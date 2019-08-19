@@ -55,7 +55,7 @@ public abstract class DefaultFileKeyManager extends FileKeyManager implements As
 
     static final String BTCPAY_SERVER_ECDSA_CURVE="secp256k1";
 
-    private static final int AES_KEY_LENGTH = 128;
+    private static final int AES_KEY_LENGTH = 256;
 
     private KeyFactory rsaKeyFactory;
     private KeyFactory ecKeyFactory;

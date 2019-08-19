@@ -14,6 +14,7 @@
  *************************************************************************/
 package org.lightningj.paywall.spring
 
+import org.lightningj.paywall.InternalErrorException
 import org.lightningj.paywall.spring.local.LocalProfileBeanConfiguration
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
@@ -51,6 +52,11 @@ class SpringPaymentHandlerSpec extends Specification {
     def "Verify that getDefaultSettlementValidity returns Duration from setting paywall.settlement.defaultvalidity"() {
         expect:
         paymentHandler.getDefaultSettlementValidity().toMinutes() == 2
+    }
+
+    def "Verify that isLightningHandlerAutoconnect returns value from setting paywall.lightninghandler.autoconnect"() {
+        expect:
+        !paymentHandler.isLightningHandlerAutoconnect()
     }
 
     def "Verify that getDefaultInvoiceValidity returns default validity if setting is not set"() {
@@ -93,5 +99,17 @@ class SpringPaymentHandlerSpec extends Specification {
         then:
         r.toHours() == 24
         1 * SpringPaymentHandler.log.severe("Error parsing application properties, setting paywall.settlement.defaultvalidity should be an integer, not abc, using default value: 86400")
+    }
+
+    def "Verify that error log is done for invalid setting of lightning node autoconnect"() {
+        setup:
+        PaywallProperties p = new PaywallProperties()
+        p.lightningHandlerAutoconnect = "abc"
+        paymentHandler.paywallProperties = p
+        when:
+        paymentHandler.isLightningHandlerAutoconnect()
+        then:
+        def e = thrown InternalErrorException
+        e.message == "Invalid server configuration, check that setting paywall.lightninghandler.autoconnect is either true or false, not abc."
     }
 }

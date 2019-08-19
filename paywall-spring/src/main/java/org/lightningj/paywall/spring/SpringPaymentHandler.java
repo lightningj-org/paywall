@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.Duration;
 import java.util.logging.Logger;
 
+import static org.lightningj.paywall.util.SettingUtils.checkBooleanWithDefault;
 import static org.lightningj.paywall.util.SettingUtils.checkLongWithDefault;
 
 /**
@@ -95,4 +96,11 @@ public abstract class SpringPaymentHandler extends BasePaymentHandler implements
         return Duration.ofSeconds(PaywallProperties.DEFAULT_SETTLEMENT_DEFAULT_VALIDITY);
     }
 
+    /**
+     * @return true if base payment handler should try to connect to lightning handler automatically upon restart.
+     */
+    @Override
+    protected boolean isLightningHandlerAutoconnect() throws InternalErrorException {
+        return checkBooleanWithDefault(paywallProperties.getLightningHandlerAutoconnect(), PaywallProperties.LIGHTNINGHANDLER_AUTOCONNECT, PaywallProperties.DEFAULT_LIGHTNINGHANDLER_AUTOCONNECT);
+    }
 }

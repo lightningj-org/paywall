@@ -133,13 +133,12 @@ public interface PaymentHandler {
     void unregisterListener(PaymentListener listener) throws InternalErrorException;
 
     /**
-     * Method to generate the latest LNDLightningHandlerContext of latest
+     * Method to generate the latest LightningHandlerContext of latest
      * known state of the lightning node. Used to make sure the PaymentHandler
      * starts listening on the correct location of the invoice event queue after
-     * restart.
+     * restart. For LND Nodes should this method return a LNDLightningHandlerContext
      * @return the last known state of lightning handler context.
-     * @throws IOException if communication exception occurred in underlying components.
      * @throws InternalErrorException if internal exception occurred fetching latest known state of lightning handler.
      */
-    LNDLightningHandlerContext getLightningHandlerContext() throws IOException,InternalErrorException;
+    LightningHandlerContext getLightningHandlerContext() throws InternalErrorException;
 }

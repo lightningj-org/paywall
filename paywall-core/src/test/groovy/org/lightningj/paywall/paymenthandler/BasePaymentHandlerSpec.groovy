@@ -62,7 +62,7 @@ class BasePaymentHandlerSpec extends Specification {
         BasePaymentHandler.log.isLoggable(Level.FINE) >> true
     }
 
-    def "Verify init setup up handler correctly"(){
+    def "Verify init setup up handler correctly, and no connect call is done to lightning handler if autoconnect is false"(){
         when:
         paymentHandler.init()
         then:
@@ -71,6 +71,21 @@ class BasePaymentHandlerSpec extends Specification {
         paymentHandler.paymentDataConverter.defaultSettlementValidity.toMinutes() == 5
         paymentHandler.paymentDataConverter.defaultInvoiceValidity.toMinutes() == 60
         1 * lightningHandler.registerListener(paymentHandler)
+        0 * lightningHandler.connect(_)
+        1 * BasePaymentHandler.log.log(Level.FINE,"Initialized BasePaymentHandler.")
+    }
+
+    def "Verify init setup up handler correctly, and connect call is done to lightning handler if autoconnect is true"(){
+        when:
+        paymentHandler.autoconnect = true
+        paymentHandler.init()
+        then:
+        paymentHandler.paymentEventBus != null
+        paymentHandler.paymentDataConverter.lightningHandler == lightningHandler
+        paymentHandler.paymentDataConverter.defaultSettlementValidity.toMinutes() == 5
+        paymentHandler.paymentDataConverter.defaultInvoiceValidity.toMinutes() == 60
+        1 * lightningHandler.registerListener(paymentHandler)
+        1 * lightningHandler.connect(_)
         1 * BasePaymentHandler.log.log(Level.FINE,"Initialized BasePaymentHandler.")
     }
 
@@ -422,6 +437,8 @@ PerRequestPaymentData even though OrderRequest contains payPerRequest flag."""()
 
     static class TestPaymentHandler extends BasePaymentHandler{
 
+        boolean autoconnect = false
+
         TestPaymentHandler(LightningHandler lightningHandler){
             this.lightningHandler = lightningHandler
         }
@@ -443,6 +460,11 @@ PerRequestPaymentData even though OrderRequest contains payPerRequest flag."""()
         @Override
         protected Duration getDefaultSettlementValidity() {
             return Duration.ofMinutes(5)
+        }
+
+        @Override
+        protected boolean isLightningHandlerAutoconnect() throws InternalErrorException {
+            return autoconnect
         }
 
         @Override

@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <title>Lightning J, Paywall TA Demo</title>
+</head>
+<body>
+<nav class="navbar navbar-expand-md navbar-dark bg-dark">
+    <div class="navbar-collapse collapse w-100 order-1 order-md-0 dual-collapse2">
+        <a class="navbar-brand justify-content-left" href="#">LightningJ Paywall TA Demo</a>
+    </div>
+    <div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="#">Project Doc</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">GitHub</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<div id="welcomeCard" class="card" >
+    <div class="card-body">
+        <h5 class="card-title">Bitcoin Price Prediction Service</h5>
+        <h6 class="card-subtitle mb-2 text-muted"><i>Cost:</i> 10 Satoshis</h6>
+        <p class="card-text">Click on button below do receive a Bitcoin price indication with guaranteed 50% prediction accuracy.</p>
+        <button id="welcomeCardBuyButton" type="button" class="btn btn-primary">Buy Prediction</button>
+    </div>
+</div>
+<div id="predictionCard" class="card invisible" >
+    <div class="card-body">
+        <h5 class="card-title">Bitcoin Prediction Generated</h5>
+        <p class="card-text">TODO</p>
+        <button type="button" class="btn btn-primary">Buy New Prediction</button>
+        <button type="button" class="btn btn-primary">Reset</button>
+    </div>
+</div>
+<div id="invoiceModal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Invoice Received</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div id="invoiceModalBody" class="modal-body">
+                <p>Modal body text goes here.</p>
+            </div>
+            <div class="modal-footer justify-content-left">
+                <button type="button" class="btn btn-secondary mr-auto" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="fixed-bottom bg-secondary text-white"><i>Disclamer:</i> This is not a real TA application. This is just a demo of LightingJ Paywall Framework. Do NOT consider this as financial advice in any way.</div>
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+<!-- TODO reference external scripts -->
+<script src="js/sockjs.js" ></script>
+<script src="js/stomp.js" ></script>
+<script src="js/paywall.js" ></script>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#welcomeCardBuyButton").click(function(){
+            var paywallHttpRequest = new PaywallHttpRequest();
+
+            // TODO Close
+
+            // First set up event listeners
+
+            paywallHttpRequest.paywall.addEventListener("InvoiceListener", PaywallEventType.INVOICE, function (type, invoice) {
+                // Add a Paywall Invoice event Listener that displays the invoice for the user.
+                var modalBody = $('#invoiceModalBody')
+                modalBody.empty();
+                var invoiceExpire = new PaywallTime(invoice.invoiceExpireDate)
+                modalBody.append("<h6>Invoice Expires In: " + invoiceExpire.remaining().minutes() + ":" + invoiceExpire.remaining().seconds() + "</h6>") // Time Left
+                modalBody.append("<img class='justify-content-center' src='" + invoice.qrLink + "'/>"); // QR
+                var amountInSat = new PaywallAmount(invoice.invoiceAmount).as(BTCUnit.SAT);
+                modalBody.append("<h6>Price: " + amountInSat + "</h6>") // Time Left
+                modalBody.append("<div class=\"accordion\" id=\"advancedAccordion\">\n" +
+                    "    <div id=\"welcomeCard2\" class=\"card\" >\n" +
+                    "        <div class=\"card-header\" id=\"advancedAccordionHeader\">\n" +
+                    "            <h6 class=\"mb-0\">\n" +
+                    "                <button class=\"btn btn-link\" type=\"button\" data-toggle=\"collapse\" data-target=\"#advancedAccordionBody\" aria-expanded=\"false\" aria-controls=\"advancedAccordionBody\">\n" +
+                    "                    Advanced\n" +
+                    "                </button>\n" +
+                    "            </h6>\n" +
+                    "        </div>\n" +
+                    "      <div id=\"advancedAccordionBody\" class=\"collapse\" aria-labelledby=\"advancedAccordionHeader\" data-parent=\"#advancedAccordion\">\n" +
+                    "            <div class=\"card-body\">\n" +
+                    "                <div class=\"card\" >\n" +
+                    "                    <div class=\"card-body\">\n" +
+                    "                        <h6 class=\"card-subtitle mb-2 text-muted\"><i>Invoice:</i></h6>\n" +
+                    "                        <p id=\"bolt11Invoice\" class=\"card-text\">" + invoice.bolt11Invoice + "</p>\n" +
+                    "                    </div>\n" +
+                    "                </div>\n" +
+                    "                <div class=\"card\" >\n" +
+                    "                    <div class=\"card-body\">\n" +
+                    "                        <h6 class=\"card-subtitle mb-2 text-muted\"><i>Node Info:</i></h6>\n" +
+                    "                        <p id=\"nodeInfo\" class=\"card-text\">" + invoice.nodeInfo.connectString + "</p>\n" +
+                    "                    </div>\n" +
+                    "                </div>\n" +
+                    "            </div>\n" +
+                    "        </div>\n" +
+                    "      </div>\n" +
+                    "   </div>"); // Advanced, with invoice and node
+
+
+                // Finally activate the invoice.
+                $('#invoiceModal').modal({});
+            });
+
+            paywallHttpRequest.paywall.addEventListener("SettledListener", PaywallEventType.SETTLED, function (type, settlement) {
+                // Hide the invoice panel as soon as the invoice have been payed.
+                console.log("Settled");
+                $('#invoiceModal').modal('hide');
+            });
+
+            paywallHttpRequest.onload = function(){
+                // Process the service response as would be done with a regular XMLHttpRequest
+                console.log("Performed");
+            }
+
+            // Open up a connection to the paywalled service.
+            paywallHttpRequest.open("GET","/tademo");
+            // Send the data to the service that will trigger the payment flow if required.
+            paywallHttpRequest.send();
+
+        });
+
+    });
+
+</script>
+</body>
+</html>

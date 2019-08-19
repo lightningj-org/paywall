@@ -31,6 +31,9 @@ public class PaywallProperties {
     public static final String LND_PORT = "paywall.lnd.port";
     public static final String LND_TLS_CERT_PATH = "paywall.lnd.tlscertpath";
     public static final String LND_MACAROON_PATH = "paywall.lnd.macaroonpath";
+
+    public static final boolean DEFAULT_LIGHTNINGHANDLER_AUTOCONNECT = true;
+    public static final String LIGHTNINGHANDLER_AUTOCONNECT = "paywall.lightninghandler.autoconnect";
     // Key Store Manager Settings
     public static final String KEYMGR_ASYMTRUSTSTOREPATH = "paywall.keys.truststorepath";
     public static final String KEYMGR_KEYSTOREPATH = "paywall.keys.keystorepath";
@@ -77,6 +80,9 @@ public class PaywallProperties {
 
     @Value("${" + LND_MACAROON_PATH +  ":}")
     private String lndMacaroonPath;
+
+    @Value("${" + LIGHTNINGHANDLER_AUTOCONNECT +  ":" + DEFAULT_LIGHTNINGHANDLER_AUTOCONNECT + "}")
+    private String lightningHandlerAutoconnect;
 
     @Value("${" + KEYMGR_ASYMTRUSTSTOREPATH +  ":}")
     private String keymgrAsymTruststorePath;
@@ -156,6 +162,15 @@ public class PaywallProperties {
      */
     public String getLndMacaroonPath() {
         return lndMacaroonPath;
+    }
+
+    /**
+     * True if BasePaymentHandler should connect automatically to Lightning Node upon initialization of bean.
+     * if false should the implementing application connect the lightning handler manually during startup.
+     * @return "true" or "false" (Default is "true").
+     */
+    public String getLightningHandlerAutoconnect(){
+        return lightningHandlerAutoconnect;
     }
 
     /**

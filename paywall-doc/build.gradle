@@ -1,4 +1,3 @@
-group 'org.lightningj'
 
 apply plugin: 'org.asciidoctor.convert'
 

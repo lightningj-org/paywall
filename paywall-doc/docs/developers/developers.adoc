@@ -65,6 +65,10 @@ Before release is should unit, integration and functional tests be verified with
 
 This requires that integration and functional test suites are set up.
 
+==== Test Reports
+
+Latest Java test reports are located link:allTests/index.html[here].
+
 === Generating a Release
 
 ==== GPG Sign Releases using SmartCard
@@ -99,7 +103,7 @@ the version. The release will be at Maven Central within a couple of hours.
 
 To generate documentation use:
 
-    ./gradlew build doc
+    ./gradlew build preReleaseTest doc
 
 The generated documentation will be placed in _build/docs/html5_. After verifying it is correct
 it is possible to publish the web site to github using the command:

@@ -12,30 +12,14 @@
  *  See terms of license at gnu.org.                                     *
  *                                                                       *
  *************************************************************************/
-package org.lightningj.paywall.spring.util;
+package org.lightningj.paywall.paywalltademo.paymenthandler;
+
+import org.springframework.data.repository.CrudRepository;
 
 /**
- * Special RuntimeException used in Spring controllers and filters to
- * return correct response data.
- *
- * @author philip 2019-02-14
+ * Spring Data repository for DemoPerRequestPaymentData.
  */
-public class PaywallRuntimeException extends RuntimeException{
+public interface DemoPerRequestPaymentDataRepository extends CrudRepository<DemoPerRequestPaymentData,Integer> {
 
-    /**
-     * Constructs a new runtime exception with the specified cause and a
-     * detail message of <i>(cause==null ? null : cause.toString())</i>
-     * (which typically contains the class and detail message of
-     * <i>cause</i>).  This constructor is useful for runtime exceptions
-     * that are little more than wrappers for other throwables.
-     *
-     * @param cause the cause (which is saved for later retrieval by the
-     *              {@link #getCause()} method).  (A <i>null</i> value is
-     *              permitted, and indicates that the cause is nonexistent or
-     *              unknown.)
-     * @since 1.4
-     */
-    public PaywallRuntimeException(Throwable cause) {
-        super(cause);
-    }
+    DemoPerRequestPaymentData findByPreImageHash(String preImageHash);
 }

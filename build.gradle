@@ -1,4 +1,4 @@
-
+group 'org.lightningj.paywall'
 
 allprojects{
   repositories {

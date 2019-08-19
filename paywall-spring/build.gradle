@@ -1,6 +1,8 @@
-group 'org.lightningj'
 
 description = "LightningJ Paywall Spring - Spring components for LightningJ Paywall"
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
 
 
 dependencies {

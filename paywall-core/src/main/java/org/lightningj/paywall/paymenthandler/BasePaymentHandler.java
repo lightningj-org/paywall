@@ -67,6 +67,13 @@ public abstract class BasePaymentHandler implements PaymentHandler, LightningEve
                 getDefaultSettlementValidity(),
                 getDefaultInvoiceValidity());
         getLightningHandler().registerListener(this);
+        if(isLightningHandlerAutoconnect()) {
+            try {
+                getLightningHandler().connect(getLightningHandlerContext());
+            } catch (IOException e) {
+                throw new InternalErrorException("Error connecting to Lighting Node: " + e.getLocalizedMessage(), e);
+            }
+        }
         log.log(Level.FINE, "Initialized BasePaymentHandler.");
     }
 
@@ -250,11 +257,10 @@ public abstract class BasePaymentHandler implements PaymentHandler, LightningEve
      * Lightning context is updated through when lightning events are triggered.
      *
      * @return the last known state of lightning handler context.
-     * @throws IOException if communication exception occurred in underlying components.
      * @throws InternalErrorException if internal exception occurred fetching latest known state of lightning handler.
      */
     @Override
-    public LNDLightningHandlerContext getLightningHandlerContext() throws IOException, InternalErrorException {
+    public LightningHandlerContext getLightningHandlerContext() throws InternalErrorException {
         return new LNDLightningHandlerContext();
     }
 
@@ -277,6 +283,12 @@ public abstract class BasePaymentHandler implements PaymentHandler, LightningEve
      * been set explicit in PaymentData.
      */
     protected abstract Duration getDefaultSettlementValidity();
+
+    /**
+     *
+     * @return true if base payment handler should try to connect to lightning handler automatically upon restart.
+     */
+    protected abstract boolean isLightningHandlerAutoconnect() throws InternalErrorException;
 
     /**
      * Method that should generate a new PaymentData for a given order request.

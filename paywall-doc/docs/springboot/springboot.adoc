@@ -160,6 +160,9 @@ paywall.lnd.hostname=somehost.org
 paywall.lnd.port=10009
 paywall.lnd.tlscertpath=/home/lnd/.lnd/tls.cert
 paywall.lnd.macaroonpath=/home/lnd/.lnd/data/chain/bitcoin/testnet/invoice.macaroon
+
+paywall.keys.keystorepath=~/ta-demo-keys
+paywall.keys.password=foobar123
 ------------------------------------
 
 But settings _paywall.keys.keystorepath_ and _paywall.keys.password_ are also
@@ -170,7 +173,7 @@ recommended for production systems.
 |===
 | Property | Required | Default Value | Description
 
-| LND Properties:
+| LND and Lightning Properties:
 |
 |
 | Settings related to connecting to used LND Node.
@@ -196,6 +199,12 @@ recommended for production systems.
 | n/a
 | The path to the macaroon file that is used to authenticate to the LND node. The macaroon
   should have invoice creation rights. Required if running local payment flow.
+
+| paywall.lightninghandler.autoconnect
+| false
+| true
+| if BasePaymentHandler should connect automatically to Lightning Node upon initialization of bean.
+  if set to false should the implementing application connect the lightning handler manually during startup.
 
 | Key Management Settings:
 |
