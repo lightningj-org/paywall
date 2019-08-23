@@ -1,9 +1,0 @@
-rootProject.name = 'paywall'
-include 'paywall-doc'
-include 'paywall-core'
-include 'paywall-js'
-include 'paywall-spring'
-include 'paywall-springboot2'
-include 'paywall-ta-demo'
-
-
