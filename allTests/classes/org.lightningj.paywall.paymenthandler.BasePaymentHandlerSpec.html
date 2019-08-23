@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=edge"/>
+<title>Test results - Class org.lightningj.paywall.paymenthandler.BasePaymentHandlerSpec</title>
+<link href="../css/base-style.css" rel="stylesheet" type="text/css"/>
+<link href="../css/style.css" rel="stylesheet" type="text/css"/>
+<script src="../js/report.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="content">
+<h1>Class org.lightningj.paywall.paymenthandler.BasePaymentHandlerSpec</h1>
+<div class="breadcrumbs">
+<a href="../index.html">all</a> &gt; 
+<a href="../packages/org.lightningj.paywall.paymenthandler.html">org.lightningj.paywall.paymenthandler</a> &gt; BasePaymentHandlerSpec</div>
+<div id="summary">
+<table>
+<tr>
+<td>
+<div class="summaryGroup">
+<table>
+<tr>
+<td>
+<div class="infoBox" id="tests">
+<div class="counter">27</div>
+<p>tests</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="failures">
+<div class="counter">0</div>
+<p>failures</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="ignored">
+<div class="counter">0</div>
+<p>ignored</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="duration">
+<div class="counter">0.198s</div>
+<p>duration</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</td>
+<td>
+<div class="infoBox success" id="successRate">
+<div class="percent">100%</div>
+<p>successful</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div id="tabs">
+<ul class="tabLinks">
+<li>
+<a href="#tab0">Tests</a>
+</li>
+</ul>
+<div id="tab0" class="tab">
+<h2>Tests</h2>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Duration</th>
+<th>Result</th>
+</tr>
+</thead>
+<tr>
+<td class="success">Verify init setup up handler correctly, and connect call is done to lightning handler if autoconnect is true</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify init setup up handler correctly, and no connect call is done to lightning handler if autoconnect is false</td>
+<td class="success">0.021s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that checkSettlement returns a Settlement if related invoice was found and was settled and invoice
+was returned with the includeInvoice flag.</td>
+<td class="success">0.008s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that checkSettlement returns a Settlement if related invoice was found and was settled and is payPerRequest</td>
+<td class="success">0.009s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that checkSettlement returns a Settlement if related invoice was found and was settled and no invoice
+was returned without the includeInvoice flag.</td>
+<td class="success">0.006s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that checkSettlement returns null if no related invoice was found.</td>
+<td class="success">0.004s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that checkSettlement returns null if related invoice was not settled.</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that checkSettlement throws IllegalArgumentException if related invoice is payPerRequest and already executed</td>
+<td class="success">0.037s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that createOrder calls newPaymentData and converts it into an order</td>
+<td class="success">0.008s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that createOrder throws InternalErrorException if orderRequest has payPerRequest flag and newPaymentData
+doesn't return PaymentData implementing PerRequestPaymentData</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that getLightningHandlerContext returns an empty LNDLightningHandlerContext.</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that lookupInvoice returns calls findPaymentData and converts the PaymentData into an invoice.</td>
+<td class="success">0.004s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that lookupInvoice returns null if no related PaymentData was found.</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that markAsExecuted throws InternalErrorException if preImageHash couldn't be found.</td>
+<td class="success">0s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that markAsExecuted throws InternalErrorException if related payment doesn't implement PerRequestPaymentData.</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that markAsExecuted updates a PerRequestPaymentData with executed flag if related payment exists</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that onLightningEvent calls updatePaymentData properly for PaymentEventType INVOICE_CREATED</td>
+<td class="success">0.010s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that onLightningEvent calls updatePaymentData properly for PaymentEventType INVOICE_SETTLED</td>
+<td class="success">0.006s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that onLightningEvent logs error if any exception occurs during processing</td>
+<td class="success">0.004s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that onLightningEvent logs info about skipping an invoice it hasn't created before hand.</td>
+<td class="success">0.004s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that registerListener calls register in event bus.</td>
+<td class="success">0.045s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that registerSettledInvoice registers new payment data if not exists and registerNew flag set.</td>
+<td class="success">0.006s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that registerSettledInvoice throws IllegalArgumentException if no payment exists in system and registerNew flag is not set.</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that registerSettledInvoice throws IllegalArgumentException if payment is already settled in the system.</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that registerSettledInvoice throws InternalErrorExcpetion if new payment data doesn't implement
+PerRequestPaymentData even though OrderRequest contains payPerRequest flag.</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that registerSettledInvoice updates existing payment data if exists and not prior settled.</td>
+<td class="success">0.007s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that unregisterListener calls unregister in event bus.</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+</table>
+</div>
+</div>
+<div id="footer">
+<p>
+<div>
+<label class="hidden" id="label-for-line-wrapping-toggle" for="line-wrapping-toggle">Wrap lines
+<input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
+</label>
+</div>Generated by 
+<a href="http://www.gradle.org">Gradle 5.0</a> at Aug 23, 2019 1:36:30 PM</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=edge"/>
+<title>Test results - Class org.lightningj.paywall.btcpayserver.BTCPayServerResponseParserSpec</title>
+<link href="../css/base-style.css" rel="stylesheet" type="text/css"/>
+<link href="../css/style.css" rel="stylesheet" type="text/css"/>
+<script src="../js/report.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="content">
+<h1>Class org.lightningj.paywall.btcpayserver.BTCPayServerResponseParserSpec</h1>
+<div class="breadcrumbs">
+<a href="../index.html">all</a> &gt; 
+<a href="../packages/org.lightningj.paywall.btcpayserver.html">org.lightningj.paywall.btcpayserver</a> &gt; BTCPayServerResponseParserSpec</div>
+<div id="summary">
+<table>
+<tr>
+<td>
+<div class="summaryGroup">
+<table>
+<tr>
+<td>
+<div class="infoBox" id="tests">
+<div class="counter">3</div>
+<p>tests</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="failures">
+<div class="counter">0</div>
+<p>failures</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="ignored">
+<div class="counter">0</div>
+<p>ignored</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="duration">
+<div class="counter">0.009s</div>
+<p>duration</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</td>
+<td>
+<div class="infoBox success" id="successRate">
+<div class="percent">100%</div>
+<p>successful</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div id="tabs">
+<ul class="tabLinks">
+<li>
+<a href="#tab0">Tests</a>
+</li>
+<li>
+<a href="#tab1">Standard output</a>
+</li>
+</ul>
+<div id="tab0" class="tab">
+<h2>Tests</h2>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Duration</th>
+<th>Result</th>
+</tr>
+</thead>
+<tr>
+<td class="success">Verify that parseInvoice with BTCPay Server invoice returns an Invoice</td>
+<td class="success">0.006s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that parseInvoice with null value returns null</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that parseTokenwith BTCPay Server token returns an Token</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+</table>
+</div>
+<div id="tab1" class="tab">
+<h2>Standard output</h2>
+<span class="code">
+<pre>{
+    &quot;facade&quot;: &quot;pos/invoice&quot;,
+    &quot;data&quot;: {
+        &quot;url&quot;: &quot;https://btcpay302112.lndyn.com/invoice?id=HGgydgG9JRTcRoYDnKrtKk&quot;,
+        &quot;posData&quot;: null,
+        &quot;status&quot;: &quot;new&quot;,
+        &quot;btcPrice&quot;: &quot;0.00001591&quot;,
+        &quot;btcDue&quot;: &quot;0.00003791&quot;,
+        &quot;cryptoInfo&quot;: [
+            {
+                &quot;cryptoCode&quot;: &quot;BTC&quot;,
+                &quot;paymentType&quot;: &quot;LightningLike&quot;,
+                &quot;rate&quot;: 6285.9216482124,
+                &quot;exRates&quot;: {
+                    &quot;USD&quot;: 0
+                },
+                &quot;paid&quot;: &quot;0.00000000&quot;,
+                &quot;price&quot;: &quot;0.00001591&quot;,
+                &quot;due&quot;: &quot;0.00001591&quot;,
+                &quot;paymentUrls&quot;: {
+                    &quot;BIP21&quot;: null,
+                    &quot;BIP72&quot;: null,
+                    &quot;BIP72b&quot;: null,
+                    &quot;BIP73&quot;: null,
+                    &quot;BOLT11&quot;: &quot;lightning:lntb15910n1pduryyrpp5ztlfregsmt7rxjqfkl2p546d3junpjr6437tljghdyzg3xkundlqdpj2pskjepqw3hjqar9wd69xar0wfjnzgpgfaexgetjypy5gw3q9ycqzysxqzuyckp6shmdpepj2q9mn00nscsv5h6439k6tlnmrhwyranacvek9aypthgwtc7nuxztp9ldhue3937y03nstwxfculx08fcl2kyn34xgkcqrgvtmn&quot;
+                },
+                &quot;address&quot;: &quot;lntb15910n1pduryyrpp5ztlfregsmt7rxjqfkl2p546d3junpjr6437tljghdyzg3xkundlqdpj2pskjepqw3hjqar9wd69xar0wfjnzgpgfaexgetjypy5gw3q9ycqzysxqzuyckp6shmdpepj2q9mn00nscsv5h6439k6tlnmrhwyranacvek9aypthgwtc7nuxztp9ldhue3937y03nstwxfculx08fcl2kyn34xgkcqrgvtmn&quot;,
+                &quot;url&quot;: &quot;https://btcpay302112.lndyn.com/i/BTC_LightningLike/HGgydgG9JRTcRoYDnKrtKk&quot;,
+                &quot;totalDue&quot;: &quot;0.00001591&quot;,
+                &quot;networkFee&quot;: &quot;0.00000000&quot;,
+                &quot;txCount&quot;: 0,
+                &quot;cryptoPaid&quot;: &quot;0.00000000&quot;
+            },
+            {
+                &quot;cryptoCode&quot;: &quot;BTC&quot;,
+                &quot;paymentType&quot;: &quot;BTCLike&quot;,
+                &quot;rate&quot;: 6285.9216482124,
+                &quot;exRates&quot;: {
+                    &quot;USD&quot;: 0
+                },
+                &quot;paid&quot;: &quot;0.00000000&quot;,
+                &quot;price&quot;: &quot;0.00001591&quot;,
+                &quot;due&quot;: &quot;0.00003791&quot;,
+                &quot;paymentUrls&quot;: {
+                    &quot;BIP21&quot;: &quot;bitcoin:tb1qynflqpm75000f6zkdxyv9fkm4fhedr47syqsqr?amount=0.00003791&quot;,
+                    &quot;BIP72&quot;: &quot;bitcoin:tb1qynflqpm75000f6zkdxyv9fkm4fhedr47syqsqr?amount=0.00003791&amp;r=https://btcpay302112.lndyn.com/i/HGgydgG9JRTcRoYDnKrtKk&quot;,
+                    &quot;BIP72b&quot;: &quot;bitcoin:?r=https://btcpay302112.lndyn.com/i/HGgydgG9JRTcRoYDnKrtKk&quot;,
+                    &quot;BIP73&quot;: &quot;https://btcpay302112.lndyn.com/i/HGgydgG9JRTcRoYDnKrtKk&quot;,
+                    &quot;BOLT11&quot;: null
+                },
+                &quot;address&quot;: &quot;tb1qynflqpm75000f6zkdxyv9fkm4fhedr47syqsqr&quot;,
+                &quot;url&quot;: &quot;https://btcpay302112.lndyn.com/i/BTC/HGgydgG9JRTcRoYDnKrtKk&quot;,
+                &quot;totalDue&quot;: &quot;0.00003791&quot;,
+                &quot;networkFee&quot;: &quot;0.00002200&quot;,
+                &quot;txCount&quot;: 0,
+                &quot;cryptoPaid&quot;: &quot;0.00000000&quot;
+            }
+        ],
+        &quot;price&quot;: 0.1,
+        &quot;currency&quot;: &quot;USD&quot;,
+        &quot;exRates&quot;: {
+            &quot;USD&quot;: 0
+        },
+        &quot;buyerTotalBtcAmount&quot;: null,
+        &quot;itemDesc&quot;: null,
+        &quot;orderId&quot;: null,
+        &quot;guid&quot;: &quot;b2e3696e-5627-4e18-bea4-612a1f0f0582&quot;,
+        &quot;id&quot;: &quot;HGgydgG9JRTcRoYDnKrtKk&quot;,
+        &quot;invoiceTime&quot;: 1539412098000,
+        &quot;expirationTime&quot;: 1539412998000,
+        &quot;currentTime&quot;: 1539412099613,
+        &quot;lowFeeDetected&quot;: false,
+        &quot;btcPaid&quot;: &quot;0.00000000&quot;,
+        &quot;rate&quot;: 6285.9216482124,
+        &quot;exceptionStatus&quot;: false,
+        &quot;paymentUrls&quot;: {
+            &quot;BIP21&quot;: &quot;bitcoin:tb1qynflqpm75000f6zkdxyv9fkm4fhedr47syqsqr?amount=0.00003791&quot;,
+            &quot;BIP72&quot;: &quot;bitcoin:tb1qynflqpm75000f6zkdxyv9fkm4fhedr47syqsqr?amount=0.00003791&amp;r=https://btcpay302112.lndyn.com/i/HGgydgG9JRTcRoYDnKrtKk&quot;,
+            &quot;BIP72b&quot;: &quot;bitcoin:?r=https://btcpay302112.lndyn.com/i/HGgydgG9JRTcRoYDnKrtKk&quot;,
+            &quot;BIP73&quot;: &quot;https://btcpay302112.lndyn.com/i/HGgydgG9JRTcRoYDnKrtKk&quot;,
+            &quot;BOLT11&quot;: null
+        },
+        &quot;refundAddressRequestPending&quot;: false,
+        &quot;buyerPaidBtcMinerFee&quot;: null,
+        &quot;bitcoinAddress&quot;: &quot;tb1qynflqpm75000f6zkdxyv9fkm4fhedr47syqsqr&quot;,
+        &quot;token&quot;: &quot;BodnkXGPkuDWs5C4wFEvK9&quot;,
+        &quot;flags&quot;: {
+            &quot;refundable&quot;: false
+        },
+        &quot;paymentSubtotals&quot;: {
+            &quot;BTC_LightningLike&quot;: 1591,
+            &quot;BTC&quot;: 1591
+        },
+        &quot;paymentTotals&quot;: {
+            &quot;BTC_LightningLike&quot;: 1591,
+            &quot;BTC&quot;: 3791
+        },
+        &quot;amountPaid&quot;: 0,
+        &quot;minerFees&quot;: {
+            &quot;BTC&quot;: {
+                &quot;satoshisPerByte&quot;: 22,
+                &quot;totalFee&quot;: 2200
+            }
+        },
+        &quot;exchangeRates&quot;: {
+            &quot;BTC&quot;: {
+                &quot;USD&quot;: 0
+            }
+        },
+        &quot;supportedTransactionCurrencies&quot;: {
+            &quot;BTC&quot;: {
+                &quot;enabled&quot;: true
+            }
+        },
+        &quot;addresses&quot;: {
+            &quot;BTC_LightningLike&quot;: &quot;lntb15910n1pduryyrpp5ztlfregsmt7rxjqfkl2p546d3junpjr6437tljghdyzg3xkundlqdpj2pskjepqw3hjqar9wd69xar0wfjnzgpgfaexgetjypy5gw3q9ycqzysxqzuyckp6shmdpepj2q9mn00nscsv5h6439k6tlnmrhwyranacvek9aypthgwtc7nuxztp9ldhue3937y03nstwxfculx08fcl2kyn34xgkcqrgvtmn&quot;,
+            &quot;BTC&quot;: &quot;tb1qynflqpm75000f6zkdxyv9fkm4fhedr47syqsqr&quot;
+        },
+        &quot;paymentCodes&quot;: {
+            &quot;BTC_LightningLike&quot;: {
+                &quot;BIP21&quot;: null,
+                &quot;BIP72&quot;: null,
+                &quot;BIP72b&quot;: null,
+                &quot;BIP73&quot;: null,
+                &quot;BOLT11&quot;: &quot;lightning:lntb15910n1pduryyrpp5ztlfregsmt7rxjqfkl2p546d3junpjr6437tljghdyzg3xkundlqdpj2pskjepqw3hjqar9wd69xar0wfjnzgpgfaexgetjypy5gw3q9ycqzysxqzuyckp6shmdpepj2q9mn00nscsv5h6439k6tlnmrhwyranacvek9aypthgwtc7nuxztp9ldhue3937y03nstwxfculx08fcl2kyn34xgkcqrgvtmn&quot;
+            },
+            &quot;BTC&quot;: {
+                &quot;BIP21&quot;: &quot;bitcoin:tb1qynflqpm75000f6zkdxyv9fkm4fhedr47syqsqr?amount=0.00003791&quot;,
+                &quot;BIP72&quot;: &quot;bitcoin:tb1qynflqpm75000f6zkdxyv9fkm4fhedr47syqsqr?amount=0.00003791&amp;r=https://btcpay302112.lndyn.com/i/HGgydgG9JRTcRoYDnKrtKk&quot;,
+                &quot;BIP72b&quot;: &quot;bitcoin:?r=https://btcpay302112.lndyn.com/i/HGgydgG9JRTcRoYDnKrtKk&quot;,
+                &quot;BIP73&quot;: &quot;https://btcpay302112.lndyn.com/i/HGgydgG9JRTcRoYDnKrtKk&quot;,
+                &quot;BOLT11&quot;: null
+            }
+        }
+    }
+}{&quot;data&quot;:[{&quot;policies&quot;:[],&quot;pairingCode&quot;:&quot;iuiWpWq&quot;,&quot;pairingExpiration&quot;:1540191320741,&quot;dateCreated&quot;:1540190420741,&quot;facade&quot;:&quot;merchant&quot;,&quot;token&quot;:&quot;A5WTwn1hH31bWJXukFecoGMYvYyHo9xa5KHoZCCNR11F&quot;,&quot;label&quot;:&quot;Paywall Test Client&quot;}]}</pre>
+</span>
+</div>
+</div>
+<div id="footer">
+<p>
+<div>
+<label class="hidden" id="label-for-line-wrapping-toggle" for="line-wrapping-toggle">Wrap lines
+<input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
+</label>
+</div>Generated by 
+<a href="http://www.gradle.org">Gradle 5.0</a> at Aug 23, 2019 1:36:30 PM</p>
+</div>
+</div>
+</body>
+</html>

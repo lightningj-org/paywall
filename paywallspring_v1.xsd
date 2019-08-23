@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema elementFormDefault="qualified" version="1.0" targetNamespace="http://lightningj.org/xsd/paywallspringapi_1_0" xmlns:tns="http://lightningj.org/xsd/paywallspringapi_1_0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="InvoiceResponse" type="tns:InvoiceResponseType"/>
+
+  <xs:element name="SettlementResponse" type="tns:SettlementResponseType"/>
+
+  <xs:complexType name="SettlementResponseType">
+    <xs:complexContent>
+      <xs:extension base="tns:ResponseType">
+        <xs:sequence>
+          <xs:element name="preImageHash" type="xs:string" minOccurs="0"/>
+          <xs:element name="token" type="xs:string" minOccurs="0"/>
+          <xs:element name="settlementValidUntil" type="xs:dateTime" minOccurs="0"/>
+          <xs:element name="settlementValidFrom" type="xs:dateTime" minOccurs="0"/>
+          <xs:element name="payPerRequest" type="xs:boolean" minOccurs="0"/>
+          <xs:element name="settled" type="xs:boolean"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="ResponseType" abstract="true">
+    <xs:sequence>
+      <xs:element name="status" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="InvoiceResponseType">
+    <xs:complexContent>
+      <xs:extension base="tns:ResponseType">
+        <xs:sequence>
+          <xs:element name="preImageHash" type="xs:string"/>
+          <xs:element name="bolt11Invoice" type="xs:string"/>
+          <xs:element name="description" type="xs:string" minOccurs="0"/>
+          <xs:element name="invoiceAmount" type="tns:CryptoAmountType"/>
+          <xs:element name="nodeInfo" type="tns:NodeInfoType" minOccurs="0"/>
+          <xs:element name="token" type="xs:string"/>
+          <xs:element name="invoiceDate" type="xs:dateTime"/>
+          <xs:element name="invoiceExpireDate" type="xs:dateTime"/>
+          <xs:element name="payPerRequest" type="xs:boolean" default="false" minOccurs="0"/>
+          <xs:element name="requestPolicyType" type="xs:string"/>
+          <xs:element name="checkSettlementLink" type="xs:string" minOccurs="0"/>
+          <xs:element name="qrLink" type="xs:string" minOccurs="0"/>
+          <xs:element name="checkSettlementWebSocketEndpoint" type="xs:string" minOccurs="0"/>
+          <xs:element name="checkSettlementWebSocketQueue" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="CryptoAmountType">
+    <xs:sequence>
+      <xs:element name="value" type="xs:long"/>
+      <xs:element name="currencyCode" type="xs:string" default="BTC" minOccurs="0"/>
+      <xs:element name="magnetude" type="tns:magnetude" default="NONE" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="NodeInfoType">
+    <xs:sequence>
+      <xs:element name="publicKeyInfo" type="xs:string"/>
+      <xs:element name="nodeAddress" type="xs:string"/>
+      <xs:element name="nodePort" type="xs:int"/>
+      <xs:element name="network" type="tns:nodeNetwork" default="UNKNOWN" minOccurs="0"/>
+      <xs:element name="connectString" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="magnetude">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="NONE"/>
+      <xs:enumeration value="MILLI"/>
+      <xs:enumeration value="NANO"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="nodeNetwork">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="MAIN_NET"/>
+      <xs:enumeration value="TEST_NET"/>
+      <xs:enumeration value="UNKNOWN"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
+
