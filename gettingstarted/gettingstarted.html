@@ -748,11 +748,12 @@ p.tableblock.header { color: #6d6e71; }
 <h2 id="gettingstarted">Getting Started</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>TODO Introduction.</p>
+<p>In this section we will build a simple REST Service based application that required payment for each call using
+the Paywall library.</p>
 </div>
 <div class="paragraph">
-<p>In our example we will build a web service that provides a Bitcoin Price TA ( Technical Analysis ) Price Prediction
-Service, with a guaranteed correct prediction rate of 50%, that we will paywall and charge 10 Satoshis per prediction.</p>
+<p>It will be a web service that provides a Bitcoin Price TA ( Technical Analysis ) Price Prediction
+Service, with a guaranteed correct prediction rate of 50%. We will then charge 10 Satoshis per prediction.</p>
 </div>
 <div class="sect2">
 <h3 id="_prerequisites">Prerequisites</h3>
@@ -770,11 +771,19 @@ Service, with a guaranteed correct prediction rate of 50%, that we will paywall 
 </ul>
 </div>
 <div class="paragraph">
-<p>Instructions to set up or install an LND node can be found at <a href="//TODO" class="bare">//TODO</a>, you will also
-need to find the TLS certificate and the invoice.macaroon file generated after LND startups.</p>
+<p>Instructions to set up or install an LND node can be found at
+<a href="//https://github.com/lightningnetwork/lnd/blob/master/docs/INSTALL.md">LND Site</a>. After finished installing the LND
+node you will also need to find the TLS certificate and the invoice.macaroon file generated after LND startup. You also
+need to retrieve the connect string by issuing the command:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>lncli getinfo</pre>
+</div>
 </div>
 <div class="paragraph">
-<p>TODO test with invoice.macaroon.</p>
+<p>The connection string is one of the <em>uris</em> listed. The port is the one specified using the parameter 'rpclisted' in the
+LND configuration.</p>
 </div>
 </div>
 <div class="sect2">
@@ -813,10 +822,23 @@ clicking on <em>Generate the Project</em>.</p>
 <div class="sect2">
 <h3 id="_configuring_the_project">Configuring the Project</h3>
 <div class="paragraph">
-<p>First we need to add paywall dependencies to the file build.gradle:</p>
+<p>First we need to add a paywall dependency to the file <em>build.gradle</em> by adding the row:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>    compile 'org.lightningj.paywall:paywall-spring:0.1.0'</pre>
+</div>
 </div>
 <div class="paragraph">
-<p>TODO</p>
+<p>You also need to add database support, in our example we use an in memory database:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>implementation 'com.h2database:h2'</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Full example of the <em>build.gradle</em> is shown below.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -836,12 +858,12 @@ clicking on <em>Generate the Project</em>.</p>
     }
 
     dependencies {
-	    // TODO
 	    // Add Paywall Spring dependency here
-	    compile project(':paywall-spring')
+	    compile 'org.lightningj.paywall:paywall-spring:0.1.0'
 
+	    implementation 'com.h2database:h2'
 	    // Optionally if you want to use mariadb database instead of in memory, uncomment:
-	    // implementation 'org.mariadb.jdbc:mariadb-java-client:2.4.0'
+	    //implementation 'org.mariadb.jdbc:mariadb-java-client:2.4.0'
 
     	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -852,10 +874,9 @@ clicking on <em>Generate the Project</em>.</p>
 </div>
 <div class="paragraph">
 <p>Then we need to setup a minimum configuration in the file <em>src/main/resources/application.properties</em>.
-Here we configure the current paywall profile: <em>paywall_local</em> and connection options to your local LND node
-(to retrieve the connect string use the <em>lncli getinfo</em> command.)
-as well as location of and password protecting the secret key signing and encrypting the JWT (Java Web Token, used
-to prove the state of a specific payment in a stateless way).</p>
+Here we configure the current paywall profile: <em>paywall_local</em> and connection options to your local LND node.
+Also required is the location of and password protecting the secret key signing and encrypting the JWT (Java Web Token,
+used to prove the state of a specific payment in a stateless way).</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -872,12 +893,9 @@ paywall.keys.password=foobar123</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>If you want to use mariadb as database instead of the in-memory provided by default also
+<p>If you want to use mariadb as database instead of the in-memory provided in the example also
 add the following properties, assuming your mariadb database is called <em>paywallTSDemo</em> (also remember
 to add the <em>mariadb-java-client</em> dependency in <em>build.gradle</em>):</p>
-</div>
-<div class="paragraph">
-<p>TODO Test that this works.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1464,10 +1482,11 @@ is received.</p>
 &lt;/div&gt;
 &lt;div class="fixed-bottom bg-secondary text-white"&gt;&lt;i&gt;Disclamer:&lt;/i&gt; This is not a real TA application. This is just a demo of LightingJ Paywall Framework. Do NOT consider this as financial advice in any way.&lt;/div&gt;
 
-&lt;!-- TODO reference external scripts --&gt;
-&lt;script src="js/sockjs.js" &gt;&lt;/script&gt;
-&lt;script src="js/stomp.js" &gt;&lt;/script&gt;
-&lt;script src="js/paywall.js" &gt;&lt;/script&gt;
+&lt;!-- JavaScript Required for Paywall--&gt;
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.3.0/sockjs.js"&gt;&lt;/script&gt;
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js" &gt;&lt;/script&gt;
+&lt;script src="https://github.com/lightningj-org/paywall/releases/download/v0.0.1/paywall.js" &gt;&lt;/script&gt;
+
 
 &lt;!-- Optional JavaScript --&gt;
 &lt;!-- jQuery first, then Popper.js, then Bootstrap JS --&gt;
@@ -1660,7 +1679,7 @@ releases all underlying resources, such as closing web socket, etc.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>The full index.html can be found in the example repository <a href="TODO">here</a>.</p>
+<p>The full index.html can be found in the example repository <a href="https://github.com/lightningj-org/paywall-ta-demo/blob/master/src/main/resources/static/index.html">here</a>.</p>
 </div>
 <div class="paragraph">
 <p>Also see <a href="#javascriptapi">Javascript API</a> section for more details on how to use the <em>PaywallHttpRequest</em> class.</p>
@@ -1687,7 +1706,7 @@ the command</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-08-23 11:11:25 CEST
+Last updated 2019-08-25 09:07:11 CEST
 </div>
 </div>
 </body>

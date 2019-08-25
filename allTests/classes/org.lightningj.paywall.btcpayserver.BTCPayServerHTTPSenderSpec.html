@@ -41,7 +41,7 @@
 </td>
 <td>
 <div class="infoBox" id="duration">
-<div class="counter">1.917s</div>
+<div class="counter">0.908s</div>
 <p>duration</p>
 </div>
 </td>
@@ -99,7 +99,7 @@
 </tr>
 <tr>
 <td class="success">Verify that sending contains the correct headers</td>
-<td class="success">1.916s</td>
+<td class="success">0.907s</td>
 <td class="success">passed</td>
 </tr>
 </table>
@@ -110,46 +110,46 @@
 <pre>SLF4J: Failed to load class &quot;org.slf4j.impl.StaticLoggerBinder&quot;.
 SLF4J: Defaulting to no-operation (NOP) logger implementation
 SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
-Aug 23, 2019 1:33:55 PM io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler channelRegistered
-INFO: [id: 0x9dd649dc] REGISTERED
-Aug 23, 2019 1:33:55 PM io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler bind
-INFO: [id: 0x9dd649dc] BIND: 0.0.0.0/0.0.0.0:50898
-Aug 23, 2019 1:33:55 PM io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler channelActive
-INFO: [id: 0x9dd649dc, L:/0.0.0.0:50898] ACTIVE
-Aug 23, 2019 1:33:56 PM org.lightningj.paywall.btcpayserver.BTCPayServerHTTPSender send
-INFO: Sending to BTC Server POST http://localhost:50898/someendpoint?param1=value1&amp;param2=value2, data: {&quot;requestdata1&quot;:&quot;value1&quot;}
-Aug 23, 2019 1:33:56 PM io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler channelRead
-INFO: [id: 0x9dd649dc, L:/0.0.0.0:50898] READ: [id: 0xf673c943, L:/127.0.0.1:50898 - R:/127.0.0.1:50899]
-Aug 23, 2019 1:33:56 PM io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler channelReadComplete
-INFO: [id: 0x9dd649dc, L:/0.0.0.0:50898] READ COMPLETE
-Aug 23, 2019 1:33:56 PM org.lightningj.paywall.btcpayserver.BTCPayServerHTTPSender send
+Aug 25, 2019 9:40:28 PM io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler channelRegistered
+INFO: [id: 0x57e0c0a1] REGISTERED
+Aug 25, 2019 9:40:28 PM io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler bind
+INFO: [id: 0x57e0c0a1] BIND: 0.0.0.0/0.0.0.0:58926
+Aug 25, 2019 9:40:28 PM io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler channelActive
+INFO: [id: 0x57e0c0a1, L:/0.0.0.0:58926] ACTIVE
+Aug 25, 2019 9:40:28 PM org.lightningj.paywall.btcpayserver.BTCPayServerHTTPSender send
+INFO: Sending to BTC Server POST http://localhost:58926/someendpoint?param1=value1&amp;param2=value2, data: {&quot;requestdata1&quot;:&quot;value1&quot;}
+Aug 25, 2019 9:40:28 PM io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler channelRead
+INFO: [id: 0x57e0c0a1, L:/0.0.0.0:58926] READ: [id: 0x1c15074a, L:/127.0.0.1:58926 - R:/127.0.0.1:58927]
+Aug 25, 2019 9:40:28 PM io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler channelReadComplete
+INFO: [id: 0x57e0c0a1, L:/0.0.0.0:58926] READ COMPLETE
+Aug 25, 2019 9:40:29 PM org.lightningj.paywall.btcpayserver.BTCPayServerHTTPSender send
 INFO: Received from BTC Server, 200, data: {&quot;test1&quot;:&quot;value1&quot;}
-Aug 23, 2019 1:33:56 PM org.lightningj.paywall.btcpayserver.BTCPayServerHTTPSender send
-INFO: Sending to BTC Server PUT http://localhost:50898/someendpoint, data: {&quot;requestdata1&quot;:&quot;value1&quot;}
-Aug 23, 2019 1:33:56 PM io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler channelRead
-INFO: [id: 0x9dd649dc, L:/0.0.0.0:50898] READ: [id: 0x9dba91d9, L:/127.0.0.1:50898 - R:/127.0.0.1:50900]
-Aug 23, 2019 1:33:56 PM io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler channelReadComplete
-INFO: [id: 0x9dd649dc, L:/0.0.0.0:50898] READ COMPLETE
-Aug 23, 2019 1:33:56 PM org.lightningj.paywall.btcpayserver.BTCPayServerHTTPSender send
+Aug 25, 2019 9:40:29 PM org.lightningj.paywall.btcpayserver.BTCPayServerHTTPSender send
+INFO: Sending to BTC Server PUT http://localhost:58926/someendpoint, data: {&quot;requestdata1&quot;:&quot;value1&quot;}
+Aug 25, 2019 9:40:29 PM io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler channelRead
+INFO: [id: 0x57e0c0a1, L:/0.0.0.0:58926] READ: [id: 0x6b2d52a8, L:/127.0.0.1:58926 - R:/127.0.0.1:58929]
+Aug 25, 2019 9:40:29 PM io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler channelReadComplete
+INFO: [id: 0x57e0c0a1, L:/0.0.0.0:58926] READ COMPLETE
+Aug 25, 2019 9:40:29 PM org.lightningj.paywall.btcpayserver.BTCPayServerHTTPSender send
 INFO: Received from BTC Server, 200, data: {&quot;test1&quot;:&quot;value1&quot;}
-Aug 23, 2019 1:33:56 PM org.lightningj.paywall.btcpayserver.BTCPayServerHTTPSender send
-INFO: Sending to BTC Server GET http://localhost:50898/someendpoint, data: 
-Aug 23, 2019 1:33:56 PM io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler channelRead
-INFO: [id: 0x9dd649dc, L:/0.0.0.0:50898] READ: [id: 0x1f3b1aae, L:/127.0.0.1:50898 - R:/127.0.0.1:50901]
-Aug 23, 2019 1:33:56 PM io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler channelReadComplete
-INFO: [id: 0x9dd649dc, L:/0.0.0.0:50898] READ COMPLETE
-Aug 23, 2019 1:33:56 PM org.lightningj.paywall.btcpayserver.BTCPayServerHTTPSender send
+Aug 25, 2019 9:40:29 PM org.lightningj.paywall.btcpayserver.BTCPayServerHTTPSender send
+INFO: Sending to BTC Server GET http://localhost:58926/someendpoint, data: 
+Aug 25, 2019 9:40:29 PM io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler channelRead
+INFO: [id: 0x57e0c0a1, L:/0.0.0.0:58926] READ: [id: 0x6b87ecbb, L:/127.0.0.1:58926 - R:/127.0.0.1:58930]
+Aug 25, 2019 9:40:29 PM io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler channelReadComplete
+INFO: [id: 0x57e0c0a1, L:/0.0.0.0:58926] READ COMPLETE
+Aug 25, 2019 9:40:29 PM org.lightningj.paywall.btcpayserver.BTCPayServerHTTPSender send
 INFO: Received from BTC Server, 200, data: {&quot;test1&quot;:&quot;value1&quot;}
-Aug 23, 2019 1:33:56 PM org.lightningj.paywall.btcpayserver.BTCPayServerHTTPSender send
-INFO: Sending to BTC Server GET http://localhost:50898/someendpoint, data: 
-Aug 23, 2019 1:33:56 PM io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler channelRead
-INFO: [id: 0x9dd649dc, L:/0.0.0.0:50898] READ: [id: 0x7fd465a2, L:/127.0.0.1:50898 - R:/127.0.0.1:50902]
-Aug 23, 2019 1:33:56 PM io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler channelReadComplete
-INFO: [id: 0x9dd649dc, L:/0.0.0.0:50898] READ COMPLETE
-Aug 23, 2019 1:33:56 PM org.lightningj.paywall.btcpayserver.BTCPayServerHTTPSender send
+Aug 25, 2019 9:40:29 PM org.lightningj.paywall.btcpayserver.BTCPayServerHTTPSender send
+INFO: Sending to BTC Server GET http://localhost:58926/someendpoint, data: 
+Aug 25, 2019 9:40:29 PM io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler channelRead
+INFO: [id: 0x57e0c0a1, L:/0.0.0.0:58926] READ: [id: 0x2a6858a1, L:/127.0.0.1:58926 - R:/127.0.0.1:58931]
+Aug 25, 2019 9:40:29 PM io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler channelReadComplete
+INFO: [id: 0x57e0c0a1, L:/0.0.0.0:58926] READ COMPLETE
+Aug 25, 2019 9:40:29 PM org.lightningj.paywall.btcpayserver.BTCPayServerHTTPSender send
 INFO: Received from BTC Server, 400, data: Bad Request
-Aug 23, 2019 1:33:56 PM io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler channelUnregistered
-INFO: [id: 0x9dd649dc, L:/0.0.0.0:50898] UNREGISTERED
+Aug 25, 2019 9:40:29 PM io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler channelUnregistered
+INFO: [id: 0x57e0c0a1, L:/0.0.0.0:58926] UNREGISTERED
 </pre>
 </span>
 </div>
@@ -161,7 +161,7 @@ INFO: [id: 0x9dd649dc, L:/0.0.0.0:50898] UNREGISTERED
 <input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
 </label>
 </div>Generated by 
-<a href="http://www.gradle.org">Gradle 5.0</a> at Aug 23, 2019 1:36:30 PM</p>
+<a href="http://www.gradle.org">Gradle 5.0</a> at Aug 25, 2019 10:07:48 PM</p>
 </div>
 </div>
 </body>

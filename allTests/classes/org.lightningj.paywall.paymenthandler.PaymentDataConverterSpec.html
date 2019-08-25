@@ -41,7 +41,7 @@
 </td>
 <td>
 <div class="infoBox" id="duration">
-<div class="counter">0.205s</div>
+<div class="counter">0.029s</div>
 <p>duration</p>
 </div>
 </td>
@@ -76,12 +76,12 @@
 </thead>
 <tr>
 <td class="success">Verify populatePaymentDataFromInvoice sets all expected fields for a FullPaymentData</td>
-<td class="success">0.003s</td>
+<td class="success">0.001s</td>
 <td class="success">passed</td>
 </tr>
 <tr>
 <td class="success">Verify populatePaymentDataFromInvoice sets all expected fields for a MinimalPaymentData</td>
-<td class="success">0.001s</td>
+<td class="success">0s</td>
 <td class="success">passed</td>
 </tr>
 <tr>
@@ -91,112 +91,112 @@
 </tr>
 <tr>
 <td class="success">Verify that basicCheck throws InternalErrorException if paymentData is null.</td>
-<td class="success">0.001s</td>
-<td class="success">passed</td>
-</tr>
-<tr>
-<td class="success">Verify that convertToInvoice converts FullPaymentData into Invoice for unsettled invoice.</td>
-<td class="success">0.019s</td>
-<td class="success">passed</td>
-</tr>
-<tr>
-<td class="success">Verify that convertToInvoice converts FullPaymentData into Invoice without looking up the invoice in LightningHandler.</td>
-<td class="success">0.013s</td>
-<td class="success">passed</td>
-</tr>
-<tr>
-<td class="success">Verify that convertToInvoice fetches the invoice from LightningHandler if payment data is of type StandardPaymentData.</td>
-<td class="success">0.076s</td>
-<td class="success">passed</td>
-</tr>
-<tr>
-<td class="success">Verify that convertToInvoice throws InternalErrorException if lightningHandler cannot lookup the related invoice if payment data is of type StandardPaymentData.</td>
-<td class="success">0.006s</td>
-<td class="success">passed</td>
-</tr>
-<tr>
-<td class="success">Verify that convertToInvoice throws InternalErrorException if payment data isn't implementing MinimalPaymentData</td>
-<td class="success">0.010s</td>
-<td class="success">passed</td>
-</tr>
-<tr>
-<td class="success">Verify that convertToOrder converts a MinimalPaymentData correctly.</td>
-<td class="success">0.004s</td>
-<td class="success">passed</td>
-</tr>
-<tr>
-<td class="success">Verify that convertToOrder converts a StandardPaymentData correctly if expire data is NOT set.</td>
-<td class="success">0.006s</td>
-<td class="success">passed</td>
-</tr>
-<tr>
-<td class="success">Verify that convertToOrder converts a StandardPaymentData correctly if expire data is set.</td>
-<td class="success">0.001s</td>
-<td class="success">passed</td>
-</tr>
-<tr>
-<td class="success">Verify that convertToOrder throws InternalErrorException if payment data isn't implementing MinimalPaymentData</td>
-<td class="success">0.004s</td>
-<td class="success">passed</td>
-</tr>
-<tr>
-<td class="success">Verify that convertToSettlement converts FullPaymentData using default settlement duration if neither settlementExpireDate nor settlementDuration are set.</td>
-<td class="success">0.004s</td>
-<td class="success">passed</td>
-</tr>
-<tr>
-<td class="success">Verify that convertToSettlement converts FullPaymentData using settlementDuration if settlementExpireDate is not set.</td>
-<td class="success">0.004s</td>
-<td class="success">passed</td>
-</tr>
-<tr>
-<td class="success">Verify that convertToSettlement converts FullPaymentData with payment data valid from set in settlement.</td>
-<td class="success">0.003s</td>
-<td class="success">passed</td>
-</tr>
-<tr>
-<td class="success">Verify that convertToSettlement converts MinimalPaymentData correctly</td>
-<td class="success">0.020s</td>
-<td class="success">passed</td>
-</tr>
-<tr>
-<td class="success">Verify that convertToSettlement converts StandardPaymentData with default validity duration.</td>
-<td class="success">0.005s</td>
-<td class="success">passed</td>
-</tr>
-<tr>
-<td class="success">Verify that convertToSettlement converts StandardPaymentData with payment data validity if set.</td>
-<td class="success">0.001s</td>
-<td class="success">passed</td>
-</tr>
-<tr>
-<td class="success">Verify that convertToSettlement includes invoice if includeInvoice is set.</td>
-<td class="success">0.004s</td>
-<td class="success">passed</td>
-</tr>
-<tr>
-<td class="success">Verify that convertToSettlement throws InternalErrorException if payment data isn't implementing MinimalPaymentData</td>
-<td class="success">0.002s</td>
-<td class="success">passed</td>
-</tr>
-<tr>
-<td class="success">Verify that isSettled returns false if paymentData.isSettled is false</td>
 <td class="success">0s</td>
 <td class="success">passed</td>
 </tr>
 <tr>
-<td class="success">Verify that isSettled returns true if paymentData.isSettled is true</td>
+<td class="success">Verify that convertToInvoice converts FullPaymentData into Invoice for unsettled invoice.</td>
 <td class="success">0.001s</td>
 <td class="success">passed</td>
 </tr>
 <tr>
+<td class="success">Verify that convertToInvoice converts FullPaymentData into Invoice without looking up the invoice in LightningHandler.</td>
+<td class="success">0.004s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that convertToInvoice fetches the invoice from LightningHandler if payment data is of type StandardPaymentData.</td>
+<td class="success">0.004s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that convertToInvoice throws InternalErrorException if lightningHandler cannot lookup the related invoice if payment data is of type StandardPaymentData.</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that convertToInvoice throws InternalErrorException if payment data isn't implementing MinimalPaymentData</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that convertToOrder converts a MinimalPaymentData correctly.</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that convertToOrder converts a StandardPaymentData correctly if expire data is NOT set.</td>
+<td class="success">0.004s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that convertToOrder converts a StandardPaymentData correctly if expire data is set.</td>
+<td class="success">0s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that convertToOrder throws InternalErrorException if payment data isn't implementing MinimalPaymentData</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that convertToSettlement converts FullPaymentData using default settlement duration if neither settlementExpireDate nor settlementDuration are set.</td>
+<td class="success">0s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that convertToSettlement converts FullPaymentData using settlementDuration if settlementExpireDate is not set.</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that convertToSettlement converts FullPaymentData with payment data valid from set in settlement.</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that convertToSettlement converts MinimalPaymentData correctly</td>
+<td class="success">0s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that convertToSettlement converts StandardPaymentData with default validity duration.</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that convertToSettlement converts StandardPaymentData with payment data validity if set.</td>
+<td class="success">0s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that convertToSettlement includes invoice if includeInvoice is set.</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that convertToSettlement throws InternalErrorException if payment data isn't implementing MinimalPaymentData</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that isSettled returns false if paymentData.isSettled is false</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Verify that isSettled returns true if paymentData.isSettled is true</td>
+<td class="success">0s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
 <td class="success">Verify that isSettled throws InternalErrorException if paymentData doesn't implement MinimalPaymentData</td>
-<td class="success">0.015s</td>
+<td class="success">0.001s</td>
 <td class="success">passed</td>
 </tr>
 <tr>
 <td class="success">Verify that populatePaymentDataFromInvoice throws InternalErrorException if payment data isn't implementing MinimalPaymentData</td>
-<td class="success">0.002s</td>
+<td class="success">0.001s</td>
 <td class="success">passed</td>
 </tr>
 </table>
@@ -209,7 +209,7 @@
 <input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
 </label>
 </div>Generated by 
-<a href="http://www.gradle.org">Gradle 5.0</a> at Aug 23, 2019 1:36:30 PM</p>
+<a href="http://www.gradle.org">Gradle 5.0</a> at Aug 25, 2019 10:07:48 PM</p>
 </div>
 </div>
 </body>

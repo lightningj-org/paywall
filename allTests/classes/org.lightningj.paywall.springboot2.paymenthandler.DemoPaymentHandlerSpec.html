@@ -41,7 +41,7 @@
 </td>
 <td>
 <div class="infoBox" id="duration">
-<div class="counter">1.844s</div>
+<div class="counter">3.638s</div>
 <p>duration</p>
 </div>
 </td>
@@ -79,12 +79,12 @@
 </thead>
 <tr>
 <td class="success">Verify that InternalErrorException is thrown if no article was found.</td>
-<td class="success">0.010s</td>
+<td class="success">0.031s</td>
 <td class="success">passed</td>
 </tr>
 <tr>
 <td class="success">Verify that payment data handler method handles valid payment data request properly.</td>
-<td class="success">1.834s</td>
+<td class="success">3.607s</td>
 <td class="success">passed</td>
 </tr>
 </table>
@@ -92,12 +92,12 @@
 <div id="tab1" class="tab">
 <h2>Standard output</h2>
 <span class="code">
-<pre>2019-08-23 13:36:04.353  INFO 18580 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Neither @ContextConfiguration nor @ContextHierarchy found for test class [org.lightningj.paywall.springboot2.paymenthandler.DemoPaymentHandlerSpec], using SpringBootContextLoader
-2019-08-23 13:36:04.353  INFO 18580 --- [    Test worker] o.s.t.c.support.AbstractContextLoader    : Could not detect default resource locations for test class [org.lightningj.paywall.springboot2.paymenthandler.DemoPaymentHandlerSpec]: no resource found for suffixes {-context.xml, Context.groovy}.
-2019-08-23 13:36:04.354  INFO 18580 --- [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [org.lightningj.paywall.springboot2.paymenthandler.DemoPaymentHandlerSpec]: DemoPaymentHandlerSpec does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-2019-08-23 13:36:04.374  INFO 18580 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration org.lightningj.paywall.springboot2.PocApplication for test class org.lightningj.paywall.springboot2.paymenthandler.DemoPaymentHandlerSpec
-2019-08-23 13:36:04.375  INFO 18580 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Loaded default TestExecutionListener class names from location [META-INF/spring.factories]: [org.spockframework.spring.SpringMockTestExecutionListener, org.springframework.boot.test.autoconfigure.restdocs.RestDocsTestExecutionListener, org.springframework.boot.test.autoconfigure.web.client.MockRestServiceServerResetTestExecutionListener, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrintOnlyOnFailureTestExecutionListener, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverTestExecutionListener, org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener, org.springframework.boot.test.mock.mockito.ResetMocksTestExecutionListener, org.springframework.test.context.web.ServletTestExecutionListener, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener, org.springframework.test.context.support.DependencyInjectionTestExecutionListener, org.springframework.test.context.support.DirtiesContextTestExecutionListener, org.springframework.test.context.transaction.TransactionalTestExecutionListener, org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener]
-2019-08-23 13:36:04.376  INFO 18580 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Using TestExecutionListeners: [org.springframework.test.context.web.ServletTestExecutionListener@4a7ce4da, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener@6138d6ab, org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener@7669af62, org.springframework.boot.test.autoconfigure.SpringBootDependencyInjectionTestExecutionListener@6068d264, org.springframework.test.context.support.DirtiesContextTestExecutionListener@4d9fa087, org.springframework.test.context.transaction.TransactionalTestExecutionListener@6ab5aa11, org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener@519c1a9a, org.springframework.boot.test.autoconfigure.restdocs.RestDocsTestExecutionListener@77c1093f, org.springframework.boot.test.autoconfigure.web.client.MockRestServiceServerResetTestExecutionListener@47ea04d8, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrintOnlyOnFailureTestExecutionListener@48db16, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverTestExecutionListener@3131494f, org.springframework.boot.test.mock.mockito.ResetMocksTestExecutionListener@4ec626a7, org.spockframework.spring.SpringMockTestExecutionListener@599d3763]
+<pre>2019-08-25 21:41:00.931  INFO 42287 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Neither @ContextConfiguration nor @ContextHierarchy found for test class [org.lightningj.paywall.springboot2.paymenthandler.DemoPaymentHandlerSpec], using SpringBootContextLoader
+2019-08-25 21:41:00.932  INFO 42287 --- [    Test worker] o.s.t.c.support.AbstractContextLoader    : Could not detect default resource locations for test class [org.lightningj.paywall.springboot2.paymenthandler.DemoPaymentHandlerSpec]: no resource found for suffixes {-context.xml, Context.groovy}.
+2019-08-25 21:41:00.932  INFO 42287 --- [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [org.lightningj.paywall.springboot2.paymenthandler.DemoPaymentHandlerSpec]: DemoPaymentHandlerSpec does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2019-08-25 21:41:00.959  INFO 42287 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration org.lightningj.paywall.springboot2.PocApplication for test class org.lightningj.paywall.springboot2.paymenthandler.DemoPaymentHandlerSpec
+2019-08-25 21:41:00.961  INFO 42287 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Loaded default TestExecutionListener class names from location [META-INF/spring.factories]: [org.spockframework.spring.SpringMockTestExecutionListener, org.springframework.boot.test.autoconfigure.restdocs.RestDocsTestExecutionListener, org.springframework.boot.test.autoconfigure.web.client.MockRestServiceServerResetTestExecutionListener, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrintOnlyOnFailureTestExecutionListener, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverTestExecutionListener, org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener, org.springframework.boot.test.mock.mockito.ResetMocksTestExecutionListener, org.springframework.test.context.web.ServletTestExecutionListener, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener, org.springframework.test.context.support.DependencyInjectionTestExecutionListener, org.springframework.test.context.support.DirtiesContextTestExecutionListener, org.springframework.test.context.transaction.TransactionalTestExecutionListener, org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener]
+2019-08-25 21:41:00.962  INFO 42287 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Using TestExecutionListeners: [org.springframework.test.context.web.ServletTestExecutionListener@2e89f9bd, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener@e182372, org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener@57ab9139, org.springframework.boot.test.autoconfigure.SpringBootDependencyInjectionTestExecutionListener@40b9f9d0, org.springframework.test.context.support.DirtiesContextTestExecutionListener@219cb46b, org.springframework.test.context.transaction.TransactionalTestExecutionListener@6e501099, org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener@65796633, org.springframework.boot.test.autoconfigure.restdocs.RestDocsTestExecutionListener@6a016435, org.springframework.boot.test.autoconfigure.web.client.MockRestServiceServerResetTestExecutionListener@2e7abaf2, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrintOnlyOnFailureTestExecutionListener@4040b37c, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverTestExecutionListener@6ea61db9, org.springframework.boot.test.mock.mockito.ResetMocksTestExecutionListener@fe7fc94, org.spockframework.spring.SpringMockTestExecutionListener@74b17ab0]
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -107,29 +107,29 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::        (v2.1.3.RELEASE)
 
-2019-08-23 13:36:04.412  INFO 18580 --- [    Test worker] o.l.p.s.p.DemoPaymentHandlerSpec         : Starting DemoPaymentHandlerSpec on philips-mbp with PID 18580 (/Users/philip/Documents/git-repos/paywall/paywall-springboot2/build/classes/groovy/test started by philip in /Users/philip/Documents/git-repos/paywall/paywall-springboot2)
-2019-08-23 13:36:04.412  INFO 18580 --- [    Test worker] o.l.p.s.p.DemoPaymentHandlerSpec         : The following profiles are active: integration_paywall_local
-2019-08-23 13:36:04.610  INFO 18580 --- [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data repositories in DEFAULT mode.
-2019-08-23 13:36:04.632  INFO 18580 --- [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 22ms. Found 4 repository interfaces.
-2019-08-23 13:36:04.710  INFO 18580 --- [    Test worker] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration' of type [org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration$$EnhancerBySpringCGLIB$$82f70047] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
-2019-08-23 13:36:04.778  INFO 18580 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
-2019-08-23 13:36:04.780  INFO 18580 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
-2019-08-23 13:36:04.798  INFO 18580 --- [    Test worker] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [
+2019-08-25 21:41:01.010  INFO 42287 --- [    Test worker] o.l.p.s.p.DemoPaymentHandlerSpec         : Starting DemoPaymentHandlerSpec on philips-mbp with PID 42287 (/Users/philip/Documents/git-repos/paywall/paywall-springboot2/build/classes/groovy/test started by philip in /Users/philip/Documents/git-repos/paywall/paywall-springboot2)
+2019-08-25 21:41:01.011  INFO 42287 --- [    Test worker] o.l.p.s.p.DemoPaymentHandlerSpec         : The following profiles are active: integration_paywall_local
+2019-08-25 21:41:01.375  INFO 42287 --- [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data repositories in DEFAULT mode.
+2019-08-25 21:41:01.419  INFO 42287 --- [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 44ms. Found 4 repository interfaces.
+2019-08-25 21:41:01.562  INFO 42287 --- [    Test worker] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration' of type [org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration$$EnhancerBySpringCGLIB$$1fcac869] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2019-08-25 21:41:01.779  INFO 42287 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+2019-08-25 21:41:01.788  INFO 42287 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+2019-08-25 21:41:01.824  INFO 42287 --- [    Test worker] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [
 	name: default
 	...]
-2019-08-23 13:36:04.804  INFO 18580 --- [    Test worker] org.hibernate.dialect.Dialect            : HHH000400: Using dialect: org.hibernate.dialect.H2Dialect
-2019-08-23 13:36:04.860  INFO 18580 --- [    Test worker] o.h.t.schema.internal.SchemaCreatorImpl  : HHH000476: Executing import script 'org.hibernate.tool.schema.internal.exec.ScriptSourceInputNonExistentImpl@12f2950e'
-2019-08-23 13:36:04.860  INFO 18580 --- [    Test worker] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2019-08-23 13:36:05.181  INFO 18580 --- [    Test worker] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'clientInboundChannelExecutor'
-2019-08-23 13:36:05.189  INFO 18580 --- [    Test worker] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'clientOutboundChannelExecutor'
-2019-08-23 13:36:05.220  INFO 18580 --- [    Test worker] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'messageBrokerTaskScheduler'
-2019-08-23 13:36:05.240  INFO 18580 --- [    Test worker] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'brokerChannelExecutor'
-2019-08-23 13:36:05.599  WARN 18580 --- [    Test worker] aWebConfiguration$JpaWebMvcConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2019-08-23 13:36:05.890  INFO 18580 --- [    Test worker] o.s.m.s.b.SimpleBrokerMessageHandler     : Starting...
-2019-08-23 13:36:05.890  INFO 18580 --- [    Test worker] o.s.m.s.b.SimpleBrokerMessageHandler     : BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [DefaultSubscriptionRegistry[cache[0 destination(s)], registry[0 sessions]]]]
-2019-08-23 13:36:05.891  INFO 18580 --- [    Test worker] o.s.m.s.b.SimpleBrokerMessageHandler     : Started.
-2019-08-23 13:36:05.895  INFO 18580 --- [    Test worker] o.l.p.s.p.DemoPaymentHandlerSpec         : Started DemoPaymentHandlerSpec in 1.507 seconds (JVM running for 11.428)
-2019-08-23 13:36:05.960  INFO 18580 --- [    Test worker] o.h.h.i.QueryTranslatorFactoryInitiator  : HHH000397: Using ASTQueryTranslatorFactory
+2019-08-25 21:41:01.836  INFO 42287 --- [    Test worker] org.hibernate.dialect.Dialect            : HHH000400: Using dialect: org.hibernate.dialect.H2Dialect
+2019-08-25 21:41:01.996  INFO 42287 --- [    Test worker] o.h.t.schema.internal.SchemaCreatorImpl  : HHH000476: Executing import script 'org.hibernate.tool.schema.internal.exec.ScriptSourceInputNonExistentImpl@51dfe5c3'
+2019-08-25 21:41:01.997  INFO 42287 --- [    Test worker] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2019-08-25 21:41:02.782  INFO 42287 --- [    Test worker] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'clientInboundChannelExecutor'
+2019-08-25 21:41:02.790  INFO 42287 --- [    Test worker] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'clientOutboundChannelExecutor'
+2019-08-25 21:41:02.821  INFO 42287 --- [    Test worker] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'messageBrokerTaskScheduler'
+2019-08-25 21:41:02.839  INFO 42287 --- [    Test worker] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'brokerChannelExecutor'
+2019-08-25 21:41:03.260  WARN 42287 --- [    Test worker] aWebConfiguration$JpaWebMvcConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2019-08-25 21:41:03.960  INFO 42287 --- [    Test worker] o.s.m.s.b.SimpleBrokerMessageHandler     : Starting...
+2019-08-25 21:41:03.961  INFO 42287 --- [    Test worker] o.s.m.s.b.SimpleBrokerMessageHandler     : BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [DefaultSubscriptionRegistry[cache[0 destination(s)], registry[0 sessions]]]]
+2019-08-25 21:41:03.961  INFO 42287 --- [    Test worker] o.s.m.s.b.SimpleBrokerMessageHandler     : Started.
+2019-08-25 21:41:03.974  INFO 42287 --- [    Test worker] o.l.p.s.p.DemoPaymentHandlerSpec         : Started DemoPaymentHandlerSpec in 2.997 seconds (JVM running for 15.149)
+2019-08-25 21:41:04.139  INFO 42287 --- [    Test worker] o.h.h.i.QueryTranslatorFactoryInitiator  : HHH000397: Using ASTQueryTranslatorFactory
 </pre>
 </span>
 </div>
@@ -141,7 +141,7 @@
 <input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
 </label>
 </div>Generated by 
-<a href="http://www.gradle.org">Gradle 5.0</a> at Aug 23, 2019 1:36:30 PM</p>
+<a href="http://www.gradle.org">Gradle 5.0</a> at Aug 25, 2019 10:07:48 PM</p>
 </div>
 </div>
 </body>

@@ -765,7 +765,20 @@ into your web page. paywall.js has two dependency libraries, sockjs.js and stomp
 used to open up web sockets.</p>
 </div>
 <div class="paragraph">
-<p>Add the following to your web page, given that you placed the java script files in 'js' sub directory.</p>
+<p>Simples way to get started with the javascript library is to use the CDN download points of the
+javascript libraries by adding the following to the HTML files:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-html" data-lang="html">&lt;!-- JavaScript Required for Paywall--&gt;
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.3.0/sockjs.js"&gt;&lt;/script&gt;
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js" &gt;&lt;/script&gt;
+&lt;script src="https://github.com/lightningj-org/paywall/releases/download/v0.0.1/paywall.js" &gt;&lt;/script&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you want to host the files locally in your application to avoid external dependencies then download them into a <em>/js</em>
+sub directory of your web application&#8217;s static files and instead add the snippet below to the HTML file.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1585,7 +1598,7 @@ as the payment required filter, QR code generator end point and checkSettlement 
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-08-19 22:09:41 CEST
+Last updated 2019-08-25 09:13:26 CEST
 </div>
 </div>
 </body>

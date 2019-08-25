@@ -41,7 +41,7 @@
 </td>
 <td>
 <div class="infoBox" id="duration">
-<div class="counter">0.715s</div>
+<div class="counter">1.119s</div>
 <p>duration</p>
 </div>
 </td>
@@ -79,37 +79,37 @@
 </thead>
 <tr>
 <td class="success">Verify successful local payment flow with Json and pay per request set to false.</td>
-<td class="success">0.324s</td>
+<td class="success">0.575s</td>
 <td class="success">passed</td>
 </tr>
 <tr>
 <td class="success">Verify successful local payment flow with Json and pay per request set to true.</td>
-<td class="success">0.065s</td>
+<td class="success">0.103s</td>
 <td class="success">passed</td>
 </tr>
 <tr>
 <td class="success">Verify successful local payment flow with xml</td>
-<td class="success">0.210s</td>
+<td class="success">0.283s</td>
 <td class="success">passed</td>
 </tr>
 <tr>
 <td class="success">Verify that PaymentInterceptor returns status 401 with reason EXPIRED if settlement has expired.</td>
-<td class="success">0.039s</td>
+<td class="success">0.057s</td>
 <td class="success">passed</td>
 </tr>
 <tr>
 <td class="success">Verify that PaymentInterceptor returns status 500 with error message if internal error occurred.</td>
-<td class="success">0.013s</td>
+<td class="success">0.014s</td>
 <td class="success">passed</td>
 </tr>
 <tr>
 <td class="success">Verify that PaywallInterceptor returns 400 with message BAD_REQUEST if request body doesn't match</td>
-<td class="success">0.029s</td>
+<td class="success">0.033s</td>
 <td class="success">passed</td>
 </tr>
 <tr>
 <td class="success">Verify that checkSettlementController returns status 401 with reason EXPIRED if invoice has expired.</td>
-<td class="success">0.035s</td>
+<td class="success">0.054s</td>
 <td class="success">passed</td>
 </tr>
 </table>
@@ -117,23 +117,23 @@
 <div id="tab1" class="tab">
 <h2>Standard output</h2>
 <span class="code">
-<pre>2019-08-23 13:36:06.257  INFO 18580 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Neither @ContextConfiguration nor @ContextHierarchy found for test class [org.lightningj.paywall.springboot2.LocalPaymentFlowIntegrationSpec], using SpringBootContextLoader
-2019-08-23 13:36:06.258  INFO 18580 --- [    Test worker] o.s.t.c.support.AbstractContextLoader    : Could not detect default resource locations for test class [org.lightningj.paywall.springboot2.LocalPaymentFlowIntegrationSpec]: no resource found for suffixes {-context.xml, Context.groovy}.
-2019-08-23 13:36:06.258  INFO 18580 --- [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [org.lightningj.paywall.springboot2.LocalPaymentFlowIntegrationSpec]: LocalPaymentFlowIntegrationSpec does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-2019-08-23 13:36:06.260  INFO 18580 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration org.lightningj.paywall.springboot2.PocApplication for test class org.lightningj.paywall.springboot2.LocalPaymentFlowIntegrationSpec
-2019-08-23 13:36:06.262  INFO 18580 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Loaded default TestExecutionListener class names from location [META-INF/spring.factories]: [org.spockframework.spring.SpringMockTestExecutionListener, org.springframework.boot.test.autoconfigure.restdocs.RestDocsTestExecutionListener, org.springframework.boot.test.autoconfigure.web.client.MockRestServiceServerResetTestExecutionListener, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrintOnlyOnFailureTestExecutionListener, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverTestExecutionListener, org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener, org.springframework.boot.test.mock.mockito.ResetMocksTestExecutionListener, org.springframework.test.context.web.ServletTestExecutionListener, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener, org.springframework.test.context.support.DependencyInjectionTestExecutionListener, org.springframework.test.context.support.DirtiesContextTestExecutionListener, org.springframework.test.context.transaction.TransactionalTestExecutionListener, org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener]
-2019-08-23 13:36:06.262  INFO 18580 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Using TestExecutionListeners: [org.springframework.test.context.web.ServletTestExecutionListener@13e69759, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener@38bcefca, org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener@5d6a7027, org.springframework.boot.test.autoconfigure.SpringBootDependencyInjectionTestExecutionListener@1b64cd0b, org.springframework.test.context.support.DirtiesContextTestExecutionListener@3c9fcd61, org.springframework.test.context.transaction.TransactionalTestExecutionListener@6382a787, org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener@6d670898, org.springframework.boot.test.autoconfigure.restdocs.RestDocsTestExecutionListener@50569caa, org.springframework.boot.test.autoconfigure.web.client.MockRestServiceServerResetTestExecutionListener@12e0a704, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrintOnlyOnFailureTestExecutionListener@64288440, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverTestExecutionListener@315e6395, org.springframework.boot.test.mock.mockito.ResetMocksTestExecutionListener@55091ad8, org.spockframework.spring.SpringMockTestExecutionListener@42c65ffa]
-2019-08-23 13:36:06.280  INFO 18580 --- [    Test worker] o.h.h.i.QueryTranslatorFactoryInitiator  : HHH000397: Using ASTQueryTranslatorFactory
-Starting Test Setup on Port: 51147
-2019-08-23 13:36:06.551  WARN 18580 --- [    Test worker] groovyx.net.http.ParserRegistry          : Cannot find parser for content-type: image/png -- using default parser.
-2019-08-23 13:36:06.937  INFO 18580 --- [-auto-1-exec-10] o.l.paywall.spring.PaywallInterceptor    : Paywall Interceptor: JWT Token exception: JWT Token have expired.
+<pre>2019-08-25 21:41:04.760  INFO 42287 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Neither @ContextConfiguration nor @ContextHierarchy found for test class [org.lightningj.paywall.springboot2.LocalPaymentFlowIntegrationSpec], using SpringBootContextLoader
+2019-08-25 21:41:04.761  INFO 42287 --- [    Test worker] o.s.t.c.support.AbstractContextLoader    : Could not detect default resource locations for test class [org.lightningj.paywall.springboot2.LocalPaymentFlowIntegrationSpec]: no resource found for suffixes {-context.xml, Context.groovy}.
+2019-08-25 21:41:04.761  INFO 42287 --- [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [org.lightningj.paywall.springboot2.LocalPaymentFlowIntegrationSpec]: LocalPaymentFlowIntegrationSpec does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2019-08-25 21:41:04.765  INFO 42287 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration org.lightningj.paywall.springboot2.PocApplication for test class org.lightningj.paywall.springboot2.LocalPaymentFlowIntegrationSpec
+2019-08-25 21:41:04.767  INFO 42287 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Loaded default TestExecutionListener class names from location [META-INF/spring.factories]: [org.spockframework.spring.SpringMockTestExecutionListener, org.springframework.boot.test.autoconfigure.restdocs.RestDocsTestExecutionListener, org.springframework.boot.test.autoconfigure.web.client.MockRestServiceServerResetTestExecutionListener, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrintOnlyOnFailureTestExecutionListener, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverTestExecutionListener, org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener, org.springframework.boot.test.mock.mockito.ResetMocksTestExecutionListener, org.springframework.test.context.web.ServletTestExecutionListener, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener, org.springframework.test.context.support.DependencyInjectionTestExecutionListener, org.springframework.test.context.support.DirtiesContextTestExecutionListener, org.springframework.test.context.transaction.TransactionalTestExecutionListener, org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener]
+2019-08-25 21:41:04.768  INFO 42287 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Using TestExecutionListeners: [org.springframework.test.context.web.ServletTestExecutionListener@47dc62f8, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener@19f9bc73, org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener@4d63bc24, org.springframework.boot.test.autoconfigure.SpringBootDependencyInjectionTestExecutionListener@46fc9b7e, org.springframework.test.context.support.DirtiesContextTestExecutionListener@6293fafb, org.springframework.test.context.transaction.TransactionalTestExecutionListener@365dd8fe, org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener@668fc08d, org.springframework.boot.test.autoconfigure.restdocs.RestDocsTestExecutionListener@440a8049, org.springframework.boot.test.autoconfigure.web.client.MockRestServiceServerResetTestExecutionListener@3933fe11, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrintOnlyOnFailureTestExecutionListener@61715be1, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverTestExecutionListener@79e274ea, org.springframework.boot.test.mock.mockito.ResetMocksTestExecutionListener@697abb57, org.spockframework.spring.SpringMockTestExecutionListener@4f9f131f]
+2019-08-25 21:41:04.795  INFO 42287 --- [    Test worker] o.h.h.i.QueryTranslatorFactoryInitiator  : HHH000397: Using ASTQueryTranslatorFactory
+Starting Test Setup on Port: 58944
+2019-08-25 21:41:05.292  WARN 42287 --- [    Test worker] groovyx.net.http.ParserRegistry          : Cannot find parser for content-type: image/png -- using default parser.
+2019-08-25 21:41:05.845  INFO 42287 --- [-auto-1-exec-10] o.l.paywall.spring.PaywallInterceptor    : Paywall Interceptor: JWT Token exception: JWT Token have expired.
 
 org.lightningj.paywall.tokengenerator.TokenException: JWT Token have expired.
-	at org.lightningj.paywall.tokengenerator.BaseTokenGenerator.checkExpireDate(BaseTokenGenerator.java:221) ~[paywall-core.jar:na]
-	at org.lightningj.paywall.tokengenerator.BaseTokenGenerator.parseToken(BaseTokenGenerator.java:199) ~[paywall-core.jar:na]
-	at org.lightningj.paywall.paymentflow.BasePaymentFlowManager.getAndVerifyTokenClaims(BasePaymentFlowManager.java:261) ~[paywall-core.jar:na]
-	at org.lightningj.paywall.paymentflow.BasePaymentFlowManager.getPaymentFlowByAnnotation(BasePaymentFlowManager.java:69) ~[paywall-core.jar:na]
-	at org.lightningj.paywall.spring.PaywallInterceptor.preHandle(PaywallInterceptor.java:133) ~[paywall-spring.jar:na]
+	at org.lightningj.paywall.tokengenerator.BaseTokenGenerator.checkExpireDate(BaseTokenGenerator.java:221) ~[paywall-core-0.0.1.jar:na]
+	at org.lightningj.paywall.tokengenerator.BaseTokenGenerator.parseToken(BaseTokenGenerator.java:199) ~[paywall-core-0.0.1.jar:na]
+	at org.lightningj.paywall.paymentflow.BasePaymentFlowManager.getAndVerifyTokenClaims(BasePaymentFlowManager.java:261) ~[paywall-core-0.0.1.jar:na]
+	at org.lightningj.paywall.paymentflow.BasePaymentFlowManager.getPaymentFlowByAnnotation(BasePaymentFlowManager.java:69) ~[paywall-core-0.0.1.jar:na]
+	at org.lightningj.paywall.spring.PaywallInterceptor.preHandle(PaywallInterceptor.java:133) ~[paywall-spring-0.0.1.jar:na]
 	at org.springframework.web.servlet.HandlerExecutionChain.applyPreHandle(HandlerExecutionChain.java:136) [spring-webmvc-5.1.5.RELEASE.jar:5.1.5.RELEASE]
 	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1033) [spring-webmvc-5.1.5.RELEASE.jar:5.1.5.RELEASE]
 	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:942) [spring-webmvc-5.1.5.RELEASE.jar:5.1.5.RELEASE]
@@ -180,13 +180,13 @@ org.lightningj.paywall.tokengenerator.TokenException: JWT Token have expired.
 	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61) [tomcat-embed-core-9.0.16.jar:9.0.16]
 	at java.lang.Thread.run(Thread.java:748) [na:1.8.0_191]
 
-Starting Test Setup on Port: 51147
-2019-08-23 13:36:06.978 ERROR 18580 --- [o-auto-1-exec-4] o.l.paywall.spring.PaywallInterceptor    : Paywall Interceptor: Error occurred processing payment data (InternalErrorException): Some Internal Error
+Starting Test Setup on Port: 58944
+2019-08-25 21:41:05.893 ERROR 42287 --- [o-auto-1-exec-4] o.l.paywall.spring.PaywallInterceptor    : Paywall Interceptor: Error occurred processing payment data (InternalErrorException): Some Internal Error
 
 org.lightningj.paywall.InternalErrorException: Some Internal Error
 	at org.lightningj.paywall.spring.MockedLightningHandler.generateInvoice(MockedLightningHandler.java:59) ~[test/:na]
-	at org.lightningj.paywall.paymentflow.LocalPaymentFlow.requestPayment(LocalPaymentFlow.java:104) ~[paywall-core.jar:na]
-	at org.lightningj.paywall.spring.PaywallInterceptor.preHandle(PaywallInterceptor.java:144) ~[paywall-spring.jar:na]
+	at org.lightningj.paywall.paymentflow.LocalPaymentFlow.requestPayment(LocalPaymentFlow.java:104) ~[paywall-core-0.0.1.jar:na]
+	at org.lightningj.paywall.spring.PaywallInterceptor.preHandle(PaywallInterceptor.java:144) ~[paywall-spring-0.0.1.jar:na]
 	at org.springframework.web.servlet.HandlerExecutionChain.applyPreHandle(HandlerExecutionChain.java:136) [spring-webmvc-5.1.5.RELEASE.jar:5.1.5.RELEASE]
 	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1033) [spring-webmvc-5.1.5.RELEASE.jar:5.1.5.RELEASE]
 	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:942) [spring-webmvc-5.1.5.RELEASE.jar:5.1.5.RELEASE]
@@ -244,7 +244,7 @@ org.lightningj.paywall.InternalErrorException: Some Internal Error
 <input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
 </label>
 </div>Generated by 
-<a href="http://www.gradle.org">Gradle 5.0</a> at Aug 23, 2019 1:36:30 PM</p>
+<a href="http://www.gradle.org">Gradle 5.0</a> at Aug 25, 2019 10:07:48 PM</p>
 </div>
 </div>
 </body>
