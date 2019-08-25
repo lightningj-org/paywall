@@ -3,7 +3,7 @@ apply plugin: "com.github.breadmoirai.github-release"
 
 githubRelease {
 
-    authorization 'Token ' + paywallGithubReleaseToken
+    authorization 'Token ' + (project.hasProperty('paywallGithubReleaseToken') ? paywallGithubReleaseToken : "")
     owner "lightningj-org"
     repo "paywall"
     draft true
