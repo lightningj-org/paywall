@@ -24,6 +24,7 @@ import org.lightningj.paywall.tokengenerator.SymmetricKeyTokenGenerator
 import org.lightningj.paywall.util.BCUtils
 import org.lightningj.paywall.vo.ConvertedOrder
 import org.lightningj.paywall.vo.Invoice
+import org.lightningj.paywall.vo.NodeInfo
 import org.lightningj.paywall.vo.Order
 import org.lightningj.paywall.vo.PreImageData
 import org.lightningj.paywall.vo.amount.BTC
@@ -200,7 +201,15 @@ class DefaultLNDLightningHandlerIntegrationSpec extends Specification {
             return macaroonPath
         }
 
+        @Override
+        protected NodeInfo getNodeInfoFromConfiguration() throws InternalErrorException {
+            return null
+        }
 
+        @Override
+        protected String getSupportedCurrencyCode() throws InternalErrorException {
+            return CryptoAmount.CURRENCY_CODE_BTC
+        }
     }
 
     static class TestEventListener implements LightningEventListener{

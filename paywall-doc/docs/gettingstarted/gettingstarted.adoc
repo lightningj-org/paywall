@@ -1,10 +1,11 @@
 [[gettingstarted]]
 == Getting Started
 
-TODO Introduction.
+In this section we will build a simple REST Service based application that required payment for each call using
+the Paywall library.
 
-In our example we will build a web service that provides a Bitcoin Price TA ( Technical Analysis ) Price Prediction
-Service, with a guaranteed correct prediction rate of 50%, that we will paywall and charge 10 Satoshis per prediction.
+It will be a web service that provides a Bitcoin Price TA ( Technical Analysis ) Price Prediction
+Service, with a guaranteed correct prediction rate of 50%. We will then charge 10 Satoshis per prediction.
 
 === Prerequisites
 
@@ -13,12 +14,18 @@ Before you start development you need to set the following in your test environm
 * JDK 8 or JDK 11 installed.
 * Access to a local LND node, version 0.7.0 or up, preferable on Bitcoin Testnet.
 
-Instructions to set up or install an LND node can be found at link://TODO[], you will also
-need to find the TLS certificate and the invoice.macaroon file generated after LND startups.
+Instructions to set up or install an LND node can be found at
+link://https://github.com/lightningnetwork/lnd/blob/master/docs/INSTALL.md[LND Site]. After finished installing the LND
+node you will also need to find the TLS certificate and the invoice.macaroon file generated after LND startup. You also
+need to retrieve the connect string by issuing the command:
 
-TODO test with invoice.macaroon.
+    lncli getinfo
 
-=== Step 1. Generating a Starter Project
+The connection string is one of the _uris_ listed. The port is the one specified using the parameter 'rpclisted' in the
+LND configuration.
+
+
+=== Generating a Starter Project
 
 In our example we will use Spring Boot to build the service and a good way to start a new project is to
 go to _link:https://start.spring.io/[start.spring.io]_ and generate a skeleton project structure.
@@ -38,12 +45,22 @@ Open up the downloaded ZIP in your favorite IDE and you will get a project struc
 .Sprint Boot Initial Project Structure, Figure 2.3.
 image::images/paywall-ts-demo-proj-struct1.png[align="center"]
 
-=== Step 2. Configuring the Project
+=== Configuring the Project
 
-First we need to add paywall dependencies to the file build.gradle:
+First we need to add a paywall dependency to the file _build.gradle_ by adding the row:
 
-TODO
+[subs="attributes"]
+-------------------
+    compile 'org.lightningj.paywall:paywall-spring:{project-version}'
+-------------------
 
+You also need to add database support, in our example we use an in memory database:
+
+    implementation 'com.h2database:h2'
+
+Full example of the _build.gradle_ is shown below.
+
+[subs="attributes"]
 -------------------
     plugins {
     	id 'org.springframework.boot' version '2.1.7.RELEASE'
@@ -61,12 +78,12 @@ TODO
     }
 
     dependencies {
-	    // TODO
 	    // Add Paywall Spring dependency here
-	    compile project(':paywall-spring')
+	    compile 'org.lightningj.paywall:paywall-spring:{project-version}'
 
+	    implementation 'com.h2database:h2'
 	    // Optionally if you want to use mariadb database instead of in memory, uncomment:
-	    // implementation 'org.mariadb.jdbc:mariadb-java-client:2.4.0'
+	    //implementation 'org.mariadb.jdbc:mariadb-java-client:2.4.0'
 
     	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -76,9 +93,9 @@ TODO
 -------------------
 
 Then we need to setup a minimum configuration in the file _src/main/resources/application.properties_.
-Here we configure the current paywall profile: _paywall_local_ and connection options to your local LND node
-as well as location of and password protecting the secret key signing and encrypting the JWT (Java Web Token, used
-to prove the state of a specific payment in a stateless way).
+Here we configure the current paywall profile: _paywall_local_ and connection options to your local LND node.
+Also required is the location of and password protecting the secret key signing and encrypting the JWT (Java Web Token,
+used to prove the state of a specific payment in a stateless way).
 
 [source,properties]
 --------------------
@@ -88,16 +105,15 @@ paywall.lnd.hostname=test3
 paywall.lnd.port=10000
 paywall.lnd.tlscertpath=/tmp/tlscertpath
 paywall.lnd.macaroonpath=/tmp/macroonpath
+paywall.lnd.connectstring=8371729292821728191012918129172271827281262611282@10.10.10.1:9735
 
 paywall.keys.keystorepath=~/ta-demo-keys
 paywall.keys.password=foobar123
 --------------------
 
-If you want to use mariadb as database instead of the in-memory provided by default also
+If you want to use mariadb as database instead of the in-memory provided in the example also
 add the following properties, assuming your mariadb database is called _paywallTSDemo_ (also remember
 to add the _mariadb-java-client_ dependency in _build.gradle_):
-
-TODO Test that this works.
 
 [source,properties]
 --------------------
@@ -112,7 +128,7 @@ spring.jpa.hibernate.naming.physical-strategy=org.springframework.boot.orm.jpa.h
 --------------------
 
 
-=== Step 3. Creating the REST Service
+=== Creating the REST Service
 
 Next we create our TA Prediction Service that we want to paywall. It is a standard Spring RestController with
 one method generating a JSON object TADemoResult when called and that is mapped to the URL _/tademo_.
@@ -189,7 +205,7 @@ public class TADemoResult {
 }
 --------------------
 
-=== Step 4. The Required PaymentHandler
+=== The Required PaymentHandler
 
 The Paywall Framework requires one component to be implemented by the target application. And that is a PaymentHandler.
 It is in charge of creating and maintaining PaymentData, i.e. value objects about a payment that goes through the
@@ -202,7 +218,7 @@ if type PaymentData that support pay per request calls. We call this class DemoP
 Finally we will implement the actual PaymentHandler by extending the Spring Framework specific base version of
 PaymentHandlers.
 
-==== Step 4.1 The ArticleData Table
+==== The ArticleData Table
 
 First we create the ArticleData object that is mapped to a database table using Spring Data JPA framework.
 
@@ -257,7 +273,7 @@ public interface ArticleDataRepository extends CrudRepository<ArticleData,Intege
 }
 --------------------
 
-==== Step 4.2 PaymentData Table
+==== PaymentData Table
 
 Next is to create the PaymentData table. We will create a payment data containing minimal information to support pay per
 request payment flows. It contains a unique identifier of the payment flow (_preImageHash_) the amount
@@ -409,7 +425,7 @@ public interface DemoPerRequestPaymentDataRepository extends CrudRepository<Demo
 }
 --------------------
 
-==== Step 4.3 The PaymentHandler
+==== The PaymentHandler
 
 Finally we create the actual _PaymentHandler_ bean. Below is an example implementation of a component
 that extends the SpringPaymentHandler and that lookups up a article id and create an PaymentData and maintains it
@@ -559,4 +575,289 @@ public class DemoPaymentHandler extends SpringPaymentHandler {
 }
 --------------------
 
-=== Step 5. The Javascript Frontend
+=== The Javascript Frontend
+
+The final component that needs to be updated in order to support Lightning payments is the web site front end should
+display an invoice to the user. The TA application it-self is a very simple one-page html page with Bootstrap styling to
+make it a bit more pretty.
+
+.TA Prediction Web Page, Figure 2.4.
+image::images/paywall-ts-demo-web1.png[align="center"]
+
+What we want is to add automatic display of invoice when needed and it should close automatically when settled as shown
+in figure 2.5.
+
+.TA Prediction Invoice, Figure 2.5.
+image::images/paywall-ts-demo-invoice.png[align="center"]
+
+==== The HTML Page
+
+We start with creating a index.html file that uses the three required Javascript files, sockjs.js, stomp.js and
+paywall.js. The page also have a welcome section and a prediction display section, that is shown once the prediction
+is downloaded from the paywalled REST service. There also exists a modal section that will be shown as soon as an invoice
+is received.
+
+[source, html]
+---------------------
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>Lightning J, Paywall TA Demo</title>
+</head>
+<body>
+<nav class="navbar navbar-expand-md navbar-dark bg-dark">
+    <div class="navbar-collapse collapse w-100 order-1 order-md-0 dual-collapse2">
+        <a class="navbar-brand justify-content-left" href="#">LightningJ Paywall TA Demo</a>
+    </div>
+    <div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="https://paywall.lightningj.org">Project Doc</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="https://github.com/lightningj-org/paywall">GitHub</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<div id="welcomeCard" class="card" >
+    <div class="card-body">
+        <h5 class="card-title">Bitcoin Price Prediction Service</h5>
+        <h6 class="card-subtitle mb-2 text-muted"><i>Cost:</i> 10 Satoshis</h6>
+        <p class="card-text">Click on button below do receive a Bitcoin price indication with guaranteed 50% prediction accuracy.</p>
+        <button id="welcomeCardBuyButton" type="button" class="btn btn-primary">Buy Prediction</button>
+    </div>
+</div>
+<div id="predictionCard" class="card d-none" >
+    <div class="card-body">
+        <h5 class="card-title">Bitcoin Prediction Generated</h5>
+        <p id="predictionText" class="card-text text-white"></p>
+        <button id="predictionCardBuyButton" type="button" class="btn btn-primary">Buy New Prediction</button>
+        <button id="predictionCardResetButton" type="button" class="btn btn-primary">Reset</button>
+    </div>
+</div>
+<div id="invoiceModal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Invoice Received</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div id="invoiceModalBody" class="modal-body">
+            </div>
+            <div class="modal-footer justify-content-left">
+                <button type="button" class="btn btn-secondary mr-auto" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="fixed-bottom bg-secondary text-white"><i>Disclamer:</i> This is not a real TA application. This is just a demo of LightingJ Paywall Framework. Do NOT consider this as financial advice in any way.</div>
+
+<!-- JavaScript Required for Paywall-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.3.0/sockjs.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js" ></script>
+<script src="https://github.com/lightningj-org/paywall/releases/download/v0.0.1/paywall.js" ></script>
+
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+</body>
+</html>
+
+
+---------------------
+
+==== The Javascript Part
+
+How the TA REST Service would usually be called to fetch JSON is done by XMLHttpRequest as shown in the example below.
+This is what we need to enhance to support payments.
+
+[source,javascript]
+--------------------
+        function requestTA(){
+            var xmlHttpRequest = new XMLHttpRequest();
+
+            // Create onload event handler called after loading of JSON was complete.
+            xmlHttpRequest.onload = function(){
+                if(xmlHttpRequest.status === 200) {
+                    // Process the service response as would be done with a regular XMLHttpRequest
+                    var response = JSON.parse(xmlHttpRequest.responseText);
+                    // Update web page using JSON response
+                }else{
+                    // Error calling the underlying service.
+                    console.log(xmlHttpRequest.responseText)
+                    alert("Error occurred calling the service.")
+                }
+            };
+
+            // Open up a connection to the paywalled service.
+            xmlHttpRequest.open("GET","/tademo");
+            // Send the data to the service that will trigger the payment flow if required.
+            xmlHttpRequest.send();
+        }
+--------------------
+
+What we need to do is to replace the _XMLHttpRequest_ with an instance of _PaywallHttpRequest_ (that extends standard XMLHttpRequest with
+paywall functionality) and add a few new event handlers for handling invoice and settlement.
+
+After that we need to add three event handlers (It is possible to add more, but there are the minimum when creating a
+pay per request application):
+
+InvoiceListener::An event listener that will recieve the invoice generated by the Paywall API and that contains
+all information needed to display the invoice. There is also help methods to display amount in different units
+(Satoshis in this example) and creates an invoice expiration countdown timer. The event handler will also display
+the invoice modal.
+
+SettledListener::This eventhandler will cloase the invoice modal since _PaywallHttpRequest_ have autoamtically
+called the REST service again as soon as it recieved payment.
+
+InvoiceExpiredListener::This evenhandler removes all invoice data in the invoice modal and prints
+_Invoice Expired_ instead.
+
+See example below for replacement for the previous code:
+
+[source,javascript]
+--------------------
+        function requestTA(){
+            var paywallHttpRequest = new PaywallHttpRequest();
+
+            var invoiceExpireTimer;
+
+            // The invoice expiration that updates the remaining time.
+            function updateIntervalTime(){
+                var invoiceRemainingTime = paywallHttpRequest.paywall.getInvoiceExpiration().remaining();
+                var remainingTime = invoiceRemainingTime.minutes() + ":" + invoiceRemainingTime.seconds();
+                $('#invoiceTimeRemaining').text(remainingTime);
+            }
+
+            // The Invoice event handler that adds invoice information to the modal and then displays it.
+            paywallHttpRequest.paywall.addEventListener("InvoiceListener", PaywallEventType.INVOICE, function (type, invoice) {
+                // Add a Paywall Invoice event Listener that displays the invoice for the user.
+                var modalBody = $('#invoiceModalBody')
+                modalBody.empty();
+                var invoiceExpire = new PaywallTime(invoice.invoiceExpireDate)
+                modalBody.append("<h6 class='text-center'>Invoice Expires In: <span id='invoiceTimeRemaining'>" + invoiceExpire.remaining().minutes() + ":" + invoiceExpire.remaining().seconds() + "</span></h6>") // Time Left
+                modalBody.append("<img class='mx-auto d-block' src='" + invoice.qrLink + "'/>"); // QR
+                var amountInSat = new PaywallAmount(invoice.invoiceAmount).as(BTCUnit.SAT);
+                modalBody.append("<h6>Price: " + amountInSat + "</h6>") // Time Left
+                modalBody.append("<div class=\"accordion\" id=\"advancedAccordion\">\n" +
+                    "    <div id=\"welcomeCard2\" class=\"card\" >\n" +
+                    "        <div class=\"card-header\" id=\"advancedAccordionHeader\">\n" +
+                    "            <h6 class=\"mb-0\">\n" +
+                    "                <button class=\"btn btn-link\" type=\"button\" data-toggle=\"collapse\" data-target=\"#advancedAccordionBody\" aria-expanded=\"false\" aria-controls=\"advancedAccordionBody\">\n" +
+                    "                    Advanced\n" +
+                    "                </button>\n" +
+                    "            </h6>\n" +
+                    "        </div>\n" +
+                    "      <div id=\"advancedAccordionBody\" class=\"collapse\" aria-labelledby=\"advancedAccordionHeader\" data-parent=\"#advancedAccordion\">\n" +
+                    "            <div class=\"card-body\">\n" +
+                    "                <div class=\"card\" >\n" +
+                    "                    <div class=\"card-body\">\n" +
+                    "                        <h6 class=\"card-subtitle mb-2 text-muted\"><i>Invoice:</i></h6>\n" +
+                    "                        <p id=\"bolt11Invoice\" class=\"card-text\">" + invoice.bolt11Invoice + "</p>\n" +
+                    "                    </div>\n" +
+                    "                </div>\n" +
+                    "                <div class=\"card\" >\n" +
+                    "                    <div class=\"card-body\">\n" +
+                    "                        <h6 class=\"card-subtitle mb-2 text-muted\"><i>Node Info:</i></h6>\n" +
+                    "                        <p id=\"nodeInfo\" class=\"card-text\">" + invoice.nodeInfo.connectString + "</p>\n" +
+                    "                    </div>\n" +
+                    "                </div>\n" +
+                    "            </div>\n" +
+                    "        </div>\n" +
+                    "      </div>\n" +
+                    "   </div>"); // Advanced, with invoice and node
+
+                 // Set the timer
+                invoiceExpireTimer = setInterval(updateIntervalTime,1000);
+
+                // Finally activate the invoice modal.
+                $('#invoiceModal').modal({});
+            });
+
+            // Event listener that hides the modal upon settlement.
+            paywallHttpRequest.paywall.addEventListener("SettledListener", PaywallEventType.SETTLED, function (type, settlement) {
+                $('#invoiceModal').modal('hide');
+            });
+
+            // Event listener that updates the modal with invoice expired information.
+            paywallHttpRequest.paywall.addEventListener("InvoiceExpiredListener", PaywallEventType.INVOICE_EXPIRED, function (type, invoice) {
+                var modalBody = $('#invoiceModalBody')
+                modalBody.empty();
+                modalBody.append("<h6 class='text-center'>Invoice Expired</h6>") // Time Left
+            });
+
+            // The same onload handler that should have been used without paywall to call the service.
+            paywallHttpRequest.onload = function(){
+                if(paywallHttpRequest.status === 200) {
+                    // Process the service response as would be done with a regular XMLHttpRequest
+                    var response = JSON.parse(paywallHttpRequest.responseText);
+                    var predictionText = $('#predictionText')
+                    predictionText.text(response.prediction);
+                    if (response.goingUp) {
+                        predictionText.removeClass("bg-danger");
+                        predictionText.addClass("bg-success");
+                    } else {
+                        predictionText.removeClass("bg-success");
+                        predictionText.addClass("bg-danger");
+                    }
+                    $('#welcomeCard').addClass("d-none");
+                    $('#predictionCard').removeClass("d-none");
+                }else{
+                    // Error calling the underlying service.
+                    console.log(paywallHttpRequest.responseText)
+                    alert("Error occurred calling the service.")
+                }
+            };
+
+            // Open up a connection to the paywalled service.
+            paywallHttpRequest.open("GET","/tademo");
+            // Send the data to the service that will trigger the payment flow if required.
+            paywallHttpRequest.send();
+
+        }
+--------------------
+
+Finally we also add a event handler specific for the Bootstrap modal that listens to close modal events and
+releases all underlying resources, such as closing web socket, etc.
+
+[source,javascript]
+--------------------
+            $('#invoiceModal').on('hide.bs.modal', function (event) {
+                console.log("Hidden: " + paywallHttpRequest.paywall.getState());
+                if(invoiceExpireTimer !== undefined){
+                    clearInterval(invoiceExpireTimer);
+                }
+                // Catch event that Invoice Modal is closes and free allocated resources by
+                // calling the abort() method.
+                if(paywallHttpRequest.paywall.getState() !== PaywallState.SETTLED &&
+                    paywallHttpRequest.paywall.getState() !== PaywallState.EXECUTED) {
+                    console.log("Aborted");
+                    paywallHttpRequest.abort();
+                }
+            });
+--------------------
+
+The full index.html can be found in the example repository link:https://github.com/lightningj-org/paywall-ta-demo/blob/master/src/main/resources/static/index.html[here].
+
+Also see <<javascriptapi,Javascript API>> section for more details on how to use the _PaywallHttpRequest_ class.
+
+=== Starting the application.
+
+The final step to get the TA Demo application up an running in your development enviroment is by running
+the command
+
+    ./gradlew bootRun
+
+Then open up the browser and go to http://localhost:8080 and you are ready for starting to pay for TA predictions.

@@ -111,3 +111,16 @@ it is possible to publish the web site to github using the command:
     ./gradlew gitPublishPush
 
 Enter your Github credentials in the GUI and the website will be updated.
+
+==== Creating a Release Draft in GitHub
+
+To upload javascript to github and draft a new release use:
+
+    ./gradlew build githubRelease
+
+Before creating a draft set a personal access token from Github and add it to settings in ~/.gradle/gradle.properties
+
+    paywallGithubReleaseToken=
+
+Personal access tokens can be generated under developer settings in your github account, the token
+should have write access to the paywall repository.

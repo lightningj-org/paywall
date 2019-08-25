@@ -1,16 +1,17 @@
-group 'org.lightningj.paywall'
+
 
 allprojects{
+
+  group = 'org.lightningj.paywall'
+  version = "0.0.1"
+
   repositories {
     mavenCentral()
   }
-
 }
 
 subprojects{
-  group 'org.lightningj'
-  version = "0.0.1"
-
+  
   apply plugin: "java"
   apply plugin: 'signing'
   apply plugin: 'maven'
@@ -65,44 +66,7 @@ subprojects{
   }
 }
 
-task aggregatedJavadoc(type: Javadoc) {
-  source subprojects.collect { project ->
-    project.sourceSets.main.allJava
-  }
-  destinationDir = new File(buildDir, 'docs/javadoc')
-  classpath = files(subprojects.collect { project ->
-    project.sourceSets.main.compileClasspath
-  })
-}
+apply from: "release.gradle"
+apply from: "doc.gradle"
 
-task aggregatedTestReport(type: TestReport) {
-  destinationDir = file("$buildDir/reports/allTests")
-  // Include the results from the `test` task in all subprojects
-  reportOn subprojects*.test
-}
-
-task ('doc',type: Copy,dependsOn: [":paywall-doc:asciidoctor", ":paywall-js:grunt_jsdoc", aggregatedJavadoc, aggregatedTestReport]){
-  from('paywall-js/build/'){
-    include('jsdoc/**')
-    include('dist/**')
-  }
-  from('paywall-spring/build/resources/main'){
-    include('**.xsd')
-  }
-  from('build/docs/'){
-    include('javadoc/**')
-  }
-  from('build/reports/'){
-    include('allTests/**')
-  }
-  from('LICENSE.txt'){
-  }
-  from('paywall-doc/docs'){
-    include('CNAME')
-  }
-  from('paywall-doc/docs'){
-    include('lightningj-release-pubkey.asc')
-  }
-  into('paywall-doc/build/docs/html5')
-}
 

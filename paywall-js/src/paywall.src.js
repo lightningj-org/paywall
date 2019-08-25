@@ -391,7 +391,7 @@
                     if(!hasPaywallErrorOccurred()) {
                         invoice = JSON.parse(xmlHttpRequest.responseText);
                         paywallEventBus.triggerEventFromState();
-                        api.paywall.addEventListener("OnReadyStateListener", PaywallEventType.ALL, paywallOnReadyStateChangeListener);
+                        paywallEventBus.addListenerFirst("OnReadyStateListener", PaywallEventType.ALL, paywallOnReadyStateChangeListener);
                         paywallWebSocketHandler.connect(invoice);
                     }else{
                         handlePaywallError();
@@ -1247,6 +1247,24 @@
             }
         };
         this.addListener = addListener;
+
+        /**
+         * Method to add a listener to first position in eventBus, if listener already exists with given name it will be removed and the new callback
+         * will be added first.
+         * @param {string} name the unique name of the listener within this payment flow.
+         * @param {PaywallEventType} type the type of event to listen to, or special ALL that receives all events.
+         * @param {function} callback method that should be called on given event. The function should have two parameters
+         * one PaywallEventType and one object containing the object data. Type of object differs for each event.
+         * @memberof PaywallEventBus
+         */
+        var addListenerFirst = function(name, type, callback) {
+            var index = findIndex(name);
+            if(index !== -1) {
+                listeners.splice(index,1);
+            }
+            listeners.unshift({name: name, type: type, onEvent: callback});
+        };
+        this.addListenerFirst = addListenerFirst;
 
         /**
          * Method to remove listener with given name if exists.

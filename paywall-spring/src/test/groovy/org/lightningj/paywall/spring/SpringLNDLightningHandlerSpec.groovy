@@ -21,6 +21,8 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
 import spock.lang.Specification
 
+import static org.lightningj.paywall.vo.NodeInfo.NodeNetwork.*
+
 /**
  * Unit tests for SpringLNDLightningHandler
  */
@@ -101,5 +103,79 @@ class SpringLNDLightningHandlerSpec extends Specification {
         then:
         def e = thrown InternalErrorException
         e.message == "Invalid server configuration, check that setting paywall.lnd.macaroonpath is set in configuration."
+    }
+
+    def "Verify that getNodeInfoFromConfiguration returns an empty NodeInfo if paywall.invoice.includenodeinfo is set to false"(){
+        setup:
+        lightningHandler.paywallProperties = new PaywallProperties()
+        lightningHandler.paywallProperties.invoiceIncludeNodeInfo = "false"
+        expect:
+        lightningHandler.getNodeInfoFromConfiguration().nodeAddress == null
+    }
+
+    def "Verify that getNodeInfoFromConfiguration returns null if paywall.invoice.includenodeinfo is true but no connect string was set"(){
+        setup:
+        lightningHandler.paywallProperties = new PaywallProperties()
+        expect:
+        lightningHandler.getNodeInfoFromConfiguration() == null
+
+        when:
+        lightningHandler.paywallProperties.lndConnectString = "   "
+        then:
+        lightningHandler.getNodeInfoFromConfiguration() == null
+    }
+
+    def "Verify that getNodeInfoFromConfiguration returns NodeInfo if paywall.invoice.connectstring is set and if paywall.invoice.includenodeinfo is true but no network have been set"(){
+        setup:
+        lightningHandler.paywallProperties = new PaywallProperties()
+        lightningHandler.paywallProperties.lndConnectString = "asf@localhost:8000"
+        when:
+        def ni = lightningHandler.getNodeInfoFromConfiguration()
+        then:
+        ni.connectString == "asf@localhost:8000"
+        ni.nodeNetwork == UNKNOWN
+    }
+
+    def "Verify that getNodeInfoFromConfiguration returns NodeInfo if paywall.lnd.connectstring is set and if paywall.invoice.includenodeinfo is true and network have been set"(){
+        setup:
+        lightningHandler.paywallProperties = new PaywallProperties()
+        lightningHandler.paywallProperties.lndConnectString = "asf@localhost:8000"
+        lightningHandler.paywallProperties.lndNetwork = "MAIN_NET"
+        when:
+        def ni = lightningHandler.getNodeInfoFromConfiguration()
+        then:
+        ni.connectString == "asf@localhost:8000"
+        ni.nodeNetwork == MAIN_NET
+    }
+
+    def "Verify that getNodeInfoFromConfiguration throws InternalErrorException if invalid configured paywall.lnd.connectstring."(){
+        setup:
+        lightningHandler.paywallProperties = new PaywallProperties()
+        lightningHandler.paywallProperties.lndConnectString = "invalid"
+        when:
+        lightningHandler.getNodeInfoFromConfiguration()
+        then:
+        def e = thrown InternalErrorException
+        e.message == "Invalid Lightning node info connect string: invalid. It should have format publicKeyInfo@nodeaddress:port, where port is optional."
+    }
+
+    def "Verify that getNodeInfoFromConfiguration throws InternalErrorException if invalid configured paywall.lnd.network."(){
+        setup:
+        lightningHandler.paywallProperties = new PaywallProperties()
+        lightningHandler.paywallProperties.lndConnectString = "asf@localhost:8000"
+        lightningHandler.paywallProperties.lndNetwork = "INVALID"
+        when:
+        lightningHandler.getNodeInfoFromConfiguration()
+        then:
+        def e = thrown InternalErrorException
+        e.message == "Invalid configuration, unsupported network value: INVALID in setting paywall.lnd.network."
+    }
+
+    def "Verify that getSupportedCurrencyCode returns configuration from paywall properties."(){
+        setup:
+        lightningHandler.paywallProperties = new PaywallProperties()
+        lightningHandler.paywallProperties.lndCurrencyCode = "LTC"
+        expect:
+        lightningHandler.getSupportedCurrencyCode() == "LTC"
     }
 }

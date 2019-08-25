@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <title>Lightning J, Paywall TA Demo</title>
+</head>
+<body>
+<nav class="navbar navbar-expand-md navbar-dark bg-dark">
+    <div class="navbar-collapse collapse w-100 order-1 order-md-0 dual-collapse2">
+        <a class="navbar-brand justify-content-left" href="#">LightningJ Paywall TA Demo</a>
+    </div>
+    <div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="https://paywall.lightningj.org">Project Doc</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="https://github.com/lightningj-org/paywall">GitHub</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<div id="welcomeCard" class="card" >
+    <div class="card-body">
+        <h5 class="card-title">Bitcoin Price Prediction Service</h5>
+        <p class="card-text">Click on button below do receive a Bitcoin price indication with guaranteed 50% prediction accuracy.</p>
+        <button id="welcomeCardBuyButton" type="button" class="btn btn-primary">Buy Prediction</button>
+    </div>
+</div>
+<div id="predictionCard" class="card d-none" >
+    <div class="card-body">
+        <h5 class="card-title">Bitcoin Prediction Generated</h5>
+        <p id="predictionText" class="card-text text-white"></p>
+        <button id="predictionCardBuyButton" type="button" class="btn btn-primary">Buy New Prediction</button>
+        <button id="predictionCardResetButton" type="button" class="btn btn-primary">Reset</button>
+    </div>
+</div>
+<div class="fixed-bottom bg-secondary text-white"><i>Disclamer:</i> This is not a real TA application. This is just a demo of LightingJ Paywall Framework. Do NOT consider this as financial advice in any way.</div>
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+<!-- TODO reference external scripts -->
+<script src="js/sockjs.js" ></script>
+<script src="js/stomp.js" ></script>
+<script src="js/paywall.js" ></script>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+
+
+        function requestTA(){
+            var xmlHttpRequest = new XMLHttpRequest();
+
+            xmlHttpRequest.onload = function(){
+                if(xmlHttpRequest.status === 200) {
+                    // Process the service response as would be done with a regular XMLHttpRequest
+                    var response = JSON.parse(xmlHttpRequest.responseText);
+                    var predictionText = $('#predictionText')
+                    predictionText.text(response.prediction);
+                    if (response.goingUp) {
+                        predictionText.removeClass("bg-danger");
+                        predictionText.addClass("bg-success");
+                    } else {
+                        predictionText.removeClass("bg-success");
+                        predictionText.addClass("bg-danger");
+                    }
+                    $('#welcomeCard').addClass("d-none");
+                    $('#predictionCard').removeClass("d-none");
+                }else{
+                    // Error calling the underlying service.
+                    console.log(xmlHttpRequest.responseText)
+                    alert("Error occurred calling the service.")
+                }
+            };
+
+            // Open up a connection to the service.
+            xmlHttpRequest.open("GET","/tademonopayment");
+            // Send the data to the service.
+            xmlHttpRequest.send();
+        }
+
+        $("#welcomeCardBuyButton").click(requestTA);
+        $("#predictionCardBuyButton").click(requestTA);
+
+        $("#predictionCardResetButton").click(function () {
+            $('#welcomeCard').removeClass("d-none");
+            $('#predictionCard').addClass("d-none");
+        });
+    });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+
+apply plugin: "com.github.breadmoirai.github-release"
+
+githubRelease {
+
+    authorization 'Token ' + paywallGithubReleaseToken
+    owner "lightningj-org"
+    repo "paywall"
+    draft true
+    prerelease false
+    releaseAssets.from(['paywall-js/build/dist/paywall.js','paywall-js/build/dist/paywall.min.js'])
+
+}

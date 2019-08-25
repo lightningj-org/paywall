@@ -17,6 +17,8 @@ package org.lightningj.paywall.lightninghandler.lnd
 import org.lightningj.lnd.wrapper.AsynchronousLndAPI
 import org.lightningj.lnd.wrapper.SynchronousLndAPI
 import org.lightningj.paywall.InternalErrorException
+import org.lightningj.paywall.vo.NodeInfo
+import org.lightningj.paywall.vo.amount.CryptoAmount
 import spock.lang.Specification
 
 /**
@@ -134,6 +136,16 @@ class SimpleBaseLNDLightningHandlerSpec extends Specification {
         @Override
         protected String getMacaroonPath() throws InternalErrorException {
             return macaroonPath
+        }
+
+        @Override
+        protected NodeInfo getNodeInfoFromConfiguration() throws InternalErrorException {
+            return null
+        }
+
+        @Override
+        protected String getSupportedCurrencyCode() throws InternalErrorException {
+            return CryptoAmount.CURRENCY_CODE_BTC
         }
     }
 }

@@ -150,7 +150,7 @@ returned. The XML will be structured according to the following link:paywallspri
 === Available Spring Configuration Properties
 
 Paywall-Spring contains a configuration bean PaywallProperties that contains different
-settings to set in the applicaton's _application.properties_ file.
+settings available to the applicaton's _application.properties_ file.
 
 Minimal configuration is:
 ------------------------------------
@@ -160,13 +160,14 @@ paywall.lnd.hostname=somehost.org
 paywall.lnd.port=10009
 paywall.lnd.tlscertpath=/home/lnd/.lnd/tls.cert
 paywall.lnd.macaroonpath=/home/lnd/.lnd/data/chain/bitcoin/testnet/invoice.macaroon
+paywall.lnd.connectstring=8371729292821728191012918129172271827281262611282@10.10.10.1:9735
 
 paywall.keys.keystorepath=~/ta-demo-keys
 paywall.keys.password=foobar123
 ------------------------------------
 
-But settings _paywall.keys.keystorepath_ and _paywall.keys.password_ are also
-recommended for production systems.
+_Important_: If invoice.macaroon is used it is also required to set the setting _paywall.lnd.connectstring_
+since the macaroon doesn't have access rights to read node information automatically.
 
 [[paywallproperties]]
 .Table Available Paywall Spring Configuration Properties.
@@ -199,6 +200,25 @@ recommended for production systems.
 | n/a
 | The path to the macaroon file that is used to authenticate to the LND node. The macaroon
   should have invoice creation rights. Required if running local payment flow.
+
+| paywall.lnd.connectstring
+| false
+| n/a
+| The connect string displayed in node info part of generated invoices. It only needed to set this property if
+  "paywall.lnd.connectstring" is set to true and macaroon used to connect to LND doesn't have access rights to retrieve
+  information. The connect string can be fetched using 'lncli getinfo' command.
+
+| paywall.lnd.network
+| false
+| UNKNOWN
+| The network the LND node is connected to. (Optional) If LND macaroon used have access right
+to fetch information, this can be done automatically. Default UNKNOWN. The current network can be fetched using
+'lncli getinfo' command. Valid values are MAIN_NET, TEST_NET and UNKNOWN.
+
+| paywall.lnd.currency
+| false
+| BTC
+| The currency code the connected LND Node used. Should be one of CryptoAmount constants 'BTC' or 'LTC'.
 
 | paywall.lightninghandler.autoconnect
 | false
@@ -250,7 +270,7 @@ set is a temporary directory used. Keys are created automatically in the directo
 | paywall.invoice.defaultvalidity
 | false
 | 3600 (1 hour)
-| The default validity for generated invoices if no expire date have
+| The default validity in seconds for generated invoices if no expire date have
   been set explicit in PaymentData.
 
 | paywall.invoice.includenodeinfo

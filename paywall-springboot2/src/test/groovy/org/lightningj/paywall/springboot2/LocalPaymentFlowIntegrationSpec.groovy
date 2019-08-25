@@ -456,7 +456,7 @@ class LocalPaymentFlowIntegrationSpec extends Specification {
         assert jsonData.nodeInfo.publicKeyInfo == "03978f437e05f64b36fa974b415049e6c36c0163b0af097bab3eb3642501055efa"
         assert jsonData.nodeInfo.nodeAddress == "10.10.10.10"
         assert jsonData.nodeInfo.nodePort == 5735
-        assert jsonData.nodeInfo.mainNet == true
+        assert jsonData.nodeInfo.network == "UNKNOWN"
         assert jsonData.nodeInfo.connectString == "03978f437e05f64b36fa974b415049e6c36c0163b0af097bab3eb3642501055efa@10.10.10.10:5735"
         assert jsonData.token != null
         assert jsonData.invoiceDate != null

@@ -211,7 +211,10 @@ public abstract class BaseLNDLightningHandler implements LightningHandler {
     @Override
     public NodeInfo getNodeInfo() throws IOException, InternalErrorException{
         if(cachedNodeInfo == null){
-            cachedNodeInfo = getLndHelper().parseNodeInfo(getInfoResponse());
+            cachedNodeInfo = getNodeInfoFromConfiguration();
+            if(cachedNodeInfo == null) {
+                cachedNodeInfo = getLndHelper().parseNodeInfo(getInfoResponse());
+            }
         }
         return cachedNodeInfo;
     }
@@ -220,7 +223,7 @@ public abstract class BaseLNDLightningHandler implements LightningHandler {
     protected LNDHelper getLndHelper() throws IOException, InternalErrorException{
         if(cachedLndHelper == null) {
             checkConnection();
-            cachedLndHelper = new LNDHelper(getInfoResponse());
+            cachedLndHelper = new LNDHelper(getSupportedCurrencyCode());
         }
         return cachedLndHelper;
     }
@@ -254,4 +257,21 @@ public abstract class BaseLNDLightningHandler implements LightningHandler {
      * @throws InternalErrorException if internal problems occurred with LND node.
      */
     protected abstract SynchronousLndAPI getSyncAPI()  throws IOException, InternalErrorException;
+
+    /**
+     * Method to retrieve node information from configuration or null if not configured.
+     * <p>
+     *     Used when the LND macaroon doesn't have access rights to retrieve LND Node information.
+     * </p>
+     * @return populated NodeInfo from configuration or nulll if no configuration exists.
+     * @throws InternalErrorException if problems occurred parsing the configuration.
+     */
+    protected abstract NodeInfo getNodeInfoFromConfiguration() throws InternalErrorException;
+
+    /**
+     * Method to retrieve configured supported currency code. Should be one of CryptoAmount CURRENCY_CODE_ constants.
+     * @return The used currency code
+     * @throws InternalErrorException if currency code configuration was unparsable.
+     */
+    protected abstract String getSupportedCurrencyCode() throws InternalErrorException;
 }

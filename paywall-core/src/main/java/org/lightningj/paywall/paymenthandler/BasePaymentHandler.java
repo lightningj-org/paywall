@@ -287,6 +287,7 @@ public abstract class BasePaymentHandler implements PaymentHandler, LightningEve
     /**
      *
      * @return true if base payment handler should try to connect to lightning handler automatically upon restart.
+     * @throws InternalErrorException if problems occurred parsing configuration.
      */
     protected abstract boolean isLightningHandlerAutoconnect() throws InternalErrorException;
 

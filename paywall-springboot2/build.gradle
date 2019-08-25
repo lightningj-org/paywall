@@ -90,3 +90,6 @@ tasks.withType(Test) {
 tasks.withType(GroovyCompile) {
 	groovyOptions.forkOptions.memoryMaximumSize = '256m'
 }
+
+// Do not upload any release archives from this project
+uploadArchives.onlyIf {false}

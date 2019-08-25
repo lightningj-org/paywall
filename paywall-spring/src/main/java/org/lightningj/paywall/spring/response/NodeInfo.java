@@ -14,6 +14,7 @@
  *************************************************************************/
 package org.lightningj.paywall.spring.response;
 
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -29,7 +30,7 @@ import javax.xml.bind.annotation.XmlType;
         "publicKeyInfo",
         "nodeAddress",
         "nodePort",
-        "mainNet",
+        "network",
         "connectString"
 })
 public class NodeInfo {
@@ -40,8 +41,8 @@ public class NodeInfo {
     private String nodeAddress;
     @XmlElement(required = true)
     private Integer nodePort;
-    @XmlElement(defaultValue = "true")
-    private Boolean mainNet;
+    @XmlElement(defaultValue = "UNKNOWN")
+    private NodeNetwork network;
     @XmlElement(required = true)
     private String connectString;
 
@@ -58,7 +59,7 @@ public class NodeInfo {
         publicKeyInfo = nodeInfo.getPublicKeyInfo();
         nodeAddress = nodeInfo.getNodeAddress();
         nodePort = nodeInfo.getNodePort();
-        mainNet = nodeInfo.getMainNet();
+        network = nodeInfo.getNodeNetwork() != null ? NodeNetwork.fromInternalNodeNetwork(nodeInfo.getNodeNetwork()) : null;
         connectString = nodeInfo.getConnectString();
     }
 
@@ -112,21 +113,21 @@ public class NodeInfo {
 
     /**
      *
-     * @return if the node is following the main chain.
+     * @return the network node is following.
      */
-    public Boolean getMainNet() {
-        if(mainNet == null){
-            mainNet = true;
+    public NodeNetwork getNetwork() {
+        if(network == null){
+            network = NodeNetwork.UNKNOWN;
         }
-        return mainNet;
+        return network;
     }
 
     /**
      *
-     * @param mainNet if the node is following the main chain.
+     * @param network the network node is following.
      */
-    public void setMainNet(Boolean mainNet) {
-        this.mainNet = mainNet;
+    public void setNetwork(NodeNetwork network) {
+        this.network = network;
     }
 
     /**
@@ -151,7 +152,7 @@ public class NodeInfo {
                 "publicKeyInfo='" + publicKeyInfo + '\'' +
                 ", nodeAddress='" + nodeAddress + '\'' +
                 ", nodePort=" + nodePort +
-                ", mainNet=" + getMainNet() +
+                ", network=" + getNetwork() +
                 ", connectString='" + connectString + '\'' +
                 '}';
     }

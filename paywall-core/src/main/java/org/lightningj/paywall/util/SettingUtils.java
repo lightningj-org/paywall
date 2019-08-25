@@ -143,8 +143,12 @@ public class SettingUtils {
         return checkRequiredBoolean(settingValue,settingKey);
     }
 
-
-    private static boolean isEmpty(String value){
+    /**
+     * Help method to see if string is null or only contains spaces.
+     * @param value the string to check
+     * @return true if null or empty.
+     */
+    public static boolean isEmpty(String value){
         return value == null || value.trim().equals("");
     }
 

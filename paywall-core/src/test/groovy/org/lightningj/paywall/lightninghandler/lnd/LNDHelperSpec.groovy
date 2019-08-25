@@ -52,7 +52,7 @@ class LNDHelperSpec extends Specification {
         helper = new LNDHelper(getInfoResponse())
     }
 
-    def "Verify that constructor parses the supported currency correctly"(){
+    def "Verify that constructor with LND Info parses the supported currency correctly"(){
         expect:
         helper.supportedCurrency == CryptoAmount.CURRENCY_CODE_BTC
         when: // Verify that first valid found is used.
@@ -78,6 +78,11 @@ class LNDHelperSpec extends Specification {
         then:
         e = thrown(InternalErrorException)
         e.message == "Error in LightningHandler, no supported crypto currency could be found in node info."
+    }
+
+    def "Verify constructor with configured currency is initialized properly"(){
+        expect:
+        new LNDHelper(CryptoAmount.CURRENCY_CODE_BTC).supportedCurrency == CryptoAmount.CURRENCY_CODE_BTC
     }
 
     def "Verify that convert() converts unsettled invoice correctly"(){
@@ -176,7 +181,7 @@ class LNDHelperSpec extends Specification {
         ni.getPublicKeyInfo() == "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa"
         ni.getNodeAddress() == "82.196.97.86"
         ni.getNodePort() == 9735
-        !ni.getMainNet()
+        ni.getNodeNetwork() == NodeInfo.NodeNetwork.TEST_NET
         ni.getConnectString() == "03977f437e05f64b36fa973b415049e6c36c0163b0af097bab2eb3642501055efa@82.196.97.86:9735"
 
         when:
@@ -188,7 +193,7 @@ class LNDHelperSpec extends Specification {
         when:
         ni = helper.parseNodeInfo(getInfoResponse(infoResponseMainNet))
         then:
-        ni.getMainNet()
+        ni.getNodeNetwork() == NodeInfo.NodeNetwork.MAIN_NET
 
         when:
         helper.parseNodeInfo(getInfoResponse(infoResponseInvalidURI))

@@ -15,6 +15,7 @@
 package org.lightningj.paywall.spring;
 
 import org.lightningj.paywall.InternalErrorException;
+import org.lightningj.paywall.vo.amount.CryptoAmount;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,6 +32,10 @@ public class PaywallProperties {
     public static final String LND_PORT = "paywall.lnd.port";
     public static final String LND_TLS_CERT_PATH = "paywall.lnd.tlscertpath";
     public static final String LND_MACAROON_PATH = "paywall.lnd.macaroonpath";
+    public static final String LND_CONNECT_STRING = "paywall.lnd.connectstring";
+    public static final String LND_NETWORK = "paywall.lnd.network";
+    public static final String DEFAULT_LND_CURRENCY_CODE = CryptoAmount.CURRENCY_CODE_BTC;
+    public static final String LND_CURRENCY_CODE = "paywall.lnd.currency";
 
     public static final boolean DEFAULT_LIGHTNINGHANDLER_AUTOCONNECT = true;
     public static final String LIGHTNINGHANDLER_AUTOCONNECT = "paywall.lightninghandler.autoconnect";
@@ -80,6 +85,15 @@ public class PaywallProperties {
 
     @Value("${" + LND_MACAROON_PATH +  ":}")
     private String lndMacaroonPath;
+
+    @Value("${" + LND_CONNECT_STRING +  ":}")
+    private String lndConnectString;
+
+    @Value("${" + LND_NETWORK +  ":}")
+    private String lndNetwork;
+
+    @Value("${" + LND_CURRENCY_CODE +  ":" + DEFAULT_LND_CURRENCY_CODE + "}")
+    private String lndCurrencyCode;
 
     @Value("${" + LIGHTNINGHANDLER_AUTOCONNECT +  ":" + DEFAULT_LIGHTNINGHANDLER_AUTOCONNECT + "}")
     private String lightningHandlerAutoconnect;
@@ -162,6 +176,42 @@ public class PaywallProperties {
      */
     public String getLndMacaroonPath() {
         return lndMacaroonPath;
+    }
+
+    /**
+     * The connect string displayed in node info part of generated invoices. It only needed
+     * to set this property if "paywall.lnd.connectstring" is set to true and macaroon used to connect to LND doesn't
+     * have access rights to retrieve information.
+     *
+     * The connect string can be fetched using 'lncli getinfo' command.
+     *
+     * @return the connect string
+     */
+    public String getLndConnectString() {
+        return lndConnectString;
+    }
+
+    /**
+     * The network the LND node is connected to. (Optional) If LND macaroon used have access right
+     * to fetch information, this can be done automatically. Default UNKNOWN
+     *
+     * The current network can be fetched using 'lncli getinfo' command. And valid values
+     * are MAIN_NET, TEST_NET and UNKNOWN.
+     *
+     * @return the path to the macaroon to use.
+     */
+    public String getLndNetwork() {
+        return lndNetwork;
+    }
+
+    /**
+     * The currency code the connected LND Node used. Should be one of CryptoAmount constants 'BTC' or 'LTC'.
+     * Default value is 'BTC'.
+     *
+     * @return the lnd currency code to use. (Default, 'BTC')
+     */
+    public String getLndCurrencyCode() {
+        return lndCurrencyCode;
     }
 
     /**

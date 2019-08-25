@@ -23,7 +23,7 @@ dependencies {
 
 	implementation 'com.h2database:h2'
 	// Optionally if you want to use mariadb database instead of in memory, uncomment:
-	// implementation 'org.mariadb.jdbc:mariadb-java-client:2.4.0'
+	implementation 'org.mariadb.jdbc:mariadb-java-client:2.4.0'
 
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -39,3 +39,6 @@ task ('copyJSDist',type: Copy){
 }
 
 jar.dependsOn.add("copyJSDist")
+
+// Do not upload any release archives from this project
+uploadArchives.onlyIf {false}

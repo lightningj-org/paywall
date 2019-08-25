@@ -4,6 +4,8 @@ description = "LightningJ Paywall Spring - Spring components for LightningJ Payw
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
+apply plugin: 'signing'
+apply plugin: 'maven'
 
 dependencies {
 
@@ -41,3 +43,61 @@ task generateXSD(type: XSDGenerator, dependsOn: compileJava){
 }
 
 jar.dependsOn(generateXSD)
+
+// Use external gpg2 command to support signing by hardware keys (i.e. SmartCard) and sign only
+// if build should be uploaded to Maven Central.
+signing {
+    required { gradle.taskGraph.hasTask(uploadArchives) }
+    useGpgCmd()
+    sign configurations.archives
+}
+
+signArchives.onlyIf {gradle.taskGraph.hasTask(uploadArchives)}
+
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                name 'paywall-core'
+                packaging 'jar'
+                // optionally artifactId can be defined here
+                description 'Paywall LightningJ - Micropayments for Microservices for Java - Core Library'
+                url 'http://paywall.lightningj.org'
+
+                scm {
+                    connection 'https://github.com/lightningj-org/paywall.git'
+                    developerConnection 'https://github.com/lightningj-org/paywall.git'
+                    url 'https://github.com/lightningj-org/paywall'
+                }
+
+                licenses {
+                    license {
+                        name 'GNU Lesser General Public License v3.0'
+                        url 'http://www.gnu.org/licenses/lgpl.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'herrvendil'
+                        name 'Philip Vendil'
+                        email 'info@lightningj.org'
+                    }
+                }
+            }
+        }
+    }
+}
+
+uploadArchives.dependsOn.add(signArchives)

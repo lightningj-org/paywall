@@ -18,10 +18,10 @@
     <div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
         <ul class="navbar-nav ml-auto">
             <li class="nav-item">
-                <a class="nav-link" href="#">Project Doc</a>
+                <a class="nav-link" href="https://paywall.lightningj.org">Project Doc</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">GitHub</a>
+                <a class="nav-link" href="https://github.com/lightningj-org/paywall">GitHub</a>
             </li>
         </ul>
     </div>
@@ -34,12 +34,12 @@
         <button id="welcomeCardBuyButton" type="button" class="btn btn-primary">Buy Prediction</button>
     </div>
 </div>
-<div id="predictionCard" class="card invisible" >
+<div id="predictionCard" class="card d-none" >
     <div class="card-body">
         <h5 class="card-title">Bitcoin Prediction Generated</h5>
-        <p class="card-text">TODO</p>
-        <button type="button" class="btn btn-primary">Buy New Prediction</button>
-        <button type="button" class="btn btn-primary">Reset</button>
+        <p id="predictionText" class="card-text text-white"></p>
+        <button id="predictionCardBuyButton" type="button" class="btn btn-primary">Buy New Prediction</button>
+        <button id="predictionCardResetButton" type="button" class="btn btn-primary">Reset</button>
     </div>
 </div>
 <div id="invoiceModal" class="modal" tabindex="-1" role="dialog">
@@ -52,7 +52,6 @@
                 </button>
             </div>
             <div id="invoiceModalBody" class="modal-body">
-                <p>Modal body text goes here.</p>
             </div>
             <div class="modal-footer justify-content-left">
                 <button type="button" class="btn btn-secondary mr-auto" data-dismiss="modal">Cancel</button>
@@ -75,20 +74,42 @@
 
 <script type="text/javascript">
     $(document).ready(function(){
-        $("#welcomeCardBuyButton").click(function(){
+
+
+        function requestTA(){
             var paywallHttpRequest = new PaywallHttpRequest();
 
-            // TODO Close
+            var invoiceExpireTimer;
 
-            // First set up event listeners
+            // The invoice expiration that updates the remaining time.
+            function updateIntervalTime(){
+                var invoiceRemainingTime = paywallHttpRequest.paywall.getInvoiceExpiration().remaining();
+                var remainingTime = invoiceRemainingTime.minutes() + ":" + invoiceRemainingTime.seconds();
+                $('#invoiceTimeRemaining').text(remainingTime);
+            }
 
+            $('#invoiceModal').on('hide.bs.modal', function (event) {
+                console.log("Hidden: " + paywallHttpRequest.paywall.getState());
+                if(invoiceExpireTimer !== undefined){
+                    clearInterval(invoiceExpireTimer);
+                }
+                // Catch event that Invoice Modal is closes and free allocated resources by
+                // calling the abort() method.
+                if(paywallHttpRequest.paywall.getState() !== PaywallState.SETTLED &&
+                    paywallHttpRequest.paywall.getState() !== PaywallState.EXECUTED) {
+                    console.log("Aborted");
+                    paywallHttpRequest.abort();
+                }
+            });
+
+            // The Invoice event handler that adds invoice information to the modal and then displays it.
             paywallHttpRequest.paywall.addEventListener("InvoiceListener", PaywallEventType.INVOICE, function (type, invoice) {
                 // Add a Paywall Invoice event Listener that displays the invoice for the user.
                 var modalBody = $('#invoiceModalBody')
                 modalBody.empty();
                 var invoiceExpire = new PaywallTime(invoice.invoiceExpireDate)
-                modalBody.append("<h6>Invoice Expires In: " + invoiceExpire.remaining().minutes() + ":" + invoiceExpire.remaining().seconds() + "</h6>") // Time Left
-                modalBody.append("<img class='justify-content-center' src='" + invoice.qrLink + "'/>"); // QR
+                modalBody.append("<h6 class='text-center'>Invoice Expires In: <span id='invoiceTimeRemaining'>" + invoiceExpire.remaining().minutes() + ":" + invoiceExpire.remaining().seconds() + "</span></h6>") // Time Left
+                modalBody.append("<img class='mx-auto d-block' src='" + invoice.qrLink + "'/>"); // QR
                 var amountInSat = new PaywallAmount(invoice.invoiceAmount).as(BTCUnit.SAT);
                 modalBody.append("<h6>Price: " + amountInSat + "</h6>") // Time Left
                 modalBody.append("<div class=\"accordion\" id=\"advancedAccordion\">\n" +
@@ -119,28 +140,66 @@
                     "      </div>\n" +
                     "   </div>"); // Advanced, with invoice and node
 
+                 // Set the timer
+                invoiceExpireTimer = setInterval(updateIntervalTime,1000);
 
-                // Finally activate the invoice.
+                // Finally activate the invoice modal.
                 $('#invoiceModal').modal({});
             });
 
+            // Event listener that hides the modal upon settlement.
             paywallHttpRequest.paywall.addEventListener("SettledListener", PaywallEventType.SETTLED, function (type, settlement) {
-                // Hide the invoice panel as soon as the invoice have been payed.
-                console.log("Settled");
                 $('#invoiceModal').modal('hide');
             });
 
+            // Event listener that updates the modal with invoice expired information.
+            paywallHttpRequest.paywall.addEventListener("InvoiceExpiredListener", PaywallEventType.INVOICE_EXPIRED, function (type, invoice) {
+                var modalBody = $('#invoiceModalBody')
+                modalBody.empty();
+                modalBody.append("<h6 class='text-center'>Invoice Expired</h6>") // Time Left
+            });
+
+            // The same onload handler that should have been used without paywall to call the service.
             paywallHttpRequest.onload = function(){
-                // Process the service response as would be done with a regular XMLHttpRequest
-                console.log("Performed");
-            }
+                if(paywallHttpRequest.status === 200) {
+                    // Process the service response as would be done with a regular XMLHttpRequest
+                    var response = JSON.parse(paywallHttpRequest.responseText);
+                    var predictionText = $('#predictionText')
+                    predictionText.text(response.prediction);
+                    if (response.goingUp) {
+                        predictionText.removeClass("bg-danger");
+                        predictionText.addClass("bg-success");
+                    } else {
+                        predictionText.removeClass("bg-success");
+                        predictionText.addClass("bg-danger");
+                    }
+                    $('#welcomeCard').addClass("d-none");
+                    $('#predictionCard').removeClass("d-none");
+                }else{
+                    // Error calling the underlying service.
+                    console.log(paywallHttpRequest.responseText)
+                    alert("Error occurred calling the service.")
+                }
+            };
 
             // Open up a connection to the paywalled service.
             paywallHttpRequest.open("GET","/tademo");
             // Send the data to the service that will trigger the payment flow if required.
             paywallHttpRequest.send();
 
+        }
+
+
+
+        $("#welcomeCardBuyButton").click(requestTA);
+        $("#predictionCardBuyButton").click(requestTA);
+
+        $("#predictionCardResetButton").click(function () {
+            $('#welcomeCard').removeClass("d-none");
+            $('#predictionCard').addClass("d-none");
         });
+
+
 
     });
 

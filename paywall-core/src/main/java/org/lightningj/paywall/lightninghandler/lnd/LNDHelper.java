@@ -47,7 +47,7 @@ public class LNDHelper {
     }
 
     /**
-     * Default constructor of LND helper methods.
+     * Constructor of LND helper methods parsing info from LND node.
      *
      * @param infoResponse the GetInfoResponse from the LND node.
      * @throws InternalErrorException if no supported currency was given.
@@ -67,6 +67,15 @@ public class LNDHelper {
         if(supportedCurrency == null){
             throw new InternalErrorException("Error in LightningHandler, no supported crypto currency could be found in node info.");
         }
+    }
+
+    /**
+     * Default constructor when supportedCurrency comes from configuration
+     *
+     * @param supportedCurrency the configured currency code.
+     */
+    public LNDHelper(String supportedCurrency){
+        this.supportedCurrency = supportedCurrency;
     }
 
     /**
@@ -151,7 +160,7 @@ public class LNDHelper {
                 }
                 retval.setConnectString(uris.get(0));
             }
-            retval.setMainNet(!infoResponse.getTestnet());
+            retval.setNodeNetwork(infoResponse.getTestnet() ? NodeInfo.NodeNetwork.TEST_NET : NodeInfo.NodeNetwork.MAIN_NET);
 
             return retval;
         }catch(ClientSideException e){

@@ -683,6 +683,54 @@ describe("Verify PaywallEventBus public methods handle events properly", functio
 
     });
 
+    it("Expect addListenerFirst adds listener in first position, and if already removes the existing and places the new one first.", function() {
+        var eventBus = this.eventBus;
+        expect(eventBus.getListeners().length).toBe(0);
+
+        var listener1Calls = [];
+        eventBus.addListenerFirst("Listener1", PaywallEventType.PAYWALL_ERROR, function(type, object){
+            listener1Calls.push({type: type, object: object});
+        });
+        expect(eventBus.getListeners().length).toBe(1);
+        expect(eventBus.getListeners()[0].name).toBe("Listener1");
+        expect(eventBus.getListeners()[0].type).toBe(PaywallEventType.PAYWALL_ERROR);
+        expect(eventBus.getListeners()[0].onEvent).toBeDefined();
+
+        var listener2Calls = [];
+        eventBus.addListenerFirst("Listener2", PaywallEventType.ALL, function(type, object){
+            listener2Calls.push({type: type, object: object});
+        });
+        expect(eventBus.getListeners().length).toBe(2);
+        expect(eventBus.getListeners()[0].name).toBe("Listener2");
+        expect(eventBus.getListeners()[0].type).toBe(PaywallEventType.ALL);
+        expect(eventBus.getListeners()[0].onEvent).toBeDefined();
+        expect(eventBus.getListeners()[1].name).toBe("Listener1");
+
+        var listener3Calls = [];
+        eventBus.addListenerFirst("Listener3", PaywallEventType.ABORTED, function(type, object){
+            listener3Calls.push({type: type, object: object});
+        });
+        expect(eventBus.getListeners().length).toBe(3);
+        expect(eventBus.getListeners()[0].name).toBe("Listener3");
+        expect(eventBus.getListeners()[0].type).toBe(PaywallEventType.ABORTED);
+        expect(eventBus.getListeners()[0].onEvent).toBeDefined();
+        expect(eventBus.getListeners()[1].name).toBe("Listener2");
+        expect(eventBus.getListeners()[2].name).toBe("Listener1");
+
+        // Verify that addListener replaces existing listener
+        var listener4Calls = [];
+        eventBus.addListenerFirst("Listener2", PaywallEventType.ABORTED, function(type, object){
+            listener4Calls.push({type: type, object: object});
+        });
+        expect(eventBus.getListeners().length).toBe(3);
+        expect(eventBus.getListeners()[0].name).toBe("Listener2");
+        expect(eventBus.getListeners()[0].type).toBe(PaywallEventType.ABORTED);
+        expect(eventBus.getListeners()[0].onEvent).toBeDefined();
+        expect(eventBus.getListeners()[1].name).toBe("Listener3");
+        expect(eventBus.getListeners()[2].name).toBe("Listener1");
+
+    });
+
     it("Verify that close() calls clearInterval", function(){
         var clearIntervalSpy = spyOn(window, 'clearInterval');
         this.eventBus.close();

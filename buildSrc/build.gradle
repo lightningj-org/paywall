@@ -7,7 +7,7 @@ repositories {
     // Spock releases are available from Maven Central
     mavenCentral()
     // Spock snapshots are available from the Sonatype OSS snapshot repository
-   // maven { url "http://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "https://plugins.gradle.org/m2/" }
 }
 
 
@@ -28,6 +28,10 @@ dependencies {
     implementation "com.sun.xml.bind:jaxb-core:2.2.11"
     implementation "com.sun.xml.bind:jaxb-impl:2.2.11"
     implementation "javax.activation:activation:1.1.1"
+
+    implementation "gradle.plugin.com.github.breadmoirai:github-release:2.2.9"
+
+    implementation 'org.ajoberstar:gradle-git-publish:0.4.1'
 }
 
 

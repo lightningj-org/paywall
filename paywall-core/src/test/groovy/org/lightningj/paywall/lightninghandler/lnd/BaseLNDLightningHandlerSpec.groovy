@@ -27,6 +27,7 @@ import org.lightningj.paywall.lightninghandler.LightningHandlerContext
 import org.lightningj.paywall.paymenthandler.BasePaymentHandler
 import org.lightningj.paywall.vo.Invoice
 import org.lightningj.paywall.vo.NodeInfo
+import org.lightningj.paywall.vo.amount.CryptoAmount
 import spock.lang.Specification
 
 import javax.json.Json
@@ -68,7 +69,7 @@ class BaseLNDLightningHandlerSpec extends Specification {
         def ctx = new LNDLightningHandlerContext(20,10)
         def eventListener = new TestLightningEventListener()
         StreamObserver<Invoice> observer = null
-        handler.nodeInfo = new NodeInfo("abc@10.10.10.11:9001")
+        handler.configuredNodeInfo = new NodeInfo("abc@10.10.10.11:9001")
         // Add listener
         handler.registerListener(eventListener)
 
@@ -113,6 +114,13 @@ class BaseLNDLightningHandlerSpec extends Specification {
         1 * BaseLNDLightningHandler.log.info( "LND Invoice subscription completed. This shouldn't happen.")
     }
 
+    def "Verify that getNodeInfo returns configured node info if configuration exists"(){
+        setup:
+        handler.configuredNodeInfo = new NodeInfo("abcdef@10.10.10.12:9002")
+        expect:
+        handler.getNodeInfo().connectString == "abcdef@10.10.10.12:9002"
+    }
+
     static LndInvoice toInvoice(String invoiceData){
         def reader = Json.createReader(new StringReader(invoiceData))
 
@@ -136,12 +144,11 @@ class BaseLNDLightningHandlerSpec extends Specification {
 
     static class TestDefaultLNDLightningHandler extends BaseLNDLightningHandler{
 
-
         AsynchronousLndAPI asynchronousLndAPI
         SynchronousLndAPI synchronousLndAPI
         LNDLightningHandlerContext context
         LNDHelper lndHelper
-        NodeInfo nodeInfo
+        NodeInfo configuredNodeInfo
 
         TestDefaultLNDLightningHandler(){
         }
@@ -171,12 +178,18 @@ class BaseLNDLightningHandlerSpec extends Specification {
         }
 
         @Override
-        protected LNDHelper getLndHelper(){
-            return lndHelper
+        protected NodeInfo getNodeInfoFromConfiguration() throws InternalErrorException {
+            return configuredNodeInfo
         }
 
-        @Override NodeInfo getNodeInfo(){
-            return nodeInfo
+        @Override
+        protected String getSupportedCurrencyCode() throws InternalErrorException {
+            return CryptoAmount.CURRENCY_CODE_BTC
+        }
+
+        @Override
+        protected LNDHelper getLndHelper(){
+            return lndHelper
         }
 
     }

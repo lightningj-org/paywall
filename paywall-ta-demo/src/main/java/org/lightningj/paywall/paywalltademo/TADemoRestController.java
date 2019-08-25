@@ -39,11 +39,24 @@ public class TADemoRestController {
     /**
      * REST Endpoint that has a non pay per request PaymentRequired annotation.
      *
-     * @return json object with call counter and string 'PocService1, 'name''
+     * @return json object with call counter and TA Prediction
      */
     @PaymentRequired(articleId = "tademo1", payPerRequest = true)
     @RequestMapping("/tademo")
     public TADemoResult tademo() {
+        boolean goingUp = taEngine.nextBoolean();
+        return new TADemoResult(counter.incrementAndGet(),
+                String.format(template, (goingUp ? "up":"down")),
+                goingUp);
+    }
+
+    /**
+     * Same REST Endpoint without payment required
+     *
+     * @return json object with call counter and TA Prediction
+     */
+    @RequestMapping("/tademonopayment")
+    public TADemoResult tademoNoPayment() {
         boolean goingUp = taEngine.nextBoolean();
         return new TADemoResult(counter.incrementAndGet(),
                 String.format(template, (goingUp ? "up":"down")),

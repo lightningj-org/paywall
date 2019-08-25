@@ -17,7 +17,19 @@ In order to use the Javascript API you need to import the script paywall.js
 into your web page. paywall.js has two dependency libraries, sockjs.js and stomp.js
 used to open up web sockets.
 
-Add the following to your web page, given that you placed the java script files in 'js' sub directory.
+Simples way to get started with the javascript library is to use the CDN download points of the
+javascript libraries by adding the following to the HTML files:
+
+[source, html]
+-------------------------------------
+<!-- JavaScript Required for Paywall-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.3.0/sockjs.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js" ></script>
+<script src="https://github.com/lightningj-org/paywall/releases/download/v0.0.1/paywall.js" ></script>
+-------------------------------------
+
+If you want to host the files locally in your application to avoid external dependencies then download them into a _/js_
+sub directory of your web application's static files and instead add the snippet below to the HTML file.
 
 [source, html]
 -------------------------------------
@@ -155,6 +167,14 @@ function updateInvoiceRemainingTime(){
 
 setInterval(updateInvoiceRemainingTime, 1000);
 
+-------------------------------------
+
+An alternative to create a remaining time object is to create a PaywallAmount object
+manually with a given JSON CryptoAmount.
+
+[source, javascript]
+-------------------------------------
+var amountInSat = new PaywallAmount(invoice.invoiceAmount).as(BTCUnit.SAT);
 -------------------------------------
 
 See classes PaywallTime and PaywallTimeUnit in Javascript API documentation for more details.

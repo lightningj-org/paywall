@@ -32,7 +32,7 @@ public class NodeInfo extends JSONParsable{
     protected String publicKeyInfo;
     protected String nodeAddress;
     protected Integer nodePort;
-    protected Boolean mainNet;
+    protected NodeNetwork nodeNetwork;
 
     /**
      * Empty Constructor
@@ -50,6 +50,7 @@ public class NodeInfo extends JSONParsable{
         this.publicKeyInfo = publicKeyInfo;
         this.nodeAddress = nodeAddress;
         this.nodePort = nodePort;
+        this.nodeNetwork = NodeNetwork.UNKNOWN;
     }
 
     /**
@@ -57,13 +58,13 @@ public class NodeInfo extends JSONParsable{
      * @param publicKeyInfo the public key info of the lightning handlers node. (Optional)
      * @param nodeAddress address information to the lightning handlers node. (Optional)
      * @param nodePort port the node is listening on for channel connections. (Optional)
-     * @param mainNet indicator if the network is on main net or some test net. (Optional)
+     * @param nodeNetwork indicator which the network the LND node is connected to (UNKNOWN is default). (Optional)
      */
-    public NodeInfo(String publicKeyInfo, String nodeAddress, Integer nodePort, Boolean mainNet) {
+    public NodeInfo(String publicKeyInfo, String nodeAddress, Integer nodePort, NodeNetwork nodeNetwork) {
         this.publicKeyInfo = publicKeyInfo;
         this.nodeAddress = nodeAddress;
         this.nodePort = nodePort;
-        this.mainNet = mainNet;
+        this.nodeNetwork = nodeNetwork;
     }
 
     /**
@@ -134,18 +135,18 @@ public class NodeInfo extends JSONParsable{
 
     /**
      *
-     * @return indicator if the network is on main net or some test net. (Optional)
+     * @return indicator which the network the LND node is connected to (UNKNOWN is default).
      */
-    public Boolean getMainNet() {
-        return mainNet;
+    public NodeNetwork getNodeNetwork() {
+        return nodeNetwork;
     }
 
     /**
      *
-     * @param mainNet indicator if the network is on main net or some test net. (Optional)
+     * @param nodeNetwork indicator which the network the LND node is connected to (UNKNOWN is default).
      */
-    public void setMainNet(Boolean mainNet) {
-        this.mainNet = mainNet;
+    public void setNodeNetwork(NodeNetwork nodeNetwork) {
+        this.nodeNetwork = nodeNetwork;
     }
 
     /**
@@ -199,7 +200,9 @@ public class NodeInfo extends JSONParsable{
         addNotRequired(jsonObjectBuilder,"publicKeyInfo",publicKeyInfo);
         addNotRequired(jsonObjectBuilder,"nodeAddress",nodeAddress);
         addNotRequired(jsonObjectBuilder,"nodePort",nodePort);
-        addNotRequired(jsonObjectBuilder,"mainNet",mainNet);
+        if(nodeNetwork != null) {
+            addNotRequired(jsonObjectBuilder, "nodeNetwork", nodeNetwork.toString());
+        }
         if(publicKeyInfo != null && nodeAddress != null){
             add(jsonObjectBuilder,"connectString", getConnectString());
         }
@@ -216,7 +219,36 @@ public class NodeInfo extends JSONParsable{
         publicKeyInfo = getStringIfSet(jsonObject,"publicKeyInfo");
         nodeAddress = getStringIfSet(jsonObject,"nodeAddress");
         nodePort = getIntIfSet(jsonObject,"nodePort");
-        mainNet = getBooleanIfSet(jsonObject,"mainNet");
+        String nodeNetworkString = getStringIfSet(jsonObject,"nodeNetwork");
+        if(nodeNetworkString != null){
+            try{
+                nodeNetwork = NodeNetwork.valueOf(nodeNetworkString);
+            }catch (Exception e){
+                throw new JsonException("Invalid value in JSON, field 'nodeNetwork' has a value " + nodeNetworkString + " that is unsupported.");
+            }
+
+        }else{
+            nodeNetwork = NodeNetwork.UNKNOWN;
+        }
+
+    }
+
+    /**
+     * Enumeration of available Node networks the LND node can be connected to.
+     */
+    public enum NodeNetwork{
+        /**
+         * Production network.
+         */
+        MAIN_NET,
+        /**
+         * Test network.
+         */
+        TEST_NET,
+        /**
+         * Network couldn't be determined from LND node or configuration.
+         */
+        UNKNOWN
     }
 
 }
