@@ -15,7 +15,7 @@ Before you start development you need to set the following in your test environm
 * Access to a local LND node, version 0.7.0 or up, preferable on Bitcoin Testnet.
 
 Instructions to set up or install an LND node can be found at
-link://https://github.com/lightningnetwork/lnd/blob/master/docs/INSTALL.md[LND Site]. After finished installing the LND
+link:https://github.com/lightningnetwork/lnd/blob/master/docs/INSTALL.md[LND Site]. After finished installing the LND
 node you will also need to find the TLS certificate and the invoice.macaroon file generated after LND startup. You also
 need to retrieve the connect string by issuing the command:
 
