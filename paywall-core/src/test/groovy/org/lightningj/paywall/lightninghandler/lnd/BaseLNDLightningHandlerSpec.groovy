@@ -29,6 +29,7 @@ import org.lightningj.paywall.vo.Invoice
 import org.lightningj.paywall.vo.NodeInfo
 import org.lightningj.paywall.vo.amount.CryptoAmount
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import javax.json.Json
 import java.util.logging.Level
@@ -64,7 +65,7 @@ class BaseLNDLightningHandlerSpec extends Specification {
         e.message == "Error initializing LightningHandler invoice subscription, LightningHandlerContext must be of type LNDLightningHandlerContext."
 
     }
-    def "check that listenToInvoices detects added and settled invoices correctly"(){
+    def "check that listenToInvoices detects added and settled invoices correctly and verify that close method stops the background thread."(){
         setup:
         def ctx = new LNDLightningHandlerContext(20,10)
         def eventListener = new TestLightningEventListener()
@@ -77,6 +78,9 @@ class BaseLNDLightningHandlerSpec extends Specification {
         LndInvoice settled = toInvoice(settledInvoice)
         when:
         handler.listenToInvoices(ctx)
+        while(!handler.lightningInvoiceListenerRunnable.listening){
+            Thread.sleep(50)
+        }
         then:
         1 * handler.asynchronousLndAPI.subscribeInvoices(_,_) >> {
             InvoiceSubscription invoiceSubscription, StreamObserver<Invoice> o ->
@@ -86,6 +90,7 @@ class BaseLNDLightningHandlerSpec extends Specification {
                 observer = o
         }
         1 * BaseLNDLightningHandler.log.log(Level.FINE,{ it =~ "Subscribed to invoices in LND, context:"} )
+        handler.lightningInvoiceListenerRunnable.isRunning
         when:
         observer.onNext(unsettled)
         then:
@@ -107,11 +112,42 @@ class BaseLNDLightningHandlerSpec extends Specification {
         then:
         1 * BaseLNDLightningHandler.log.log(Level.SEVERE, "Error occurred listening for settled invoices from LND: Testmessage")
         1 * BaseLNDLightningHandler.log.log(Level.FINE, "LND Error Stacktrace: ", !null)
+        !handler.lightningInvoiceListenerRunnable.listening
+        !handler.lightningInvoiceListenerRunnable.connectionOpen
+
+        when: // Verify that it reconnects again after sleeping for a period of time.
+        handler.lightningInvoiceListenerThread.interrupt()
+        while(!handler.lightningInvoiceListenerRunnable.listening){
+            Thread.sleep(50)
+        }
+        then:
+        1 * BaseLNDLightningHandler.log.log(Level.FINE,{ it =~ "Subscribed to invoices in LND, context:"} )
+        handler.lightningInvoiceListenerRunnable.isRunning
+        handler.lightningInvoiceListenerRunnable.connectionOpen
+        handler.lightningInvoiceListenerRunnable.listening
 
         when:
         observer.onCompleted()
         then:
         1 * BaseLNDLightningHandler.log.info( "LND Invoice subscription completed. This shouldn't happen.")
+
+        when: // Verify that it reconnects again after sleeping for a period of time.
+        handler.lightningInvoiceListenerThread.interrupt()
+        while(!handler.lightningInvoiceListenerRunnable.listening){
+            Thread.sleep(50)
+        }
+        then:
+        1 * BaseLNDLightningHandler.log.log(Level.FINE,{ it =~ "Subscribed to invoices in LND, context:"} )
+        handler.lightningInvoiceListenerRunnable.isRunning
+        handler.lightningInvoiceListenerRunnable.connectionOpen
+        handler.lightningInvoiceListenerRunnable.listening
+
+        when:
+        handler.close()
+        then:
+        handler.lightningInvoiceListenerRunnable.isStopped()
+        1 * BaseLNDLightningHandler.log.log(Level.FINE,"LightningInvoiceListenerThread stopped." )
+
     }
 
     def "Verify that getNodeInfo returns configured node info if configuration exists"(){
@@ -119,6 +155,42 @@ class BaseLNDLightningHandlerSpec extends Specification {
         handler.configuredNodeInfo = new NodeInfo("abcdef@10.10.10.12:9002")
         expect:
         handler.getNodeInfo().connectString == "abcdef@10.10.10.12:9002"
+    }
+
+    @Unroll
+    def "Verify that genCurrentContext generates expected LNDLightningHandlerContext"(){
+        setup:
+        def invoice = new org.lightningj.lnd.wrapper.message.Invoice()
+        invoice.addIndex = invoiceAddIndex
+        invoice.settleIndex = invoiceSettleIndex
+        def lastKnownCtx = new LNDLightningHandlerContext(lastKnownAddIndex, lastKnownSettleIndex)
+        when:
+        def newCtx = handler.genCurrentContext(lastKnownCtx,invoice)
+        then:
+        newCtx.addIndex == expectedAddIndex
+        newCtx.settleIndex == expectedSettleIndex
+        where:
+        invoiceAddIndex | invoiceSettleIndex | lastKnownAddIndex | lastKnownSettleIndex | expectedAddIndex | expectedSettleIndex
+        0               | 12                 | 1                 | 0                    | 1                | 12
+        11              | 0                  | 12                | 5                    | 11               | 5
+
+    }
+
+    def "Verify that genCurrentContext with lastKnownContext set to null returns values from invoice"(){
+        setup:
+        def invoice = new org.lightningj.lnd.wrapper.message.Invoice()
+        invoice.addIndex = 2
+        invoice.settleIndex = 1
+        when:
+        def newCtx = handler.genCurrentContext(null,invoice)
+        then:
+        newCtx.addIndex == 2
+        newCtx.settleIndex == 1
+        when:
+        newCtx = handler.genCurrentContext(new LNDLightningHandlerContext(null,null),invoice)
+        then:
+        newCtx.addIndex == 2
+        newCtx.settleIndex == 1
     }
 
     static LndInvoice toInvoice(String invoiceData){
@@ -164,9 +236,6 @@ class BaseLNDLightningHandlerSpec extends Specification {
             return false
         }
 
-        @Override
-        void close() throws IOException, InternalErrorException {
-        }
 
         @Override
         protected AsynchronousLndAPI getAsyncAPI() throws IOException, InternalErrorException {
@@ -185,6 +254,15 @@ class BaseLNDLightningHandlerSpec extends Specification {
         @Override
         protected String getSupportedCurrencyCode() throws InternalErrorException {
             return CryptoAmount.CURRENCY_CODE_BTC
+        }
+
+        /**
+         * Method to reconnect API connections with a node, should be called after a restart of LND Node.
+         * @throws InternalErrorException if internal problems occurred opening up a connection with LND node.
+         */
+        @Override
+        protected void reconnect() throws InternalErrorException {
+
         }
 
         @Override

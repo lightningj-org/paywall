@@ -54,6 +54,9 @@ public abstract class BaseLNDLightningHandler implements LightningHandler {
 
     protected List<LightningEventListener> listeners = Collections.synchronizedList(new ArrayList<LightningEventListener>());
 
+    LightningInvoiceListenerRunnable lightningInvoiceListenerRunnable;
+    Thread lightningInvoiceListenerThread;
+
     /**
      * Method to create an invoice in the underlying LND node.
      *
@@ -138,51 +141,11 @@ public abstract class BaseLNDLightningHandler implements LightningHandler {
         if(!(context instanceof LNDLightningHandlerContext)){
             throw new InternalErrorException("Error initializing LightningHandler invoice subscription, LightningHandlerContext must be of type LNDLightningHandlerContext.");
         }
+
         LNDLightningHandlerContext ctx = (LNDLightningHandlerContext) context;
-        InvoiceSubscription invoiceSubscription = new InvoiceSubscription();
-        if(ctx.getAddIndex() != null) {
-            invoiceSubscription.setAddIndex(ctx.getAddIndex());
-        }
-        if(ctx.getSettleIndex() != null) {
-            invoiceSubscription.setSettleIndex(ctx.getSettleIndex());
-        }
-        try {
-            getAsyncAPI().subscribeInvoices(invoiceSubscription, new StreamObserver<org.lightningj.lnd.wrapper.message.Invoice>() {
-                @Override
-                public void onNext(org.lightningj.lnd.wrapper.message.Invoice invoice) {
-                    LightningEventType type = invoice.getSettled() ? LightningEventType.SETTLEMENT : LightningEventType.ADDED;
-                    try {
-                        Invoice invoiceData = getLndHelper().convert(getNodeInfo(),invoice);
-                        LNDLightningHandlerContext context = new LNDLightningHandlerContext(invoice.getAddIndex(),invoice.getSettleIndex());
-                        if(log.isLoggable(Level.FINE)) {
-                            log.log(Level.FINE, "Received invoice event from LND, invoice: " + invoice + "\ncontext: " + context);
-                        }
-                        LightningEvent event = new LightningEvent(type,invoiceData,context);
-                        for(LightningEventListener listener : listeners){
-                            listener.onLightningEvent(event);
-                        }
-                    } catch (Exception e) {
-                        log.log(Level.SEVERE, "Error occurred converting LND Invoice into Invoice: " +e.getMessage(),e);
-                    }
-                }
-
-                @Override
-                public void onError(Throwable t) {
-                    log.log(Level.SEVERE, "Error occurred listening for settled invoices from LND: " + t.getMessage());
-                    log.log(Level.FINE, "LND Error Stacktrace: ",t);
-                }
-
-                @Override
-                public void onCompleted() {
-                    log.info("LND Invoice subscription completed. This shouldn't happen.");
-                }
-            });
-            if(log.isLoggable(Level.FINE)) {
-                log.log(Level.FINE, "Subscribed to invoices in LND, context: " + context);
-            }
-        } catch (Exception e) {
-            throw new InternalErrorException("Internal error subscribing to LND Invoice events, message: " + e.getMessage(),e);
-        }
+        lightningInvoiceListenerRunnable = new LightningInvoiceListenerRunnable(ctx);
+        lightningInvoiceListenerThread = new Thread(lightningInvoiceListenerRunnable);
+        lightningInvoiceListenerThread.start();
     }
 
     protected void checkConnection() throws IOException, InternalErrorException{
@@ -191,6 +154,32 @@ public abstract class BaseLNDLightningHandler implements LightningHandler {
         }
     }
 
+    /**
+     * Method to close the LND connections and release underlying resources.
+     *
+     * @throws IOException            if communication problems occurred with underlying node.
+     * @throws InternalErrorException if internal problems occurred closing the connections with lightning node.
+     */
+    @Override
+    public void close() throws IOException, InternalErrorException {
+        if(lightningInvoiceListenerRunnable != null) {
+            lightningInvoiceListenerRunnable.stopListening();
+            lightningInvoiceListenerThread.interrupt();
+            int waitCounter = 0;
+            while (!lightningInvoiceListenerRunnable.isStopped()) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    log.log(Level.FINE, "LightningInvoiceListenerThread stop waiting interrupted: " + e.getMessage(), e);
+                }
+                waitCounter++;
+                if (waitCounter % 10 == 0) {
+                    log.log(Level.INFO, "Waiting for LightningInvoiceListenerThread to stop");
+                }
+            }
+            log.log(Level.FINE, "LightningInvoiceListenerThread stopped.");
+        }
+    }
 
     /**
      * Method to clear all cached objects, should be called when reconnecting to LND node.
@@ -274,4 +263,153 @@ public abstract class BaseLNDLightningHandler implements LightningHandler {
      * @throws InternalErrorException if currency code configuration was unparsable.
      */
     protected abstract String getSupportedCurrencyCode() throws InternalErrorException;
+
+    /**
+     * Method to reconnect API connections with a node, should be called after a restart of LND Node.
+     * @throws InternalErrorException if internal problems occurred opening up a connection with LND node.
+     */
+    protected abstract void reconnect() throws InternalErrorException;
+
+    /**
+     * Runnable that maintains the asynchronous invoice event stream with the LND Node and
+     * restarts it after waiting a short while.
+     */
+    protected class LightningInvoiceListenerRunnable implements Runnable{
+
+        static final int RECONNECT_WAITTIME_IN_SEC = 1;
+
+        LNDLightningHandlerContext lastKnownContext;
+        boolean isRunning;
+        boolean stopped = false;
+        boolean listening = false;
+        boolean connectionOpen = true;
+
+        /**
+         * Default constructor.
+         *
+         * @param lastKnownContext last known LNDLightningHandlerContext from where
+         *                         to start listening for invoices.
+         */
+        LightningInvoiceListenerRunnable(LNDLightningHandlerContext lastKnownContext){
+            this.lastKnownContext = lastKnownContext;
+        }
+
+        /**
+         * When an object implementing interface <code>Runnable</code> is used
+         * to create a thread, starting the thread causes the object's
+         * <code>run</code> method to be called in that separately executing
+         * thread.
+         * <p>
+         * The general contract of the method <code>run</code> is that it may
+         * take any action whatsoever.
+         *
+         * @see Thread#run()
+         */
+        @Override
+        public void run() {
+            isRunning = true;
+            while(isRunning){
+                if(!connectionOpen){
+                    try {
+                        reconnect();
+                        connectionOpen = true;
+                    }catch (Exception e){
+                        log.log(Level.SEVERE, "Internal error reconnecting to LND APIs, message: " + e.getMessage() + " will try to reconnect in " + RECONNECT_WAITTIME_IN_SEC + " seconds.", e);
+                    }
+                }
+                if(!listening){
+                    InvoiceSubscription invoiceSubscription = new InvoiceSubscription();
+                    if(lastKnownContext.getAddIndex() != null) {
+                        invoiceSubscription.setAddIndex(lastKnownContext.getAddIndex());
+                    }
+                    if(lastKnownContext.getSettleIndex() != null) {
+                        invoiceSubscription.setSettleIndex(lastKnownContext.getSettleIndex());
+                    }
+                    try {
+
+                        // Maybe a loop that for each second check if listening, if not is restarted.
+                        getAsyncAPI().subscribeInvoices(invoiceSubscription, new StreamObserver<org.lightningj.lnd.wrapper.message.Invoice>() {
+                            @Override
+                            public void onNext(org.lightningj.lnd.wrapper.message.Invoice invoice) {
+                                LightningEventType type = invoice.getSettled() ? LightningEventType.SETTLEMENT : LightningEventType.ADDED;
+                                try {
+                                    Invoice invoiceData = getLndHelper().convert(getNodeInfo(),invoice);
+                                    lastKnownContext = genCurrentContext(lastKnownContext,invoice);
+                                    // Create a copy that is sent to listeners, without possibility to affect current state.
+                                    LNDLightningHandlerContext context = genCurrentContext(lastKnownContext,invoice);
+                                    if(log.isLoggable(Level.FINE)) {
+                                        log.log(Level.FINE, "Received invoice event from LND, invoice: " + invoice + "\ncontext: " + context);
+                                    }
+                                    LightningEvent event = new LightningEvent(type,invoiceData,context);
+                                    for(LightningEventListener listener : listeners){
+                                        listener.onLightningEvent(event);
+                                    }
+                                } catch (Exception e) {
+                                    log.log(Level.SEVERE, "Error occurred converting LND Invoice into Invoice: " +e.getMessage(),e);
+                                }
+                            }
+
+                            @Override
+                            public void onError(Throwable t) {
+                                log.log(Level.SEVERE, "Error occurred listening for settled invoices from LND: " + t.getMessage());
+                                log.log(Level.FINE, "LND Error Stacktrace: ",t);
+                                connectionOpen = false;
+                                listening = false;
+                            }
+
+                            @Override
+                            public void onCompleted() {
+                                log.info("LND Invoice subscription completed. This shouldn't happen.");
+                                connectionOpen = false;
+                                listening = false;
+                            }
+                        });
+                        if(log.isLoggable(Level.FINE)) {
+                            log.log(Level.FINE, "Subscribed to invoices in LND, context: " + lastKnownContext);
+                        }
+                        listening = true;
+
+                    } catch (Exception e) {
+                        log.log(Level.SEVERE, "Internal error subscribing to LND Invoice events, message: " + e.getMessage() + " will try to reconnect in " + RECONNECT_WAITTIME_IN_SEC + " seconds.", e);
+                    }
+
+                }
+                try {
+                    Thread.sleep(RECONNECT_WAITTIME_IN_SEC * 1000);
+                } catch (InterruptedException e) {
+                    log.fine("LightningInvoiceListener listener interrupted.");
+                }
+
+                log.fine("LightningInvoiceListenerThread listening in background.");
+            }
+
+            stopped = true;
+        }
+
+        public void stopListening(){
+            isRunning = false;
+        }
+
+        public boolean isStopped(){
+            return stopped;
+        }
+    }
+
+
+    /**
+     * Help method to generate a new last known context which set to the values of the new context
+     * object if they are not set to 0, in that case is the last known index used.
+     * @param lastKnownContext last known LNDLightningHandlerContext
+     * @param newContext the new LNDLightningHandlerContext
+     * @return a new instance LNDLightningHandlerContext.
+     */
+    protected static LNDLightningHandlerContext genCurrentContext(LNDLightningHandlerContext lastKnownContext, org.lightningj.lnd.wrapper.message.Invoice newContext){
+        if(lastKnownContext == null){
+            return new LNDLightningHandlerContext(newContext.getAddIndex(),newContext.getSettleIndex());
+        }
+        return new LNDLightningHandlerContext(
+                newContext.getAddIndex() == 0 && lastKnownContext.getAddIndex() != null ? lastKnownContext.getAddIndex() : newContext.getAddIndex(),
+                newContext.getSettleIndex() == 0 && lastKnownContext.getSettleIndex() != null ? lastKnownContext.getSettleIndex() : newContext.getSettleIndex());
+
+    }
 }

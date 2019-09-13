@@ -47,6 +47,29 @@ public abstract class SimpleBaseLNDLightningHandler extends BaseLNDLightningHand
     @Override
     public void connect(LightningHandlerContext context) throws IOException, InternalErrorException {
         clearCache();
+
+        openAPIConnectios();
+        listenToInvoices(context);
+        connected = true;
+        log.log(Level.INFO,"Connected to LND Node Successfully.");
+    }
+
+    /**
+     * Method to reconnect API connections with a node, should be called after a restart of LND Node.
+     * @throws InternalErrorException if internal problems occurred opening up a connection with LND node.
+     */
+    @Override
+    public void reconnect() throws InternalErrorException{
+        closeAPIConnections();
+        openAPIConnectios();
+        connected=true;
+    }
+
+    /**
+     * Help method to open API connections between both connect and reconnect methods.
+     * @throws InternalErrorException if internal problems occurred opening up a connection with LND node.
+     */
+    private void openAPIConnectios() throws InternalErrorException{
         File tlsCertFile = new File(getTLSCertPath());
         if(!tlsCertFile.exists() || !tlsCertFile.canRead() || !tlsCertFile.isFile()){
             throw new InternalErrorException("No LND TLS certificate file found at path: " + tlsCertFile);
@@ -55,17 +78,14 @@ public abstract class SimpleBaseLNDLightningHandler extends BaseLNDLightningHand
         if(!macaroonFile.exists() || !macaroonFile.canRead() || !macaroonFile.isFile()){
             throw new InternalErrorException("No LND Macaroon file found at path: " + macaroonFile);
         }
-
         try {
-            asynchronousLndAPI = new AsynchronousLndAPI(getHost(), getPort(), tlsCertFile, macaroonFile);
-            synchronousLndAPI = new SynchronousLndAPI(getHost(), getPort(), tlsCertFile, macaroonFile);
-            listenToInvoices(context);
-            connected = true;
-            log.log(Level.INFO,"Connected to LND Node Successfully.");
-        }catch(ClientSideException e){
+          asynchronousLndAPI = new AsynchronousLndAPI(getHost(), getPort(), tlsCertFile, macaroonFile);
+          synchronousLndAPI = new SynchronousLndAPI(getHost(), getPort(), tlsCertFile, macaroonFile);
+        }catch(Exception e){
             throw new InternalErrorException("Error connecting to LND API: " + e.getMessage(),e);
         }
     }
+
 
     /**
      * Method to close the LND connections and release underlying resources.
@@ -75,6 +95,15 @@ public abstract class SimpleBaseLNDLightningHandler extends BaseLNDLightningHand
      */
     @Override
     public void close() throws IOException, InternalErrorException {
+        super.close();
+        closeAPIConnections();
+    }
+
+    /**
+     * Help method to close all connections used by both close() and reconnect()
+     * @throws InternalErrorException if internal problems occurred closing the connections with lightning node.
+     */
+    private void closeAPIConnections() throws InternalErrorException{
         if(connected) {
             clearCache();
             Exception exception = null;
