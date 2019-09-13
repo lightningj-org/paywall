@@ -28,6 +28,8 @@ dependencies {
     compile "com.sun.xml.bind:jaxb-impl:2.2.11"
     compile "javax.activation:activation:1.1.1"
 
+    compileOnly "javax.annotation:javax.annotation-api:1.3.2"
+
 }
 
 // Add integration test task, with source sets etc.
