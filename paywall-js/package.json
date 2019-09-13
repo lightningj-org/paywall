@@ -8,6 +8,7 @@
     "stompjs": "^2.3.3"
   },
   "devDependencies": {
+    "eslint-utils": ">=1.4.1",
     "grunt": "^1.0.4",
     "grunt-cli": "^1.3.2",
     "grunt-contrib-copy": "^1.0.0",
@@ -22,9 +23,8 @@
     "karma-chrome-launcher": "^2.2.0",
     "karma-jasmine": "^2.0.1",
     "lodash": ">=4.17.13",
-    "eslint-utils": ">=1.4.1",
-    "set-value": "~> 2.0.1",
-    "mixin-deep": "~> 1.3.2"
+    "mixin-deep": "~> 1.3.2",
+    "set-value": "~> 2.0.1"
   },
   "scripts": {
     "test": "test"
