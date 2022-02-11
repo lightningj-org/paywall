@@ -19,7 +19,7 @@
     "grunt-strip-code": "^1.0.6",
     "jasmine": "^3.4.0",
     "jasmine-data_driven_tests": "^1.0.0",
-    "karma": "^4.1.0",
+    "karma": "^6.3.14",
     "karma-chrome-launcher": "^2.2.0",
     "karma-jasmine": "^2.0.1",
     "lodash": ">=4.17.13",
